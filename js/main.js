@@ -34,6 +34,16 @@ class DuoSpaceApp {
     // Setup Dark Mode & System theme listener
     ThemeManager.init(this);
 
+    // ── MIGRATION: add priceSource to old investments without it ──
+    if (this.data.investments && this.data.investments.length > 0) {
+      const migrated = PriceUpdater.migrateOldInvestments(this.data.investments);
+      if (JSON.stringify(migrated) !== JSON.stringify(this.data.investments)) {
+        this.data.investments = migrated;
+        this.storage.save(this.data);
+        console.log('[DuoSpace] Migrated investment priceSource fields');
+      }
+    }
+
     // Populate Initial UI inputs
     const usdRateInput = document.getElementById('usdRateInput');
     if (usdRateInput) usdRateInput.value = this.data.usdRate || 25400;
@@ -52,6 +62,12 @@ class DuoSpaceApp {
     // Fetch realtime USD rate & Render all
     this.investment.fetchRealtimeUsdRate();
     this.render();
+
+    // ── AUTO PRICE UPDATE: fetch prices & start background timer ──
+    if (typeof priceUpdater !== 'undefined') {
+      priceUpdater.updateAllPrices();   // First run immediately
+      priceUpdater.startAutoUpdate();   // Then every 5 min check
+    }
   }
 
   setupEventListeners() {

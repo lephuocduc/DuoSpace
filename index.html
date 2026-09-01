@@ -278,6 +278,8 @@
               <p id="investTotalPnL" class="text-sm font-bold text-emerald-400 drop-shadow-sm">+0 đ (0%)</p>
             </div>
           </div>
+          <!-- Auto / Manual badge tổng -->
+          <div id="investPriceBadges" class="flex space-x-1.5 relative z-10"></div>
         </div>
 
         <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
@@ -364,6 +366,57 @@
             <input type="text" id="investNotes" placeholder="Ví Binance, Sổ TK Vietcombank..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
           </div>
           
+          <!-- ✨ Price Source Config -->
+          <fieldset class="border border-indigo-200 dark:border-indigo-800/60 rounded-xl p-3 space-y-2.5">
+            <legend class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 px-2">🔄 Tự động cập nhật giá</legend>
+
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Nguồn giá</label>
+              <select id="investPriceSourceType" onchange="updatePriceSourceFields()"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="manual">✋ Thủ công (không tự động)</option>
+                <option value="crypto">🪙 Crypto (CoinGecko – miễn phí)</option>
+                <option value="gold">🥇 Vàng thế giới (Metals.live – miễn phí)</option>
+                <option value="usd">💵 Tỷ giá USD/VND (Open ER – miễn phí)</option>
+                <option value="stock">📈 Cổ phiếu (Alpha Vantage – cần key)</option>
+              </select>
+            </div>
+
+            <!-- Symbol row: ẩn với manual, usd, gold -->
+            <div id="priceSourceSymbolRow" class="hidden">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mã tài sản</label>
+              <input type="text" id="investPriceSourceSymbol" placeholder="BTC, ETH, AAPL..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <p class="text-[9px] text-gray-400 mt-0.5">Crypto: BTC, ETH, SOL, BNB... &nbsp;|&nbsp; Stock: AAPL, MSFT...</p>
+            </div>
+
+            <!-- Gold unit: chỉ hiện khi gold -->
+            <div id="priceSourceGoldUnitRow" class="hidden">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Đơn vị vàng</label>
+              <select id="investGoldUnit"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="oz">Troy oz (giá quốc tế $/oz)</option>
+                <option value="tael">Lượng vàng VN (1 lượng = 37.5g)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tần suất cập nhật</label>
+              <select id="investRefreshInterval"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="1800">Mỗi 30 phút</option>
+                <option value="3600" selected>Mỗi giờ</option>
+                <option value="21600">Mỗi 6 giờ</option>
+                <option value="86400">Mỗi ngày</option>
+                <option value="604800">Mỗi tuần</option>
+              </select>
+            </div>
+
+            <button type="button" id="testPriceBtn" onclick="testPriceFetch()" class="hidden w-full py-1.5 text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+              <i class="fa-solid fa-flask mr-1"></i>Test Fetch Giá Ngay
+            </button>
+          </fieldset>
+
           <button id="saveInvestBtn" onclick="saveInvestment()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
             Lưu tài sản
           </button>
@@ -616,6 +669,33 @@
                   class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- API Keys Section -->
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <h3
+            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
+            <i class="fa-solid fa-plug text-indigo-500 mr-2"></i>API Keys & Tự động cập nhật giá
+          </h3>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">
+              Alpha Vantage API Key <span class="font-normal text-gray-400">(cho cổ phiếu)</span>
+            </label>
+            <input type="password" id="setAlphaVantageKey"
+              placeholder="Lấy miễn phí tại alphavantage.co"
+              class="w-full px-2.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            <p class="text-[9px] text-gray-400 mt-1">Free tier: 500 calls/ngày. Để trống nếu không dùng cổ phiếu.</p>
+          </div>
+          <div class="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl border border-blue-100 dark:border-blue-900/50">
+            <p class="text-[10px] text-blue-700 dark:text-blue-300 font-semibold mb-1">ℹ️ Các nguồn giá miễn phí:</p>
+            <ul class="text-[9px] text-blue-600 dark:text-blue-400 space-y-0.5 list-disc list-inside">
+              <li>🪙 Crypto → CoinGecko (không cần key)</li>
+              <li>🥇 Vàng → Metals.live (không cần key)</li>
+              <li>💵 USD/VND → Open ER API (không cần key)</li>
+              <li>📈 Cổ phiếu → Alpha Vantage (cần key miễn phí)</li>
+            </ul>
           </div>
         </div>
 
@@ -911,6 +991,8 @@
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/priceConfig.js"></script>
+  <script src="js/priceUpdater.js"></script>
   <script src="js/ui/theme.js"></script>
   <script src="js/ui/sidebar.js"></script>
   <script src="js/ui/tabs.js"></script>

@@ -1,5 +1,6 @@
 /**
  * DuoSpace Modules - Settings Tab Logic
+ * v2.0: Thêm Alpha Vantage API key cho auto price fetch
  */
 class SettingsModule {
   constructor(app) {
@@ -12,34 +13,43 @@ class SettingsModule {
 
   loadSettingsToForm() {
     const s = this.app.data.settings || {};
-    const munBreed = document.getElementById('setMunBreed');
-    if (munBreed) munBreed.value = s.munBreed || '';
 
-    const bongBreed = document.getElementById('setBongBreed');
-    if (bongBreed) bongBreed.value = s.bongBreed || '';
+    const fields = {
+      setMunBreed:    s.munBreed   || '',
+      setBongBreed:   s.bongBreed  || '',
+      setNmaxPlate:   s.nmaxPlate  || '',
+      setNmaxOdo:     s.nmaxOdo    || '',
+      setGrandePlate: s.grandePlate || '',
+      setGrandeOdo:   s.grandeOdo  || '',
+    };
 
-    const nmaxPlate = document.getElementById('setNmaxPlate');
-    if (nmaxPlate) nmaxPlate.value = s.nmaxPlate || '';
+    Object.entries(fields).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
 
-    const nmaxOdo = document.getElementById('setNmaxOdo');
-    if (nmaxOdo) nmaxOdo.value = s.nmaxOdo || '';
-
-    const grandePlate = document.getElementById('setGrandePlate');
-    if (grandePlate) grandePlate.value = s.grandePlate || '';
-
-    const grandeOdo = document.getElementById('setGrandeOdo');
-    if (grandeOdo) grandeOdo.value = s.grandeOdo || '';
+    // Alpha Vantage key (stored in localStorage, not in app data for security)
+    const avKeyEl = document.getElementById('setAlphaVantageKey');
+    if (avKeyEl) avKeyEl.value = localStorage.getItem('avApiKey') || '';
   }
 
   saveSettings() {
     this.app.data.settings = {
-      munBreed: (document.getElementById('setMunBreed') || {}).value || '',
-      bongBreed: (document.getElementById('setBongBreed') || {}).value || '',
-      nmaxPlate: (document.getElementById('setNmaxPlate') || {}).value || '',
-      nmaxOdo: parseInt((document.getElementById('setNmaxOdo') || {}).value) || 0,
+      munBreed:    (document.getElementById('setMunBreed')    || {}).value || '',
+      bongBreed:   (document.getElementById('setBongBreed')   || {}).value || '',
+      nmaxPlate:   (document.getElementById('setNmaxPlate')   || {}).value || '',
+      nmaxOdo:     parseInt((document.getElementById('setNmaxOdo')   || {}).value) || 0,
       grandePlate: (document.getElementById('setGrandePlate') || {}).value || '',
-      grandeOdo: parseInt((document.getElementById('setGrandeOdo') || {}).value) || 0
+      grandeOdo:   parseInt((document.getElementById('setGrandeOdo') || {}).value) || 0,
     };
+
+    // Save API key to localStorage (separate from app data)
+    const avKey = (document.getElementById('setAlphaVantageKey') || {}).value || '';
+    if (avKey) {
+      localStorage.setItem('avApiKey', avKey);
+    } else {
+      localStorage.removeItem('avApiKey');
+    }
 
     this.app.save();
     this.app.render();
@@ -47,6 +57,6 @@ class SettingsModule {
   }
 }
 
-// Global aliases for compatibility
+// Global aliases
 function loadSettingsToForm() { window.app.settings.loadSettingsToForm(); }
 function saveSettings() { window.app.settings.saveSettings(); }
