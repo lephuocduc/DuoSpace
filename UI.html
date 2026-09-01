@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>DuoSpace - App Cho 2 Người</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .sidebar-transition {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-content {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .clickable-row {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .clickable-row:active {
+      transform: scale(0.98);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased min-h-screen flex justify-center transition-colors duration-200">
+
+  <div
+    class="w-full max-w-md bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-colors duration-200">
+
+    <!-- HEADER -->
+    <header
+      class="px-5 pt-12 pb-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800 transition-colors">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <button onclick="toggleSidebar()"
+            class="w-9 h-9 bg-gray-200/60 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-700 dark:text-slate-200 active:scale-95 transition-transform hover:bg-gray-300/60 dark:hover:bg-slate-700">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+          <div class="flex -space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-slate-900"
+              title="Phước Đức">
+              Đ
+            </div>
+            <div
+              class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-slate-900"
+              title="Thu Sương">
+              S
+            </div>
+          </div>
+          <div>
+            <h1 id="pageTitle" class="text-xl font-bold text-gray-900 dark:text-white">Tổng quan</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="openAddModal()"
+            class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform hover:bg-blue-700">
+            <i class="fa-solid fa-plus text-base"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="px-5 pt-4 flex-1 overflow-y-auto pb-24 custom-scrollbar">
+
+      <!-- TAB 1: HOME -->
+      <div id="tab-home" class="space-y-5 tab-content">
+        <div id="fundCard"
+          class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg space-y-3 transition-colors duration-300">
+          <div class="flex justify-between items-center text-blue-100 text-xs font-semibold">
+            <span>QUỸ CHUNG HÀNG THÁNG</span>
+            <i class="fa-solid fa-wallet text-base"></i>
+          </div>
+          <div id="totalBudget" class="text-3xl font-extrabold">0 đ</div>
+          <div class="flex justify-between text-xs pt-2 border-t border-white/20 text-blue-100">
+            <span>Thu nhập: <strong id="spentAmount" class="text-white">0 đ</strong></span>
+            <span>Chi tiêu: <strong id="remainAmount" class="text-white">0 đ</strong></span>
+          </div>
+        </div>
+
+        <section class="grid grid-cols-2 gap-3">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <div class="text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">Chi tuần này</div>
+            <div id="homeWeekSpend" class="text-base font-bold text-rose-500">0 đ</div>
+            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Chi tháng: <span id="homeMonthSpend"
+                class="font-semibold text-gray-700 dark:text-slate-300">0 đ</span></div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <div
+              class="flex justify-between items-center text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">
+              <span>% Hoàn thành To-Do</span>
+              <span id="homeTaskPct" class="text-blue-600 dark:text-blue-400 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-gray-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mt-2">
+              <div id="homeTaskProgressBar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-2"><span id="homeTaskDoneCount">0</span>/<span
+                id="homeTaskTotalCount">0</span> việc hoàn thành</div>
+          </div>
+        </section>
+
+        <!-- PHÂN PHỐI CHI TIÊU THEO CATEGORY -->
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Chi tháng này theo
+              Category</h3>
+            <span id="homeCategoryTotalText" class="text-xs font-bold text-rose-500">0đ</span>
+          </div>
+          <div id="homeCategoryBreakdown" class="space-y-2.5">
+          </div>
+        </section>
+
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">So sánh Thu - Chi
+              theo Tháng</h3>
+            <span class="text-[10px] text-gray-400">3 tháng gần nhất</span>
+          </div>
+          <div class="w-full h-44 relative">
+            <canvas id="budgetComparisonChart"></canvas>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <div class="flex justify-between items-center">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">🔔 Deadline & Lịch quan trọng</h2>
+            <span class="text-[11px] text-gray-400">Ưu tiên Cao & Trung bình</span>
+          </div>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchHome(this.value)" placeholder="Tìm lịch nhắc quan trọng..."
+              class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+          </div>
+
+          <div id="importantList"
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: TO-DO -->
+      <div id="tab-todo" class="hidden space-y-4 tab-content">
+        <div class="flex bg-gray-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+          <button onclick="switchTodoSubTab('active')" id="todoSubTab-active"
+            class="flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400">Việc
+            cần làm</button>
+          <button onclick="switchTodoSubTab('archive')" id="todoSubTab-archive"
+            class="flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400">Đã hoàn thành</button>
+        </div>
+
+        <div class="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-xl text-[11px] font-medium justify-between">
+          <button onclick="filterTodoTime('today')" id="todoTime-today"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Hôm nay</button>
+          <button onclick="filterTodoTime('week')" id="todoTime-week"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Tuần này</button>
+          <button onclick="filterTodoTime('month')" id="todoTime-month"
+            class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold shadow-sm">Tháng
+            này 📅</button>
+          <button onclick="filterTodoTime('all')" id="todoTime-all"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Tất cả</button>
+        </div>
+
+        <div class="flex space-x-2 overflow-x-auto pb-1 custom-scrollbar">
+          <button onclick="filterTodoUser('all')" id="todoFilter-all"
+            class="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
+          <button onclick="filterTodoUser('Đ')" id="todoFilter-Đ"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cho
+            Đức</button>
+          <button onclick="filterTodoUser('S')" id="todoFilter-S"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cho
+            Sương</button>
+          <button onclick="filterTodoUser('Both')" id="todoFilter-Both"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cả
+            hai</button>
+        </div>
+
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" oninput="searchTodo(this.value)" placeholder="Tìm kiếm công việc..."
+            class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 id="todoListHeader" class="text-sm font-semibold text-gray-700 dark:text-slate-300">Danh sách việc</h3>
+            <span id="todoCount"
+              class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full font-semibold">0</span>
+          </div>
+
+          <div id="todoList" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+            <p class="text-sm text-gray-400 text-center py-4">Chưa có công việc nào</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: FINANCE -->
+      <div id="tab-finance" class="hidden space-y-4 tab-content">
+        <div class="grid grid-cols-2 gap-3">
+          <div
+            class="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/40">
+            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">Tổng Thu Nhập</div>
+            <div id="incomeTotal" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">0 đ</div>
+          </div>
+          <div class="bg-rose-50 dark:bg-rose-950/40 rounded-xl p-3 border border-rose-100 dark:border-rose-800/40">
+            <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-1">Tổng Chi Tiêu</div>
+            <div id="expenseTotal" class="text-lg font-bold text-rose-600 dark:text-rose-400">0 đ</div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử giao dịch</h3>
+            <div class="flex bg-gray-100 dark:bg-slate-700 p-0.5 rounded-lg text-xs font-medium">
+              <button onclick="filterFinance('all')" id="finFilter-all"
+                class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 shadow-sm text-gray-800 dark:text-slate-200">Tất
+                cả</button>
+              <button onclick="filterFinance('expense')" id="finFilter-expense"
+                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Chi</button>
+              <button onclick="filterFinance('income')" id="finFilter-income"
+                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Thu</button>
+            </div>
+          </div>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchFinance(this.value)" placeholder="Tìm kiếm giao dịch..."
+              class="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+          </div>
+
+          <div id="financeList" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+            <p class="text-sm text-gray-400 text-center py-4">Chưa có giao dịch nào</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: ĐẦU TƯ (PORTFOLIO MANAGEMENT) -->
+      <div id="tab-investment" class="hidden space-y-4 tab-content">
+        
+        <!-- SUMMARY CARD: VỐN, HIỆN TẠI, LÃI LỖ -->
+        <div class="bg-gradient-to-br from-indigo-800 via-purple-700 to-indigo-900 text-white p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden">
+          <!-- Decor background -->
+          <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
+            <i class="fa-solid fa-chart-pie text-9xl -mt-4 -mr-4"></i>
+          </div>
+          
+          <div class="flex justify-between items-center relative z-10">
+            <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Portfolio Thực Tế</span>
+            <div class="flex items-center space-x-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20">
+              <span class="font-medium">💵 VNĐ/USD:</span>
+              <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)" class="w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
+              <span class="font-medium">đ</span>
+              <button onclick="fetchRealtimeUsdRate()" class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
+                <i class="fa-solid fa-rotate text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="relative z-10">
+            <p class="text-[11px] text-indigo-200 font-medium mb-1">Tổng tài sản hiện tại</p>
+            <div id="investTotalValue" class="text-3xl font-extrabold tracking-tight">0 đ</div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/20 relative z-10">
+            <div>
+              <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Tổng vốn đã đầu tư</p>
+              <p id="investTotalCost" class="text-sm font-bold text-white">0 đ</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Lãi/Lỗ tổng (ROI)</p>
+              <p id="investTotalPnL" class="text-sm font-bold text-emerald-400 drop-shadow-sm">+0 đ (0%)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ tài sản</h3>
+          <div class="w-full h-44 relative flex justify-center">
+            <canvas id="assetAllocationChart"></canvas>
+          </div>
+        </div>
+
+        <!-- BỘ LỌC & TÌM KIẾM TÀI SẢN -->
+        <div class="space-y-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchInvestment(this.value)" placeholder="Tìm kiếm tài sản (BTC, VNM...)"
+              class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-slate-200 shadow-sm">
+          </div>
+          
+          <div class="flex space-x-2 overflow-x-auto custom-scrollbar pb-1">
+            <button onclick="filterInvestment('all')" id="invFilter-all" class="shrink-0 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
+            <button onclick="filterInvestment('🪙 Crypto')" id="invFilter-crypto" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 Crypto</button>
+            <button onclick="filterInvestment('📈 Cổ phiếu')" id="invFilter-stock" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">📈 Cổ phiếu</button>
+            <button onclick="filterInvestment('💵 USD')" id="invFilter-usd" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">💵 USD</button>
+            <button onclick="filterInvestment('🥇 Vàng')" id="invFilter-gold" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🥇 Vàng</button>
+            <button onclick="filterInvestment('🏦 Tiết kiệm')" id="invFilter-save" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🏦 Tiết kiệm</button>
+          </div>
+        </div>
+
+        <!-- FORM THÊM / SỬA TÀI SẢN -->
+        <div id="investmentForm" class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-md space-y-3">
+          <div class="flex justify-between items-center mb-1">
+            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Tài Sản Đầu Tư</h3>
+            <button onclick="toggleInvestmentForm()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tên tài sản <span class="text-red-500">*</span></label>
+              <input type="text" id="investName" placeholder="Ví dụ: BTC, VNM..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Phân loại</label>
+              <select id="investType" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="🪙 Crypto">🪙 Crypto</option>
+                <option value="📈 Cổ phiếu">📈 Cổ phiếu</option>
+                <option value="🥇 Vàng">🥇 Vàng</option>
+                <option value="💵 USD">💵 USD</option>
+                <option value="🏦 Tiết kiệm">🏦 Tiết kiệm</option>
+                <option value="💼 Khác">💼 Khác</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investQuantity" placeholder="0" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ (%)</label>
+              <input type="number" step="1" id="investTarget" placeholder="VD: 20" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua trung bình <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investBuyPrice" placeholder="Giá vốn / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá trị hiện tại <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div class="col-span-2 flex items-center mt-1">
+              <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
+              <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
+                Giá trị nhập là USD (App sẽ tự động nhân với tỷ giá VNĐ/USD)
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Nơi lưu trữ...)</label>
+            <input type="text" id="investNotes" placeholder="Ví Binance, Sổ TK Vietcombank..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          </div>
+          
+          <button id="saveInvestBtn" onclick="saveInvestment()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
+            Lưu tài sản
+          </button>
+        </div>
+
+        <!-- DANH SÁCH TÀI SẢN -->
+        <div class="space-y-3 pb-6">
+          <div class="flex justify-between items-center px-1">
+            <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Danh mục tài sản chi tiết</h3>
+            <button onclick="openInvestmentForm(-1)" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all">
+              + Thêm tài sản
+            </button>
+          </div>
+
+          <div id="investmentList" class="space-y-3">
+            <!-- Render danh sách ở đây -->
+          </div>
+        </div>
+      </div>
+      <div id="tab-motorbike" class="hidden space-y-4 tab-content">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-sky-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="flex justify-between items-center text-xs text-sky-200 font-semibold">
+              <span>NMAX</span>
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div id="viewNmaxOdo" class="text-lg font-bold">14.850 km</div>
+            <p id="viewNmaxPlate" class="text-[10px] opacity-80">BS: 59X1-123.45</p>
+          </div>
+          <div class="bg-indigo-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="flex justify-between items-center text-xs text-indigo-200 font-semibold">
+              <span>GRANDE</span>
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div id="viewGrandeOdo" class="text-lg font-bold">8.200 km</div>
+            <p id="viewGrandePlate" class="text-[10px] opacity-80">BS: 59X2-678.90</p>
+          </div>
+        </div>
+
+        <div id="bikeMaintenanceForm"
+          class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border border-sky-200 dark:border-sky-800/50 shadow-sm space-y-3">
+          <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase">Ghi nhận Bảo Dưỡng Xe</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chọn Xe</label>
+              <select id="maintBikeName"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+                <option value="NMAX">NMAX 🛵</option>
+                <option value="Grande">Grande 🛵</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Ngày làm</label>
+              <input type="date" id="maintDate"
+                class="w-full px-1.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục</label>
+            <input type="text" id="maintTitle" placeholder="Thay nhớt máy..."
+              class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Số Odo (km)</label>
+              <input type="number" id="maintOdo" placeholder="14850"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chi phí (VNĐ)</label>
+              <input type="number" id="maintCost" placeholder="350000"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <button onclick="saveBikeMaintenance()"
+            class="w-full py-2 bg-sky-600 text-white rounded-xl text-xs font-semibold shadow-sm">
+            Lưu bảo dưỡng
+          </button>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử bảo dưỡng (Maintenance)</h3>
+            <button onclick="toggleBikeMaintenanceForm()"
+              class="text-xs bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg font-semibold">
+              + Bảo dưỡng
+            </button>
+          </div>
+
+          <div id="bikeMaintenanceList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Công việc Xe Máy</h3>
+          <div id="motorbikeTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div id="tab-cats" class="hidden space-y-4 tab-content">
+        <div
+          class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 rounded-2xl shadow-lg flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold">Mun & Bông 🐾</h2>
+            <p id="viewCatsInfo" class="text-xs text-amber-100 mt-1">Mun (4.2kg) • Bông (3.8kg)</p>
+          </div>
+          <div class="flex space-x-1.5">
+            <button onclick="openCatWeightHistoryModal()"
+              class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
+              Lịch sử 📋
+            </button>
+            <button onclick="toggleWeightForm()"
+              class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
+              + Thêm
+            </button>
+          </div>
+        </div>
+
+        <div id="weightForm"
+          class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/50 shadow-sm space-y-3">
+          <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase">Ghi nhận cân nặng mới</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Mèo</label>
+              <select id="weightCatName"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+                <option value="Mun">Mun 🐱</option>
+                <option value="Bông">Bông 🐱</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Cân nặng (kg)</label>
+              <input type="number" step="0.1" id="weightVal" placeholder="4.2"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Ngày cân</label>
+              <input type="date" id="weightDate"
+                class="w-full px-1.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <button onclick="addCatWeight()"
+            class="w-full py-2 bg-amber-500 text-white rounded-xl text-xs font-semibold shadow-sm">
+            Lưu chỉ số
+          </button>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Biểu đồ Cân Nặng (kg)</h3>
+            <div class="flex space-x-3 text-xs font-semibold">
+              <span class="flex items-center"><i
+                  class="fa-solid fa-circle text-amber-500 mr-1 text-[8px]"></i>Mun</span>
+              <span class="flex items-center"><i
+                  class="fa-solid fa-circle text-rose-500 mr-1 text-[8px]"></i>Bông</span>
+            </div>
+          </div>
+          <div class="w-full h-48 relative">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch chăm sóc Mun & Bông</h3>
+          <div id="catsTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div id="tab-health" class="hidden space-y-4 tab-content">
+        <div class="bg-emerald-600 text-white p-5 rounded-2xl shadow-lg space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-semibold text-emerald-100">SỨC KHỎE</span>
+            <i class="fa-solid fa-heart-pulse text-xl"></i>
+          </div>
+          <div class="text-2xl font-bold">Chạy bộ & Cầu lông</div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch tập luyện & Sức khỏe</h3>
+          <div id="healthTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- TAB SETTING -->
+      <div id="tab-setting" class="hidden space-y-5 tab-content">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <h3
+            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
+            <i class="fa-solid fa-cat text-amber-500 mr-2"></i>Thông tin Mun & Bông
+          </h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Mun
+                  (Giống)</label>
+                <input type="text" id="setMunBreed" placeholder="Mèo cưng"
+                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Bông
+                  (Giống)</label>
+                <input type="text" id="setBongBreed" placeholder="Mèo cưng"
+                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <h3
+            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
+            <i class="fa-solid fa-motorcycle text-sky-600 mr-2"></i>Thông tin Xe Máy
+          </h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Biển
+                  số</label>
+                <input type="text" id="setNmaxPlate"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Odo
+                  (km)</label>
+                <input type="number" id="setNmaxOdo"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 border-t border-gray-50 dark:border-slate-700/50 pt-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Biển
+                  số</label>
+                <input type="text" id="setGrandePlate"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Odo
+                  (km)</label>
+                <input type="number" id="setGrandeOdo"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveSettings()"
+          class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">
+          Lưu Cài Đặt
+        </button>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM TAB BAR -->
+    <nav
+      class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 py-2 flex justify-between items-center z-20 transition-colors">
+      <button onclick="switchTab('home', 'Tổng quan', this)"
+        class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[10px] font-medium">Tổng quan</span>
+      </button>
+
+      <button onclick="switchTab('todo', 'Công việc chung', this)"
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 relative">
+        <i class="fa-solid fa-list-check text-lg"></i>
+        <span class="text-[10px] font-medium">To-Do</span>
+        <span id="todoBadge"
+          class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('finance', 'Quản lý Thu Chi', this)"
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1">
+        <i class="fa-solid fa-coins text-lg"></i>
+        <span class="text-[10px] font-medium">Tài chính</span>
+      </button>
+    </nav>
+
+    <!-- SIDEBAR MENU -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-30">
+    </div>
+
+    <aside id="sidebar"
+      class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-40 -translate-x-full sidebar-transition shadow-2xl p-6 flex flex-col justify-between transition-colors">
+      <div class="space-y-6">
+        <div class="pt-6 pb-4 border-b border-gray-100 dark:border-slate-800 space-y-3">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Gia Đình</h3>
+          <div class="space-y-2">
+            <div class="bg-rose-50 dark:bg-rose-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+              <div
+                class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs">Đ
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Phước Đức (Đức)</p>
+              </div>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+              <div
+                class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">S
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Thu Sương (Sương)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="space-y-1.5">
+          <a href="#" onclick="switchTab('investment', 'Quản lý Đầu Tư'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <i class="fa-solid fa-chart-line text-xs"></i></div>
+            <span>Đầu Tư</span>
+          </a>
+
+          <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+              <i class="fa-solid fa-motorcycle text-xs"></i></div>
+            <span>Xe Máy</span>
+          </a>
+
+          <a href="#" onclick="switchTab('cats', 'Mun & Bông'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <i class="fa-solid fa-cat text-xs"></i></div>
+            <span>Mun, Bông</span>
+          </a>
+
+          <a href="#" onclick="switchTab('health', 'Sức Khỏe'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <i class="fa-solid fa-heart-pulse text-xs"></i></div>
+            <span>Sức Khỏe</span>
+          </a>
+
+          <a href="#" onclick="switchTab('setting', 'Cài Đặt'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors mt-4 border-t border-gray-100 dark:border-slate-800 pt-3">
+            <div
+              class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center">
+              <i class="fa-solid fa-gear text-xs"></i></div>
+            <span>Cài Đặt (Setting)</span>
+          </a>
+        </nav>
+      </div>
+
+      <div
+        class="text-xs text-gray-400 dark:text-slate-500 text-center border-t border-gray-100 dark:border-slate-800 pt-4">
+        <p class="font-semibold text-gray-500 dark:text-slate-400">DuoSpace PWA</p>
+        <p class="text-gray-400 dark:text-slate-600">v3.1</p>
+      </div>
+    </aside>
+
+    <!-- POPUP LỊCH SỬ CÂN NẶNG MUN & BÔNG -->
+    <div id="catHistoryModal" onclick="closeCatWeightHistoryModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[75vh] flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Lịch sử cân nặng Mun & Bông</h3>
+          <button onclick="closeCatWeightHistoryModal()"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+        <div id="catWeightHistoryList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD & EDIT MODAL -->
+    <div id="addModal" onclick="closeAddModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mb-2">
+          <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
+          <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+          </button>
+        </div>
+
+        <div id="typeSelector" class="grid grid-cols-3 gap-2 mb-2">
+          <button onclick="setAddType('todo')" id="typeBtn-todo"
+            class="py-2.5 px-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs border-2 border-blue-600">
+            <i class="fa-solid fa-list-check block text-sm mb-1"></i> To-Do
+          </button>
+          <button onclick="setAddType('expense')" id="typeBtn-expense"
+            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
+            <i class="fa-solid fa-money-bill block text-sm mb-1"></i> Chi Tiêu
+          </button>
+          <button onclick="setAddType('income')" id="typeBtn-income"
+            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
+            <i class="fa-solid fa-piggy-bank block text-sm mb-1"></i> Thu Nhập
+          </button>
+        </div>
+
+        <!-- Form To-Do -->
+        <div id="addTodoForm" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Tên công việc</label>
+            <input type="text" id="todoInput" placeholder="Nhập tên công việc..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân loại</label>
+              <select id="todoCategory"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Việc nhà">🏡 Việc nhà</option>
+                <option value="Mun & Bông">🐱 Mun & Bông</option>
+                <option value="Xe Máy">🛵 Xe Máy</option>
+                <option value="Sức Khỏe">❤️ Sức Khỏe</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân công</label>
+              <select id="todoUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Đ">Đức</option>
+                <option value="S">Sương</option>
+                <option value="Both" selected>Cả hai</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mức độ ưu tiên</label>
+            <select id="todoPriority"
+              class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="high">🔴 Cao</option>
+              <option value="medium" selected>🟡 Trung bình</option>
+              <option value="low">⚪ Thấp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="todoNotes" rows="2" placeholder="Chi tiết hoặc lưu ý bổ sung..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <button id="saveTodoBtn" onclick="saveTodoAction()"
+            class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            công việc</button>
+        </div>
+
+        <!-- Form Chi Tiêu -->
+        <div id="addExpenseForm" class="hidden space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
+            <input type="number" id="expenseAmount" placeholder="0"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Category (Danh
+                mục)</label>
+              <select id="expenseCategory"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="🍜 Ăn uống">🍜 Ăn uống</option>
+                <option value="🏠 Nhà cửa">🏠 Nhà cửa</option>
+                <option value="🛒 Siêu thị">🛒 Siêu thị</option>
+                <option value="🛵 Xe">🛵 Xe</option>
+                <option value="🐱 Mèo">🐱 Mèo</option>
+                <option value="💊 Sức khỏe">💊 Sức khỏe</option>
+                <option value="🎮 Giải trí">🎮 Giải trí</option>
+                <option value="💰 Tiết kiệm">💰 Tiết kiệm</option>
+                <option value="📦 Khác" selected>📦 Khác</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người chi trả</label>
+              <select id="expenseUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="Đ">Đức</option>
+                <option value="S">Sương</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả khoản chi</label>
+            <input type="text" id="expenseDesc" placeholder="Mô tả..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="expenseNotes" rows="2" placeholder="Ghi chú chi tiết..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+          </div>
+          <button id="saveExpenseBtn" onclick="saveExpenseAction()"
+            class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            khoản chi</button>
+        </div>
+
+        <!-- Form Thu Nhập -->
+        <div id="addIncomeForm" class="hidden space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
+            <input type="number" id="incomeAmount" placeholder="0"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Nguồn thu nhập</label>
+            <input type="text" id="incomeDesc" placeholder="Nguồn thu..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người gửi</label>
+            <select id="incomeUser"
+              class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="Đ">Đức</option>
+              <option value="S">Sương</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="incomeNotes" rows="2" placeholder="Ghi chú thêm..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+          <button id="saveIncomeBtn" onclick="saveIncomeAction()"
+            class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            khoản thu</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let appData = {
+      isDarkMode: false,
+      usdRate: 25400,
+      todos: [],
+      expenses: [],
+      incomes: [],
+      bikeMaintenances: [],
+      investments: [],
+      monthlyBudgets: [
+        { month: "T6/2026", budget: 15000000, spent: 10200000 },
+        { month: "T7/2026", budget: 14000000, spent: 11800000 },
+        { month: "T8/2026", budget: 12500000, spent: 4200000 }
+      ],
+      catWeights: [
+        { date: "2026-06-01", mun: 4.0, bong: 3.5 },
+        { date: "2026-07-01", mun: 4.1, bong: 3.6 },
+        { date: "2026-08-01", mun: 4.2, bong: 3.8 }
+      ],
+      settings: {
+        munBreed: "Mèo Cưng",
+        bongBreed: "Mèo Cưng",
+        nmaxPlate: "59X1-123.45",
+        nmaxOdo: 14850,
+        grandePlate: "59X2-678.90",
+        grandeOdo: 8200
+      }
+    };
+
+    let currentTodoSubTab = 'active';
+    let currentTodoTimeFilter = 'month';
+    let currentTodoUserFilter = 'all';
+    let currentFinanceFilter = 'all';
+
+    let editingType = null;
+    let editingIndex = -1;
+
+    let homeSearchQuery = '';
+    let todoSearchQuery = '';
+    let financeSearchQuery = '';
+
+    let weightChart = null;
+    let budgetChart = null;
+    let assetAllocationChart = null;
+
+    function init() {
+      const saved = localStorage.getItem('duoSpaceData');
+      if (saved) {
+        appData = JSON.parse(saved);
+        if (!appData.usdRate) appData.usdRate = 25400;
+        if (!appData.investments) appData.investments = [];
+      } else {
+        appData.todos = [
+          { title: "Lịch nhỏ mắt & tẩy giun Mun, Bông", category: "Mun & Bông", user: "S", priority: "high", notes: "Dùng thuốc nhỏ Revolution", done: false, date: new Date().toISOString() },
+          { title: "Thay nhớt NMAX mốc 15.000km", category: "Xe Máy", user: "Đ", priority: "medium", notes: "Thay nhớt máy Motul 10W40", done: false, date: new Date().toISOString() }
+        ];
+        appData.incomes = [
+          { amount: 15000000, desc: "Lương tháng 8", user: "Đ", notes: "Thu nhập cố định", date: new Date().toISOString() },
+          { amount: 12000000, desc: "Lương tháng 8", user: "S", notes: "Thu nhập cố định", date: new Date().toISOString() }
+        ];
+        appData.expenses = [
+          { amount: 3200000, desc: "Ăn uống nhà hàng & chợ", category: "🍜 Ăn uống", user: "S", notes: "", date: new Date().toISOString() },
+          { amount: 4000000, desc: "Tiền điện nước internet", category: "🏠 Nhà cửa", user: "Đ", notes: "", date: new Date().toISOString() },
+          { amount: 800000, desc: "Xăng xe & bảo dưỡng", category: "🛵 Xe", user: "Đ", notes: "", date: new Date().toISOString() },
+          { amount: 600000, desc: "Cát vệ sinh & hạt mèo", category: "🐱 Mèo", user: "S", notes: "", date: new Date().toISOString() },
+          { amount: 3900000, desc: "Sắm đồ dùng gia đình", category: "📦 Khác", user: "Đ", notes: "", date: new Date().toISOString() }
+        ];
+        appData.bikeMaintenances = [
+          { bike: "NMAX", title: "Thay nhớt", odo: 14850, cost: 350000, date: "2026-08-31" },
+          { bike: "NMAX", title: "Thay nhớt", odo: 12100, cost: 300000, date: "2026-05-15" }
+        ];
+        appData.investments = [
+          { name: "Bitcoin Spot", type: "🪙 Crypto", quantity: 0.05, price: 65000, notes: "Tính theo USD trên Binance" },
+          { name: "Cổ phiếu VNM", type: "📈 Cổ phiếu", quantity: 500, price: 68000, notes: "Tích sản VNĐ" },
+          { name: "Tiết kiệm USD", type: "💵 USD", quantity: 1000, price: 1, notes: "Tài khoản USD" }
+        ];
+        save();
+      }
+
+      document.getElementById('usdRateInput').value = appData.usdRate;
+      setupDarkModeSystemListener();
+      loadSettingsToForm();
+      document.getElementById('weightDate').valueAsDate = new Date();
+      document.getElementById('maintDate').valueAsDate = new Date();
+
+      fetchRealtimeUsdRate();
+      render();
+    }
+
+    // TỰ ĐỘNG CẬP NHẬT TỶ GIÁ VNĐ/USD TỪ INTERNET (API REALTIME)
+    async function fetchRealtimeUsdRate() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data && data.rates && data.rates.VND) {
+          const rate = Math.round(data.rates.VND);
+          appData.usdRate = rate;
+          document.getElementById('usdRateInput').value = rate;
+          save();
+          renderInvestmentList();
+        }
+      } catch (err) {
+        console.log('Không thể lấy tỷ giá tự động:', err);
+      }
+    }
+
+    function updateUsdRate(val) {
+      const rate = parseFloat(val);
+      if (rate && rate > 0) {
+        appData.usdRate = rate;
+        save();
+        renderInvestmentList();
+      }
+    }
+
+    function setupDarkModeSystemListener() {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      appData.isDarkMode = mediaQuery.matches;
+      applyDarkMode(appData.isDarkMode);
+
+      mediaQuery.addEventListener('change', (e) => {
+        appData.isDarkMode = e.matches;
+        applyDarkMode(appData.isDarkMode);
+        renderCatChart();
+        renderBudgetChart();
+        renderAssetAllocationChart();
+      });
+    }
+
+    function save() {
+      localStorage.setItem('duoSpaceData', JSON.stringify(appData));
+    }
+
+    function applyDarkMode(isDark) {
+      const html = document.documentElement;
+      if (isDark) {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+    }
+
+    function render() {
+      renderHome();
+      renderTodoList();
+      renderFinanceList();
+      renderCatWeightHistory();
+      renderBikeMaintenanceList();
+      renderInvestmentList();
+      renderFeatureViews();
+      updateBadges();
+      updateDynamicInfo();
+    }
+
+    function updateDynamicInfo() {
+      const s = appData.settings;
+      document.getElementById('viewNmaxOdo').innerText = `${(s.nmaxOdo || 0).toLocaleString('vi-VN')} km`;
+      document.getElementById('viewNmaxPlate').innerText = `BS: ${s.nmaxPlate || 'N/A'}`;
+      document.getElementById('viewGrandeOdo').innerText = `${(s.grandeOdo || 0).toLocaleString('vi-VN')} km`;
+      document.getElementById('viewGrandePlate').innerText = `BS: ${s.grandePlate || 'N/A'}`;
+
+      const latestWeights = appData.catWeights[appData.catWeights.length - 1] || { mun: 0, bong: 0 };
+      document.getElementById('viewCatsInfo').innerText = `Mun (${latestWeights.mun}kg) • Bông (${latestWeights.bong}kg)`;
+    }
+
+    function renderHome() {
+      const totalIncome = appData.incomes.reduce((sum, i) => sum + i.amount, 0);
+      const totalExpense = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+      const fundBalance = totalIncome - totalExpense;
+
+      const fundCard = document.getElementById('fundCard');
+      if (fundBalance < 0) {
+        fundCard.className = "bg-gradient-to-r from-rose-600 to-red-600 rounded-2xl p-5 text-white shadow-lg space-y-3 transition-colors duration-300";
+      } else {
+        fundCard.className = "bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg space-y-3 transition-colors duration-300";
+      }
+
+      document.getElementById('totalBudget').innerText = formatCurrency(fundBalance);
+      document.getElementById('spentAmount').innerText = formatCurrency(totalIncome);
+      document.getElementById('remainAmount').innerText = formatCurrency(totalExpense);
+
+      const now = new Date();
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const weekSpend = appData.expenses.filter(e => new Date(e.date) >= startOfWeek).reduce((sum, e) => sum + e.amount, 0);
+      document.getElementById('homeWeekSpend').innerText = formatCurrency(weekSpend);
+      document.getElementById('homeMonthSpend').innerText = formatCurrency(totalExpense);
+
+      const totalTasks = appData.todos.length;
+      const doneTasks = appData.todos.filter(t => t.done).length;
+      const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+      document.getElementById('homeTaskPct').innerText = `${pct}%`;
+      document.getElementById('homeTaskProgressBar').style.width = `${pct}%`;
+      document.getElementById('homeTaskDoneCount').innerText = doneTasks;
+      document.getElementById('homeTaskTotalCount').innerText = totalTasks;
+
+      renderCategoryBreakdown();
+      renderImportantReminders();
+      setTimeout(renderBudgetChart, 100);
+    }
+
+    function renderCategoryBreakdown() {
+      const container = document.getElementById('homeCategoryBreakdown');
+      if (!container) return;
+
+      const now = new Date();
+      const monthExpenses = appData.expenses.filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const totalMonthExpense = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+      document.getElementById('homeCategoryTotalText').innerText = formatCurrency(totalMonthExpense);
+
+      if (totalMonthExpense === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">Tháng này chưa có khoản chi nào</p>';
+        return;
+      }
+
+      const categoriesMap = {};
+      monthExpenses.forEach(e => {
+        const cat = e.category || '📦 Khác';
+        categoriesMap[cat] = (categoriesMap[cat] || 0) + e.amount;
+      });
+
+      const sortedCategories = Object.keys(categoriesMap)
+        .map(cat => ({ name: cat, amount: categoriesMap[cat], pct: ((categoriesMap[cat] / totalMonthExpense) * 100).toFixed(1) }))
+        .sort((a, b) => b.amount - a.amount);
+
+      container.innerHTML = sortedCategories.map(item => `
+        <div class="space-y-1">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-medium text-gray-700 dark:text-slate-300">${item.name}</span>
+            <div class="space-x-2">
+              <span class="font-bold text-gray-900 dark:text-white">${formatCurrency(item.amount)}</span>
+              <span class="text-[10px] text-gray-400">${item.pct}%</span>
+            </div>
+          </div>
+          <div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-rose-500 h-full rounded-full" style="width: ${item.pct}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBudgetChart() {
+      const ctx = document.getElementById('budgetComparisonChart');
+      if (!ctx) return;
+
+      const isDark = appData.isDarkMode;
+      const labels = appData.monthlyBudgets.map(b => b.month);
+      const incomes = appData.monthlyBudgets.map(b => b.budget);
+      const expenses = appData.monthlyBudgets.map(b => b.spent);
+
+      incomes[incomes.length - 1] = appData.incomes.reduce((sum, i) => sum + i.amount, 0);
+      expenses[expenses.length - 1] = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+      if (budgetChart) budgetChart.destroy();
+
+      budgetChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Tổng Thu', data: incomes, backgroundColor: isDark ? '#10b981' : '#059669', borderRadius: 6 },
+            { label: 'Tổng Chi', data: expenses, backgroundColor: isDark ? '#f43f5e' : '#e11d48', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } } }
+          },
+          scales: {
+            y: { grid: { color: isDark ? '#334155' : '#f1f5f9' }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 9 }, callback: (v) => v / 1000000 + 'M' } },
+            x: { grid: { display: false }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function searchHome(query) {
+      homeSearchQuery = query.toLowerCase().trim();
+      renderImportantReminders();
+    }
+
+    function renderImportantReminders() {
+      const container = document.getElementById('importantList');
+      let importantTodos = appData.todos.filter(t => !t.done && (t.priority === 'high' || t.priority === 'medium'))
+        .sort((a, b) => (a.priority === 'high' ? -1 : 1));
+
+      if (homeSearchQuery) {
+        importantTodos = importantTodos.filter(t => t.title.toLowerCase().includes(homeSearchQuery));
+      }
+
+      if (importantTodos.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-400 dark:text-slate-500 text-center py-3">Không có việc quan trọng cần làm</p>';
+        return;
+      }
+
+      container.innerHTML = importantTodos.map(todo => {
+        const realIdx = appData.todos.indexOf(todo);
+        const priorityBadge = todo.priority === 'high' ? '<span class="text-[10px] font-bold px-2 py-0.5 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-md">🔴 Cao</span>' :
+          '<span class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-md">🟡 Trung bình</span>';
+
+        const createdDate = todo.date ? new Date(todo.date).toLocaleDateString('vi-VN') : '';
+
+        return `
+          <div class="flex items-center justify-between py-1 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-1.5 rounded-lg transition-colors">
+            <div class="flex items-center space-x-3 flex-1">
+              <input type="checkbox" onclick="event.stopPropagation()" onchange="toggleTodo(${realIdx})" class="w-5 h-5 rounded text-blue-600 focus:ring-0 cursor-pointer">
+              <div onclick="editTodo(${realIdx})" class="flex-1 cursor-pointer">
+                <p class="text-sm font-medium text-gray-800 dark:text-slate-200">${todo.title}</p>
+                <p class="text-[11px] text-gray-400 dark:text-slate-500">${todo.category} • ${todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai'}${createdDate ? ' • 📅 ' + createdDate : ''}${todo.notes ? ' • 📝 ' + todo.notes : ''}</p>
+              </div>
+            </div>
+            ${priorityBadge}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchTodoSubTab(subTab) {
+      currentTodoSubTab = subTab;
+      const btnActive = document.getElementById('todoSubTab-active');
+      const btnArchive = document.getElementById('todoSubTab-archive');
+
+      if (subTab === 'active') {
+        btnActive.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 font-semibold";
+        btnArchive.className = "flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 font-medium";
+        document.getElementById('todoListHeader').innerText = "Việc cần làm";
+      } else {
+        btnArchive.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 font-semibold";
+        btnActive.className = "flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 font-medium";
+        document.getElementById('todoListHeader').innerText = "Việc đã hoàn thành";
+      }
+      renderTodoList();
+    }
+
+    function filterTodoTime(time) {
+      currentTodoTimeFilter = time;
+      ['today', 'week', 'month', 'all'].forEach(t => {
+        const btn = document.getElementById(`todoTime-${t}`);
+        if (t === time) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold shadow-sm";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400";
+        }
+      });
+      renderTodoList();
+    }
+
+    function filterTodoUser(user) {
+      currentTodoUserFilter = user;
+      ['all', 'Đ', 'S', 'Both'].forEach(u => {
+        const btn = document.getElementById(`todoFilter-${u}`);
+        if (u === user) {
+          btn.className = "px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg shadow-sm";
+        } else {
+          btn.className = "px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700";
+        }
+      });
+      renderTodoList();
+    }
+
+    function searchTodo(query) {
+      todoSearchQuery = query.toLowerCase().trim();
+      renderTodoList();
+    }
+
+    function renderTodoList() {
+      const todoList = document.getElementById('todoList');
+      let filtered = appData.todos.filter(t => currentTodoSubTab === 'archive' ? t.done : !t.done);
+
+      if (currentTodoUserFilter !== 'all') {
+        filtered = filtered.filter(t => t.user === currentTodoUserFilter);
+      }
+
+      const now = new Date();
+      if (currentTodoTimeFilter === 'today') {
+        filtered = filtered.filter(t => new Date(t.date).toDateString() === now.toDateString());
+      } else if (currentTodoTimeFilter === 'month') {
+        filtered = filtered.filter(t => {
+          const d = new Date(t.date);
+          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        });
+      }
+
+      if (todoSearchQuery) {
+        filtered = filtered.filter(t => t.title.toLowerCase().includes(todoSearchQuery) || (t.notes && t.notes.toLowerCase().includes(todoSearchQuery)));
+      }
+
+      if (filtered.length === 0) {
+        todoList.innerHTML = `<p class="text-sm text-gray-400 dark:text-slate-500 text-center py-4">${currentTodoSubTab === 'archive' ? 'Chưa có công việc nào hoàn thành' : 'Không tìm thấy công việc nào'}</p>`;
+        document.getElementById('todoCount').innerText = '0';
+        return;
+      }
+
+      todoList.innerHTML = filtered.map(todo => {
+        const realIndex = appData.todos.indexOf(todo);
+        const userBadge = todo.user === 'Đ' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-semibold">Đức</span>' :
+          todo.user === 'S' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold">Sương</span>' :
+            '<span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-semibold">Cả hai</span>';
+
+        const categoryBadge = `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">${todo.category || 'Việc nhà'}</span>`;
+        const dateStr = todo.date ? new Date(todo.date).toLocaleDateString('vi-VN') : '';
+
+        return `
+          <div class="task-item bg-gray-50 dark:bg-slate-800/80 rounded-xl p-3 border border-gray-100 dark:border-slate-700/60 space-y-1 hover:bg-gray-100 dark:hover:bg-slate-700/50">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3 flex-1">
+                <input type="checkbox" onclick="event.stopPropagation()" onchange="toggleTodo(${realIndex})" ${todo.done ? 'checked' : ''} class="w-5 h-5 rounded text-blue-600 focus:ring-0 cursor-pointer">
+                <div onclick="editTodo(${realIndex})" class="flex-1 cursor-pointer">
+                  <p class="text-sm font-medium text-gray-800 dark:text-slate-200 ${todo.done ? 'line-through text-gray-400 dark:text-slate-500' : ''}">${todo.title}</p>
+                  <div class="flex items-center space-x-1.5 mt-1 flex-wrap gap-y-1">
+                    ${userBadge}
+                    ${categoryBadge}
+                    ${dateStr ? `<span class="text-[10px] text-gray-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+              <button onclick="deleteTodo(${realIndex})" class="text-gray-300 hover:text-red-500 p-1.5 transition-colors" title="Xóa">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+            ${todo.notes ? `<p onclick="editTodo(${realIndex})" class="text-[11px] text-gray-500 dark:text-slate-400 bg-white dark:bg-slate-900/60 p-2 rounded-lg border border-gray-100 dark:border-slate-800 mt-1 cursor-pointer">📝 ${todo.notes}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('todoCount').innerText = filtered.length;
+    }
+
+    function editTodo(index) {
+      editingType = 'todo';
+      editingIndex = index;
+      const todo = appData.todos[index];
+
+      document.getElementById('modalMainTitle').innerText = "Chỉnh sửa công việc";
+      document.getElementById('typeSelector').classList.add('hidden');
+
+      setAddType('todo');
+
+      document.getElementById('todoInput').value = todo.title;
+      document.getElementById('todoCategory').value = todo.category || 'Việc nhà';
+      document.getElementById('todoUser').value = todo.user || 'Both';
+      document.getElementById('todoPriority').value = todo.priority || 'medium';
+      document.getElementById('todoNotes').value = todo.notes || '';
+
+      document.getElementById('saveTodoBtn').innerText = "Cập nhật công việc";
+      openAddModal();
+    }
+
+    function editFinance(type, index) {
+      editingType = type;
+      editingIndex = index;
+      const item = type === 'expense' ? appData.expenses[index] : appData.incomes[index];
+
+      document.getElementById('modalMainTitle').innerText = type === 'expense' ? "Chỉnh sửa khoản chi" : "Chỉnh sửa khoản thu";
+      document.getElementById('typeSelector').classList.add('hidden');
+
+      setAddType(type);
+
+      if (type === 'expense') {
+        document.getElementById('expenseAmount').value = item.amount;
+        document.getElementById('expenseDesc').value = item.desc;
+        document.getElementById('expenseCategory').value = item.category || '📦 Khác';
+        document.getElementById('expenseUser').value = item.user;
+        document.getElementById('expenseNotes').value = item.notes || '';
+        document.getElementById('saveExpenseBtn').innerText = "Cập nhật khoản chi";
+      } else {
+        document.getElementById('incomeAmount').value = item.amount;
+        document.getElementById('incomeDesc').value = item.desc;
+        document.getElementById('incomeUser').value = item.user;
+        document.getElementById('incomeNotes').value = item.notes || '';
+        document.getElementById('saveIncomeBtn').innerText = "Cập nhật khoản thu";
+      }
+
+      openAddModal();
+    }
+
+    function saveTodoAction() {
+      const title = document.getElementById('todoInput').value.trim();
+      const category = document.getElementById('todoCategory').value;
+      const user = document.getElementById('todoUser').value;
+      const priority = document.getElementById('todoPriority').value;
+      const notes = document.getElementById('todoNotes').value.trim();
+
+      if (!title) return alert('Vui lòng nhập tên công việc!');
+
+      if (editingType === 'todo' && editingIndex >= 0) {
+        appData.todos[editingIndex] = { ...appData.todos[editingIndex], title, category, user, priority, notes };
+      } else {
+        appData.todos.push({ title, category, user, priority, notes, done: false, date: new Date().toISOString() });
+      }
+
+      save();
+      render();
+      closeAddModal();
+    }
+
+    function saveExpenseAction() {
+      const amount = parseInt(document.getElementById('expenseAmount').value);
+      const desc = document.getElementById('expenseDesc').value.trim();
+      const category = document.getElementById('expenseCategory').value;
+      const user = document.getElementById('expenseUser').value;
+      const notes = document.getElementById('expenseNotes').value.trim();
+
+      if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+
+      if (editingType === 'expense' && editingIndex >= 0) {
+        appData.expenses[editingIndex] = { ...appData.expenses[editingIndex], amount, desc, category, user, notes };
+      } else {
+        appData.expenses.push({ amount, desc, category, user, notes, date: new Date().toISOString() });
+      }
+
+      save();
+      render();
+      closeAddModal();
+    }
+
+    function saveIncomeAction() {
+      const amount = parseInt(document.getElementById('incomeAmount').value);
+      const desc = document.getElementById('incomeDesc').value.trim();
+      const user = document.getElementById('incomeUser').value;
+      const notes = document.getElementById('incomeNotes').value.trim();
+
+      if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+
+      if (editingType === 'income' && editingIndex >= 0) {
+        appData.incomes[editingIndex] = { ...appData.incomes[editingIndex], amount, desc, user, notes };
+      } else {
+        appData.incomes.push({ amount, desc, user, notes, date: new Date().toISOString() });
+      }
+
+      save();
+      render();
+      closeAddModal();
+    }
+
+    function filterFinance(type) {
+      currentFinanceFilter = type;
+      ['all', 'expense', 'income'].forEach(t => {
+        const btn = document.getElementById(`finFilter-${t}`);
+        if (t === type) {
+          btn.className = "px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 shadow-sm text-gray-800 dark:text-slate-200 font-semibold";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400";
+        }
+      });
+      renderFinanceList();
+    }
+
+    function searchFinance(query) {
+      financeSearchQuery = query.toLowerCase().trim();
+      renderFinanceList();
+    }
+
+    function renderFinanceList() {
+      const financeList = document.getElementById('financeList');
+      let combined = [
+        ...appData.expenses.map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
+        ...appData.incomes.map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
+      ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (currentFinanceFilter !== 'all') {
+        combined = combined.filter(item => item.type === currentFinanceFilter);
+      }
+
+      if (financeSearchQuery) {
+        combined = combined.filter(item => item.desc.toLowerCase().includes(financeSearchQuery) || (item.notes && item.notes.toLowerCase().includes(financeSearchQuery)));
+      }
+
+      if (combined.length === 0) {
+        financeList.innerHTML = '<p class="text-sm text-gray-400 dark:text-slate-500 text-center py-4">Chưa có giao dịch nào</p>';
+      } else {
+        financeList.innerHTML = combined.map(item => {
+          const isExpense = item.type === 'expense';
+          const icon = isExpense ? (item.category ? item.category.split(' ')[0] : '💸') : '💰';
+          const color = isExpense ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
+          const sign = isExpense ? '-' : '+';
+          const byLabel = isExpense ? 'Chi bởi' : 'Thu bởi';
+          const userText = item.user === 'Đ' ? 'Đức' : 'Sương';
+          const catTag = isExpense && item.category ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ml-1">${item.category}</span>` : '';
+
+          return `
+            <div onclick="editFinance('${item.type}', ${item.rawIdx})" class="clickable-row py-2 border-b border-gray-50 dark:border-slate-700/50 last:border-0 space-y-1 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-2 rounded-lg transition-colors">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 flex-1">
+                  <span class="text-base">${icon}</span>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800 dark:text-slate-200">${item.desc} ${catTag}</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-sm ${color}">${sign}${formatCurrency(item.amount)}</span>
+                  <button onclick="event.stopPropagation(); deleteFinance('${item.type}', ${item.rawIdx})" class="text-gray-300 hover:text-red-500 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+              ${item.notes ? `<p class="text-[10px] text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-900/60 p-1.5 rounded border border-gray-100 dark:border-slate-800">📝 ${item.notes}</p>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      const totalIncome = appData.incomes.reduce((sum, i) => sum + i.amount, 0);
+      const totalExpense = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+      document.getElementById('incomeTotal').innerText = formatCurrency(totalIncome);
+      document.getElementById('expenseTotal').innerText = formatCurrency(totalExpense);
+    }
+
+    function deleteFinance(type, idx) {
+      if (type === 'expense') appData.expenses.splice(idx, 1);
+      else appData.incomes.splice(idx, 1);
+      save();
+      render();
+    }
+
+    /* ==== PORTFOLIO MANAGEMENT MODULE ==== */
+    let editingInvestIndex = -1;
+    let currentInvestFilter = 'all';
+    let investSearchQuery = '';
+
+    function toggleInvestmentForm() {
+      const form = document.getElementById('investmentForm');
+      if (form) form.classList.toggle('hidden');
+    }
+
+    function openInvestmentForm(idx = -1) {
+      editingInvestIndex = idx;
+      const form = document.getElementById('investmentForm');
+      if (!form) return;
+      form.classList.remove('hidden');
+      
+      if (idx >= 0 && appData.investments && appData.investments[idx]) {
+        const item = appData.investments[idx];
+        document.getElementById('investFormTitle').innerText = "Cập nhật Tài Sản";
+        document.getElementById('investName').value = item.name || '';
+        document.getElementById('investType').value = item.type || '🪙 Crypto';
+        document.getElementById('investQuantity').value = item.quantity || '';
+        document.getElementById('investBuyPrice').value = item.buyPrice !== undefined ? item.buyPrice : (item.price || '');
+        document.getElementById('investCurrentPrice').value = item.currentPrice !== undefined ? item.currentPrice : (item.price || '');
+        document.getElementById('investTarget').value = item.targetWeight || '';
+        document.getElementById('investIsUsd').checked = item.isUsd || false;
+        document.getElementById('investNotes').value = item.notes || '';
+        document.getElementById('saveInvestBtn').innerText = "Cập nhật tài sản";
+      } else {
+        document.getElementById('investFormTitle').innerText = "Thêm Tài Sản Mới";
+        document.getElementById('investName').value = '';
+        document.getElementById('investType').value = '🪙 Crypto';
+        document.getElementById('investQuantity').value = '';
+        document.getElementById('investBuyPrice').value = '';
+        document.getElementById('investCurrentPrice').value = '';
+        document.getElementById('investTarget').value = '';
+        document.getElementById('investIsUsd').checked = false;
+        document.getElementById('investNotes').value = '';
+        document.getElementById('saveInvestBtn').innerText = "Lưu tài sản";
+      }
+      
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function saveInvestment() {
+      const name = document.getElementById('investName').value.trim();
+      const type = document.getElementById('investType').value;
+      const quantity = parseFloat(document.getElementById('investQuantity').value);
+      const buyPrice = parseFloat(document.getElementById('investBuyPrice').value);
+      const currentPrice = parseFloat(document.getElementById('investCurrentPrice').value);
+      const targetWeight = parseFloat(document.getElementById('investTarget').value) || null;
+      const isUsd = document.getElementById('investIsUsd').checked;
+      const notes = document.getElementById('investNotes').value.trim();
+
+      if (!name || isNaN(quantity) || isNaN(buyPrice) || isNaN(currentPrice)) {
+        return alert('Vui lòng nhập đủ: Tên, Số lượng, Giá mua và Giá hiện tại!');
+      }
+
+      const newItem = { name, type, quantity, buyPrice, currentPrice, targetWeight, isUsd, notes };
+
+      if (!appData.investments) appData.investments = [];
+
+      if (editingInvestIndex >= 0 && editingInvestIndex < appData.investments.length) {
+        appData.investments[editingInvestIndex] = newItem;
+      } else {
+        appData.investments.push(newItem);
+      }
+
+      save();
+      toggleInvestmentForm();
+      renderInvestmentList();
+    }
+
+    function deleteInvestmentItem(idx) {
+      if (confirm('Bạn có chắc chắn muốn xóa tài sản này?')) {
+        if (appData.investments && appData.investments[idx]) {
+          appData.investments.splice(idx, 1);
+          save();
+          renderInvestmentList();
+        }
+      }
+    }
+
+    function searchInvestment(query) {
+      investSearchQuery = (query || '').toLowerCase().trim();
+      renderInvestmentList();
+    }
+
+    function filterInvestment(type) {
+      currentInvestFilter = type;
+      const types = ['all', 'crypto', 'stock', 'usd', 'gold', 'save'];
+      const typeValues = ['all', '🪙 Crypto', '📈 Cổ phiếu', '💵 USD', '🥇 Vàng', '🏦 Tiết kiệm'];
+      
+      types.forEach((id, index) => {
+        const btn = document.getElementById(`invFilter-${id}`);
+        if(btn) {
+          if (typeValues[index] === type) {
+            btn.className = "shrink-0 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors";
+          } else {
+            btn.className = "shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700 transition-colors";
+          }
+        }
+      });
+      renderInvestmentList();
+    }
+
+    function renderInvestmentList() {
+      const container = document.getElementById('investmentList');
+      if (!container) return;
+
+      const list = appData.investments || [];
+      let totalCostVnd = 0;
+      let totalValueVnd = 0;
+
+      list.forEach(item => {
+        const bPrice = item.buyPrice !== undefined ? item.buyPrice : (item.price || 0);
+        const cPrice = item.currentPrice !== undefined ? item.currentPrice : (item.price || 0);
+        const cost = item.isUsd ? (item.quantity * bPrice * appData.usdRate) : (item.quantity * bPrice);
+        const value = item.isUsd ? (item.quantity * cPrice * appData.usdRate) : (item.quantity * cPrice);
+        totalCostVnd += cost;
+        totalValueVnd += value;
+      });
+
+      const totalPnL = totalValueVnd - totalCostVnd;
+      const totalRoi = totalCostVnd > 0 ? (totalPnL / totalCostVnd) * 100 : 0;
+
+      if (document.getElementById('investTotalValue')) {
+        document.getElementById('investTotalValue').innerText = formatCurrency(totalValueVnd);
+      }
+      if (document.getElementById('investTotalCost')) {
+        document.getElementById('investTotalCost').innerText = formatCurrency(totalCostVnd);
+      }
+      
+      const pnlEl = document.getElementById('investTotalPnL');
+      if (pnlEl) {
+        if (totalPnL >= 0) {
+          pnlEl.innerText = `+${formatCurrency(totalPnL)} (+${totalRoi.toFixed(2)}%)`;
+          pnlEl.className = "text-sm font-bold text-emerald-400 drop-shadow-sm";
+        } else {
+          pnlEl.innerText = `${formatCurrency(totalPnL)} (${totalRoi.toFixed(2)}%)`;
+          pnlEl.className = "text-sm font-bold text-rose-400 drop-shadow-sm";
+        }
+      }
+
+      let displayList = list.map((item, idx) => ({ ...item, rawIdx: idx }));
+      
+      if (currentInvestFilter !== 'all') {
+        displayList = displayList.filter(i => i.type === currentInvestFilter);
+      }
+      
+      if (investSearchQuery) {
+        displayList = displayList.filter(i => (i.name && i.name.toLowerCase().includes(investSearchQuery)) || (i.notes && i.notes.toLowerCase().includes(investSearchQuery)));
+      }
+
+      displayList.sort((a, b) => {
+        const cPriceA = a.currentPrice !== undefined ? a.currentPrice : (a.price || 0);
+        const cPriceB = b.currentPrice !== undefined ? b.currentPrice : (b.price || 0);
+        const valA = a.isUsd ? (a.quantity * cPriceA * appData.usdRate) : (a.quantity * cPriceA);
+        const valB = b.isUsd ? (b.quantity * cPriceB * appData.usdRate) : (b.quantity * cPriceB);
+        return valB - valA;
+      });
+
+      if (displayList.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700"><p class="text-sm text-gray-500">Không tìm thấy tài sản phù hợp</p></div>';
+      } else {
+        container.innerHTML = displayList.map(item => {
+          const bPrice = item.buyPrice !== undefined ? item.buyPrice : (item.price || 0);
+          const cPrice = item.currentPrice !== undefined ? item.currentPrice : (item.price || 0);
+          const costVnd = item.isUsd ? (item.quantity * bPrice * appData.usdRate) : (item.quantity * bPrice);
+          const valueVnd = item.isUsd ? (item.quantity * cPrice * appData.usdRate) : (item.quantity * cPrice);
+          const pnl = valueVnd - costVnd;
+          const roi = costVnd > 0 ? (pnl / costVnd) * 100 : 0;
+          const weight = totalValueVnd > 0 ? (valueVnd / totalValueVnd) * 100 : 0;
+          
+          const pnlColorClass = pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
+          const pnlSign = pnl >= 0 ? '+' : '';
+          const symbol = item.isUsd ? '$' : '';
+          const priceFormat = item.isUsd ? 'en-US' : 'vi-VN';
+
+          let targetHtml = '';
+          if (item.targetWeight) {
+            const isOverTarget = weight > item.targetWeight;
+            targetHtml = `
+              <div class="mt-2.5">
+                <div class="flex justify-between text-[9px] text-gray-400 mb-1">
+                  <span>Tiến độ phân bổ</span>
+                  <span>Mục tiêu: ${item.targetWeight}%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full flex overflow-hidden">
+                  <div class="bg-indigo-500 h-full" style="width: ${Math.min(weight, item.targetWeight)}%"></div>
+                  ${isOverTarget ? `<div class="bg-rose-400 h-full" style="width: ${weight - item.targetWeight}%" title="Vượt mục tiêu"></div>` : ''}
+                </div>
+              </div>
+            `;
+          } else {
+            targetHtml = `
+              <div class="mt-2.5">
+                <div class="w-full bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-indigo-500 h-full" style="width: ${weight}%"></div>
+                </div>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="text-sm font-bold text-gray-900 dark:text-white">${item.name}</h4>
+                  <p class="text-[10px] text-gray-500 font-medium">${item.type} • Tỷ trọng: <span class="font-bold text-indigo-600 dark:text-indigo-400">${weight.toFixed(1)}%</span></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-bold text-gray-900 dark:text-white">${formatCurrency(valueVnd)}</p>
+                  <p class="text-[11px] font-bold ${pnlColorClass}">${pnlSign}${formatCurrency(pnl)} (${pnlSign}${roi.toFixed(2)}%)</p>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 dark:bg-slate-900/60 rounded-xl p-2.5 text-[11px] text-gray-600 dark:text-slate-400 flex justify-between items-center border border-gray-100 dark:border-slate-700/50">
+                <div class="space-y-1">
+                  <p>Vốn: <span class="font-semibold text-gray-800 dark:text-slate-200">${symbol}${bPrice.toLocaleString(priceFormat)}</span></p>
+                  <p>Giá TT: <span class="font-semibold text-gray-800 dark:text-slate-200">${symbol}${cPrice.toLocaleString(priceFormat)}</span></p>
+                </div>
+                <div class="text-right space-y-1 flex flex-col justify-between h-full">
+                  <p>SL: <span class="font-semibold text-gray-800 dark:text-slate-200">${item.quantity.toLocaleString(priceFormat)}</span></p>
+                  <div class="flex space-x-3 justify-end mt-1">
+                    <button onclick="openInvestmentForm(${item.rawIdx})" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteInvestmentItem(${item.rawIdx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                  </div>
+                </div>
+              </div>
+              
+              ${item.notes ? `<p class="text-[10px] text-gray-400 mt-2 italic flex items-center"><i class="fa-solid fa-circle-info mr-1.5 text-[8px]"></i>${item.notes}</p>` : ''}
+              ${targetHtml}
+            </div>
+          `;
+        }).join('');
+      }
+
+      setTimeout(renderAssetAllocationChart, 100);
+    }
+
+    /* BIỂU ĐỒ PHÂN BỔ TÀI SẢN (DONUT CHART) */
+    function renderAssetAllocationChart() {
+      const ctx = document.getElementById('assetAllocationChart');
+      if (!ctx) return;
+
+      const list = appData.investments || [];
+      if (list.length === 0) {
+        if (assetAllocationChart) assetAllocationChart.destroy();
+        return;
+      }
+
+      const categoryTotals = {};
+      list.forEach(item => {
+        const cat = item.type || '💼 Khác';
+        const cPrice = item.currentPrice !== undefined ? item.currentPrice : (item.price || 0);
+        const value = item.isUsd ? (item.quantity * cPrice * appData.usdRate) : (item.quantity * cPrice);
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + value;
+      });
+
+      Object.keys(categoryTotals).forEach(key => {
+        if (categoryTotals[key] <= 0) delete categoryTotals[key];
+      });
+
+      const labels = Object.keys(categoryTotals);
+      const dataValues = Object.values(categoryTotals);
+
+      if (assetAllocationChart) assetAllocationChart.destroy();
+
+      assetAllocationChart = new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataValues,
+            backgroundColor: ['#6366f1', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#64748b'],
+            borderWidth: 2,
+            borderColor: appData.isDarkMode ? '#0f172a' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: appData.isDarkMode ? '#94a3b8' : '#64748b', font: { size: 10 }, boxWidth: 12 }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+    function toggleBikeMaintenanceForm() {
+      document.getElementById('bikeMaintenanceForm').classList.toggle('hidden');
+    }
+
+    function saveBikeMaintenance() {
+      const bike = document.getElementById('maintBikeName').value;
+      const title = document.getElementById('maintTitle').value.trim();
+      const odo = parseInt(document.getElementById('maintOdo').value);
+      const cost = parseInt(document.getElementById('maintCost').value);
+      const date = document.getElementById('maintDate').value;
+
+      if (!title || !odo || !cost || !date) return alert('Vui lòng nhập đầy đủ thông tin bảo dưỡng!');
+
+      if (!appData.bikeMaintenances) appData.bikeMaintenances = [];
+      appData.bikeMaintenances.push({ bike, title, odo, cost, date });
+
+      if (bike === 'NMAX') appData.settings.nmaxOdo = Math.max(appData.settings.nmaxOdo || 0, odo);
+      if (bike === 'Grande') appData.settings.grandeOdo = Math.max(appData.settings.grandeOdo || 0, odo);
+
+      appData.expenses.push({
+        amount: cost,
+        desc: `Bảo dưỡng ${bike}: ${title}`,
+        category: "🛵 Xe",
+        user: "Đ",
+        notes: `Mốc Odo: ${odo.toLocaleString('vi-VN')} km`,
+        date: new Date(date).toISOString()
+      });
+
+      save();
+      render();
+      document.getElementById('maintTitle').value = '';
+      document.getElementById('maintOdo').value = '';
+      document.getElementById('maintCost').value = '';
+      toggleBikeMaintenanceForm();
+    }
+
+    function renderBikeMaintenanceList() {
+      const container = document.getElementById('bikeMaintenanceList');
+      if (!container) return;
+
+      const list = (appData.bikeMaintenances || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-3">Chưa có lịch sử bảo dưỡng nào</p>';
+        return;
+      }
+
+      container.innerHTML = list.map((item, idx) => {
+        const formattedDate = new Date(item.date).toLocaleDateString('vi-VN');
+        return `
+          <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-900/60 rounded-xl border border-gray-100 dark:border-slate-800 text-xs">
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="font-bold text-sky-600 dark:text-sky-400">[${item.bike}]</span>
+                <span class="font-semibold text-gray-800 dark:text-slate-200">${item.title}</span>
+              </div>
+              <p class="text-[10px] text-gray-400 mt-0.5">📅 ${formattedDate} • 📍 ${item.odo.toLocaleString('vi-VN')} km</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-rose-500">${formatCurrency(item.cost)}</span>
+              <button onclick="deleteBikeMaintenance(${idx})" class="text-gray-300 hover:text-red-500">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteBikeMaintenance(idx) {
+      appData.bikeMaintenances.splice(idx, 1);
+      save();
+      render();
+    }
+
+    function openCatWeightHistoryModal() {
+      renderCatWeightHistory();
+      const modal = document.getElementById('catHistoryModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.remove('translate-y-full');
+    }
+
+    function closeCatWeightHistoryModal() {
+      const modal = document.getElementById('catHistoryModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.add('translate-y-full');
+    }
+
+    function renderCatWeightHistory() {
+      const container = document.getElementById('catWeightHistoryList');
+      if (!container) return;
+
+      const sorted = [...appData.catWeights].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (sorted.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Chưa có dữ liệu cân nặng nào</p>';
+        return;
+      }
+
+      container.innerHTML = sorted.map(item => {
+        const realIdx = appData.catWeights.indexOf(item);
+        const formattedDate = new Date(item.date).toLocaleDateString('vi-VN');
+
+        return `
+          <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-800/80 rounded-xl border border-gray-100 dark:border-slate-700/60 text-xs">
+            <div class="font-semibold text-gray-700 dark:text-slate-300">📅 ${formattedDate}</div>
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center space-x-1">
+                <span class="text-amber-500 font-bold">Mun:</span>
+                <input type="number" step="0.1" value="${item.mun}" onchange="updateCatWeightItem(${realIdx}, 'mun', this.value)"
+                  class="w-14 px-1.5 py-0.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 text-center rounded font-semibold text-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <span>kg</span>
+              </div>
+              <div class="flex items-center space-x-1">
+                <span class="text-rose-500 font-bold">Bông:</span>
+                <input type="number" step="0.1" value="${item.bong}" onchange="updateCatWeightItem(${realIdx}, 'bong', this.value)"
+                  class="w-14 px-1.5 py-0.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 text-center rounded font-semibold text-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500">
+                <span>kg</span>
+              </div>
+              <button onclick="deleteCatWeightItem(${realIdx})" class="text-gray-300 hover:text-red-500 ml-1">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateCatWeightItem(idx, cat, val) {
+      const numVal = parseFloat(val);
+      if (isNaN(numVal) || numVal <= 0) return;
+      appData.catWeights[idx][cat] = numVal;
+      save();
+      renderCatChart();
+      updateDynamicInfo();
+    }
+
+    function deleteCatWeightItem(idx) {
+      appData.catWeights.splice(idx, 1);
+      save();
+      renderCatChart();
+      renderCatWeightHistory();
+      updateDynamicInfo();
+    }
+
+    function renderCatChart() {
+      const ctx = document.getElementById('weightChart');
+      if (!ctx) return;
+
+      const isDark = appData.isDarkMode;
+      const sorted = [...appData.catWeights].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const labels = sorted.map(w => {
+        const d = new Date(w.date);
+        return `${d.getDate()}/${d.getMonth() + 1}`;
+      });
+      const munData = sorted.map(w => w.mun);
+      const bongData = sorted.map(w => w.bong);
+
+      if (weightChart) weightChart.destroy();
+
+      weightChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Mun (kg)', data: munData, borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', tension: 0.3, fill: true, pointRadius: 4 },
+            { label: 'Bông (kg)', data: bongData, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', tension: 0.3, fill: true, pointRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { min: 2, max: 7, grid: { color: isDark ? '#334155' : '#f1f5f9' }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } } },
+            x: { grid: { display: false }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function toggleWeightForm() {
+      document.getElementById('weightForm').classList.toggle('hidden');
+    }
+
+    function addCatWeight() {
+      const cat = document.getElementById('weightCatName').value;
+      const val = parseFloat(document.getElementById('weightVal').value);
+      const date = document.getElementById('weightDate').value;
+
+      if (!val || !date) return alert('Vui lòng nhập đủ cân nặng và ngày cân!');
+
+      let existing = appData.catWeights.find(w => w.date === date);
+      if (existing) {
+        if (cat === 'Mun') existing.mun = val;
+        else existing.bong = val;
+      } else {
+        const last = appData.catWeights[appData.catWeights.length - 1] || { mun: 4.0, bong: 3.5 };
+        appData.catWeights.push({ date: date, mun: cat === 'Mun' ? val : last.mun, bong: cat === 'Bông' ? val : last.bong });
+      }
+
+      save();
+      renderCatChart();
+      renderCatWeightHistory();
+      updateDynamicInfo();
+      document.getElementById('weightVal').value = '';
+      toggleWeightForm();
+    }
+
+    function renderFeatureViews() {
+      renderCategoryList('Xe Máy', 'motorbikeTodoList');
+      renderCategoryList('Mun & Bông', 'catsTodoList');
+      renderCategoryList('Sức Khỏe', 'healthTodoList');
+    }
+
+    function renderCategoryList(category, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const list = appData.todos.filter(t => t.category === category && !t.done);
+
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 dark:text-slate-500 text-center py-2">Không có việc cần làm</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(todo => {
+        const realIndex = appData.todos.indexOf(todo);
+        const createdDate = todo.date ? new Date(todo.date).toLocaleDateString('vi-VN') : '';
+
+        return `
+          <div class="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-1 rounded-lg">
+            <div class="flex items-center space-x-2 flex-1">
+              <input type="checkbox" onclick="event.stopPropagation()" onchange="toggleTodo(${realIndex})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
+              <span onclick="editTodo(${realIndex})" class="text-sm text-gray-800 dark:text-slate-200 flex-1 cursor-pointer">${todo.title}</span>
+            </div>
+            <div onclick="editTodo(${realIndex})" class="text-right cursor-pointer">
+              <span class="text-[10px] text-gray-400 dark:text-slate-500 block">${todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai'}</span>
+              ${createdDate ? `<span class="text-[9px] text-gray-400 block">${createdDate}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleTodo(idx) {
+      appData.todos[idx].done = !appData.todos[idx].done;
+      save();
+      render();
+    }
+
+    function deleteTodo(idx) {
+      appData.todos.splice(idx, 1);
+      save();
+      render();
+    }
+
+    function loadSettingsToForm() {
+      const s = appData.settings;
+      document.getElementById('setMunBreed').value = s.munBreed || '';
+      document.getElementById('setBongBreed').value = s.bongBreed || '';
+      document.getElementById('setNmaxPlate').value = s.nmaxPlate || '';
+      document.getElementById('setNmaxOdo').value = s.nmaxOdo || '';
+      document.getElementById('setGrandePlate').value = s.grandePlate || '';
+      document.getElementById('setGrandeOdo').value = s.grandeOdo || '';
+    }
+
+    function saveSettings() {
+      appData.settings = {
+        munBreed: document.getElementById('setMunBreed').value,
+        bongBreed: document.getElementById('setBongBreed').value,
+        nmaxPlate: document.getElementById('setNmaxPlate').value,
+        nmaxOdo: parseInt(document.getElementById('setNmaxOdo').value) || 0,
+        grandePlate: document.getElementById('setGrandePlate').value,
+        grandeOdo: parseInt(document.getElementById('setGrandeOdo').value) || 0
+      };
+      save();
+      render();
+      alert('Đã cập nhật cài đặt thành công!');
+    }
+
+    function updateBadges() {
+      const incompleteTodos = appData.todos.filter(t => !t.done).length;
+      const badge = document.getElementById('todoBadge');
+      if (incompleteTodos > 0) {
+        badge.innerText = incompleteTodos;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function openAddModal() {
+      if (editingIndex < 0) {
+        document.getElementById('modalMainTitle').innerText = "Thêm mới";
+        document.getElementById('typeSelector').classList.remove('hidden');
+        document.getElementById('saveTodoBtn').innerText = "Lưu công việc";
+        document.getElementById('saveExpenseBtn').innerText = "Lưu khoản chi";
+        document.getElementById('saveIncomeBtn').innerText = "Lưu khoản thu";
+
+        document.getElementById('todoInput').value = '';
+        document.getElementById('todoNotes').value = '';
+        document.getElementById('expenseAmount').value = '';
+        document.getElementById('expenseDesc').value = '';
+        document.getElementById('expenseNotes').value = '';
+        document.getElementById('incomeAmount').value = '';
+        document.getElementById('incomeDesc').value = '';
+        document.getElementById('incomeNotes').value = '';
+      }
+
+      const modal = document.getElementById('addModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.remove('translate-y-full');
+      if (editingIndex < 0) setAddType('todo');
+    }
+
+    function closeAddModal() {
+      const modal = document.getElementById('addModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.add('translate-y-full');
+      editingIndex = -1;
+      editingType = null;
+    }
+
+    function setAddType(type) {
+      ['todo', 'expense', 'income'].forEach(t => {
+        const btn = document.getElementById(`typeBtn-${t}`);
+        const form = document.getElementById(`add${t.charAt(0).toUpperCase() + t.slice(1)}Form`);
+
+        if (t === type) {
+          btn.className = "py-2.5 px-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs border-2 border-blue-600";
+          form.classList.remove('hidden');
+        } else {
+          btn.className = "py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent";
+          form.classList.add('hidden');
+        }
+      });
+    }
+
+    function switchTab(tabId, title, btn) {
+      document.getElementById('pageTitle').innerText = title;
+
+      ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting'].forEach(id => {
+        const el = document.getElementById(`tab-${id}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      if (tabId === 'cats') setTimeout(renderCatChart, 100);
+      if (tabId === 'home') setTimeout(renderBudgetChart, 100);
+      if (tabId === 'investment') setTimeout(renderAssetAllocationChart, 100);
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('text-blue-600', 'dark:text-blue-400');
+        b.classList.add('text-gray-400', 'dark:text-slate-500');
+      });
+
+      if (btn) {
+        btn.classList.remove('text-gray-400', 'dark:text-slate-500');
+        btn.classList.add('text-blue-600', 'dark:text-blue-400');
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function formatCurrency(amount) {
+      return amount.toLocaleString('vi-VN') + ' đ';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAddModal();
+        closeCatWeightHistoryModal();
+      }
+    });
+
+    init();
+  </script>
+</body>
+
+</html>

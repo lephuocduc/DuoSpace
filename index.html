@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>DuoSpace - App Cho 2 Người</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+
+<body
+  class="bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased min-h-screen flex justify-center transition-colors duration-200">
+
+  <div
+    class="w-full max-w-md bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-colors duration-200">
+
+    <!-- HEADER -->
+    <header
+      class="px-5 pt-12 pb-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800 transition-colors">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <button onclick="toggleSidebar()"
+            class="w-9 h-9 bg-gray-200/60 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-700 dark:text-slate-200 active:scale-95 transition-transform hover:bg-gray-300/60 dark:hover:bg-slate-700">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+          <div class="flex -space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-slate-900"
+              title="Phước Đức">
+              Đ
+            </div>
+            <div
+              class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-slate-900"
+              title="Thu Sương">
+              S
+            </div>
+          </div>
+          <div>
+            <h1 id="pageTitle" class="text-xl font-bold text-gray-900 dark:text-white">Tổng quan</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="openAddModal()"
+            class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform hover:bg-blue-700">
+            <i class="fa-solid fa-plus text-base"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="px-5 pt-4 flex-1 overflow-y-auto pb-24 custom-scrollbar">
+
+      <!-- TAB 1: HOME -->
+      <div id="tab-home" class="space-y-5 tab-content">
+        <div id="fundCard"
+          class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg space-y-3 transition-colors duration-300">
+          <div class="flex justify-between items-center text-blue-100 text-xs font-semibold">
+            <span>QUỸ CHUNG HÀNG THÁNG</span>
+            <i class="fa-solid fa-wallet text-base"></i>
+          </div>
+          <div id="totalBudget" class="text-3xl font-extrabold">0 đ</div>
+          <div class="flex justify-between text-xs pt-2 border-t border-white/20 text-blue-100">
+            <span>Thu nhập: <strong id="spentAmount" class="text-white">0 đ</strong></span>
+            <span>Chi tiêu: <strong id="remainAmount" class="text-white">0 đ</strong></span>
+          </div>
+        </div>
+
+        <section class="grid grid-cols-2 gap-3">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <div class="text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">Chi tuần này</div>
+            <div id="homeWeekSpend" class="text-base font-bold text-rose-500">0 đ</div>
+            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Chi tháng: <span id="homeMonthSpend"
+                class="font-semibold text-gray-700 dark:text-slate-300">0 đ</span></div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <div
+              class="flex justify-between items-center text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">
+              <span>% Hoàn thành To-Do</span>
+              <span id="homeTaskPct" class="text-blue-600 dark:text-blue-400 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-gray-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mt-2">
+              <div id="homeTaskProgressBar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-2"><span id="homeTaskDoneCount">0</span>/<span
+                id="homeTaskTotalCount">0</span> việc hoàn thành</div>
+          </div>
+        </section>
+
+        <!-- PHÂN PHỐI CHI TIÊU THEO CATEGORY -->
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Chi tháng này theo
+              Category</h3>
+            <span id="homeCategoryTotalText" class="text-xs font-bold text-rose-500">0đ</span>
+          </div>
+          <div id="homeCategoryBreakdown" class="space-y-2.5">
+          </div>
+        </section>
+
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">So sánh Thu - Chi
+              theo Tháng</h3>
+            <span class="text-[10px] text-gray-400">3 tháng gần nhất</span>
+          </div>
+          <div class="w-full h-44 relative">
+            <canvas id="budgetComparisonChart"></canvas>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <div class="flex justify-between items-center">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">🔔 Deadline & Lịch quan trọng</h2>
+            <span class="text-[11px] text-gray-400">Ưu tiên Cao & Trung bình</span>
+          </div>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchHome(this.value)" placeholder="Tìm lịch nhắc quan trọng..."
+              class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+          </div>
+
+          <div id="importantList"
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: TO-DO -->
+      <div id="tab-todo" class="hidden space-y-4 tab-content">
+        <div class="flex bg-gray-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+          <button onclick="switchTodoSubTab('active')" id="todoSubTab-active"
+            class="flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400">Việc
+            cần làm</button>
+          <button onclick="switchTodoSubTab('archive')" id="todoSubTab-archive"
+            class="flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400">Đã hoàn thành</button>
+        </div>
+
+        <div class="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-xl text-[11px] font-medium justify-between">
+          <button onclick="filterTodoTime('today')" id="todoTime-today"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Hôm nay</button>
+          <button onclick="filterTodoTime('week')" id="todoTime-week"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Tuần này</button>
+          <button onclick="filterTodoTime('month')" id="todoTime-month"
+            class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold shadow-sm">Tháng
+            này 📅</button>
+          <button onclick="filterTodoTime('all')" id="todoTime-all"
+            class="px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400">Tất cả</button>
+        </div>
+
+        <div class="flex space-x-2 overflow-x-auto pb-1 custom-scrollbar">
+          <button onclick="filterTodoUser('all')" id="todoFilter-all"
+            class="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
+          <button onclick="filterTodoUser('Đ')" id="todoFilter-Đ"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cho
+            Đức</button>
+          <button onclick="filterTodoUser('S')" id="todoFilter-S"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cho
+            Sương</button>
+          <button onclick="filterTodoUser('Both')" id="todoFilter-Both"
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">Cả
+            hai</button>
+        </div>
+
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" oninput="searchTodo(this.value)" placeholder="Tìm kiếm công việc..."
+            class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 id="todoListHeader" class="text-sm font-semibold text-gray-700 dark:text-slate-300">Danh sách việc</h3>
+            <span id="todoCount"
+              class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full font-semibold">0</span>
+          </div>
+
+          <div id="todoList" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+            <p class="text-sm text-gray-400 text-center py-4">Chưa có công việc nào</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: FINANCE -->
+      <div id="tab-finance" class="hidden space-y-4 tab-content">
+        <div class="grid grid-cols-2 gap-3">
+          <div
+            class="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/40">
+            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">Tổng Thu Nhập</div>
+            <div id="incomeTotal" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">0 đ</div>
+          </div>
+          <div class="bg-rose-50 dark:bg-rose-950/40 rounded-xl p-3 border border-rose-100 dark:border-rose-800/40">
+            <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-1">Tổng Chi Tiêu</div>
+            <div id="expenseTotal" class="text-lg font-bold text-rose-600 dark:text-rose-400">0 đ</div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử giao dịch</h3>
+            <div class="flex bg-gray-100 dark:bg-slate-700 p-0.5 rounded-lg text-xs font-medium">
+              <button onclick="filterFinance('all')" id="finFilter-all"
+                class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 shadow-sm text-gray-800 dark:text-slate-200">Tất
+                cả</button>
+              <button onclick="filterFinance('expense')" id="finFilter-expense"
+                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Chi</button>
+              <button onclick="filterFinance('income')" id="finFilter-income"
+                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Thu</button>
+            </div>
+          </div>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchFinance(this.value)" placeholder="Tìm kiếm giao dịch..."
+              class="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+          </div>
+
+          <div id="financeList" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+            <p class="text-sm text-gray-400 text-center py-4">Chưa có giao dịch nào</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: ĐẦU TƯ (PORTFOLIO MANAGEMENT) -->
+      <div id="tab-investment" class="hidden space-y-4 tab-content">
+        
+        <!-- SUMMARY CARD: VỐN, HIỆN TẠI, LÃI LỖ -->
+        <div class="bg-gradient-to-br from-indigo-800 via-purple-700 to-indigo-900 text-white p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden">
+          <!-- Decor background -->
+          <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
+            <i class="fa-solid fa-chart-pie text-9xl -mt-4 -mr-4"></i>
+          </div>
+          
+          <div class="flex justify-between items-center relative z-10">
+            <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Portfolio Thực Tế</span>
+            <div class="flex items-center space-x-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20">
+              <span class="font-medium">💵 VNĐ/USD:</span>
+              <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)" class="w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
+              <span class="font-medium">đ</span>
+              <button onclick="fetchRealtimeUsdRate()" class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
+                <i class="fa-solid fa-rotate text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="relative z-10">
+            <p class="text-[11px] text-indigo-200 font-medium mb-1">Tổng tài sản hiện tại</p>
+            <div id="investTotalValue" class="text-3xl font-extrabold tracking-tight">0 đ</div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/20 relative z-10">
+            <div>
+              <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Tổng vốn đã đầu tư</p>
+              <p id="investTotalCost" class="text-sm font-bold text-white">0 đ</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Lãi/Lỗ tổng (ROI)</p>
+              <p id="investTotalPnL" class="text-sm font-bold text-emerald-400 drop-shadow-sm">+0 đ (0%)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ tài sản</h3>
+          <div class="w-full h-44 relative flex justify-center">
+            <canvas id="assetAllocationChart"></canvas>
+          </div>
+        </div>
+
+        <!-- BỘ LỌC & TÌM KIẾM TÀI SẢN -->
+        <div class="space-y-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" oninput="searchInvestment(this.value)" placeholder="Tìm kiếm tài sản (BTC, VNM...)"
+              class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-slate-200 shadow-sm">
+          </div>
+          
+          <div class="flex space-x-2 overflow-x-auto custom-scrollbar pb-1">
+            <button onclick="filterInvestment('all')" id="invFilter-all" class="shrink-0 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
+            <button onclick="filterInvestment('🪙 Crypto')" id="invFilter-crypto" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 Crypto</button>
+            <button onclick="filterInvestment('📈 Cổ phiếu')" id="invFilter-stock" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">📈 Cổ phiếu</button>
+            <button onclick="filterInvestment('💵 USD')" id="invFilter-usd" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">💵 USD</button>
+            <button onclick="filterInvestment('🥇 Vàng')" id="invFilter-gold" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🥇 Vàng</button>
+            <button onclick="filterInvestment('🏦 Tiết kiệm')" id="invFilter-save" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🏦 Tiết kiệm</button>
+          </div>
+        </div>
+
+        <!-- FORM THÊM / SỬA TÀI SẢN -->
+        <div id="investmentForm" class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-md space-y-3">
+          <div class="flex justify-between items-center mb-1">
+            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Tài Sản Đầu Tư</h3>
+            <button onclick="toggleInvestmentForm()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tên tài sản <span class="text-red-500">*</span></label>
+              <input type="text" id="investName" placeholder="Ví dụ: BTC, VNM..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Phân loại</label>
+              <select id="investType" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="🪙 Crypto">🪙 Crypto</option>
+                <option value="📈 Cổ phiếu">📈 Cổ phiếu</option>
+                <option value="🥇 Vàng">🥇 Vàng</option>
+                <option value="💵 USD">💵 USD</option>
+                <option value="🏦 Tiết kiệm">🏦 Tiết kiệm</option>
+                <option value="💼 Khác">💼 Khác</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investQuantity" placeholder="0" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ (%)</label>
+              <input type="number" step="1" id="investTarget" placeholder="VD: 20" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua trung bình <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investBuyPrice" placeholder="Giá vốn / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá trị hiện tại <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div class="col-span-2 flex items-center mt-1">
+              <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
+              <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
+                Giá trị nhập là USD (App sẽ tự động nhân với tỷ giá VNĐ/USD)
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Nơi lưu trữ...)</label>
+            <input type="text" id="investNotes" placeholder="Ví Binance, Sổ TK Vietcombank..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          </div>
+          
+          <button id="saveInvestBtn" onclick="saveInvestment()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
+            Lưu tài sản
+          </button>
+        </div>
+
+        <!-- DANH SÁCH TÀI SẢN -->
+        <div class="space-y-3 pb-6">
+          <div class="flex justify-between items-center px-1">
+            <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Danh mục tài sản chi tiết</h3>
+            <button onclick="openInvestmentForm(-1)" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all">
+              + Thêm tài sản
+            </button>
+          </div>
+
+          <div id="investmentList" class="space-y-3">
+            <!-- Render danh sách ở đây -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: XE MÁY -->
+      <div id="tab-motorbike" class="hidden space-y-4 tab-content">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-sky-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="flex justify-between items-center text-xs text-sky-200 font-semibold">
+              <span>NMAX</span>
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div id="viewNmaxOdo" class="text-lg font-bold">14.850 km</div>
+            <p id="viewNmaxPlate" class="text-[10px] opacity-80">BS: 59X1-123.45</p>
+          </div>
+          <div class="bg-indigo-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="flex justify-between items-center text-xs text-indigo-200 font-semibold">
+              <span>GRANDE</span>
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div id="viewGrandeOdo" class="text-lg font-bold">8.200 km</div>
+            <p id="viewGrandePlate" class="text-[10px] opacity-80">BS: 59X2-678.90</p>
+          </div>
+        </div>
+
+        <div id="bikeMaintenanceForm"
+          class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border border-sky-200 dark:border-sky-800/50 shadow-sm space-y-3">
+          <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase">Ghi nhận Bảo Dưỡng Xe</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chọn Xe</label>
+              <select id="maintBikeName"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+                <option value="NMAX">NMAX 🛵</option>
+                <option value="Grande">Grande 🛵</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Ngày làm</label>
+              <input type="date" id="maintDate"
+                class="w-full px-1.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục</label>
+            <input type="text" id="maintTitle" placeholder="Thay nhớt máy..."
+              class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Số Odo (km)</label>
+              <input type="number" id="maintOdo" placeholder="14850"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chi phí (VNĐ)</label>
+              <input type="number" id="maintCost" placeholder="350000"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <button onclick="saveBikeMaintenance()"
+            class="w-full py-2 bg-sky-600 text-white rounded-xl text-xs font-semibold shadow-sm">
+            Lưu bảo dưỡng
+          </button>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử bảo dưỡng (Maintenance)</h3>
+            <button onclick="toggleBikeMaintenanceForm()"
+              class="text-xs bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg font-semibold">
+              + Bảo dưỡng
+            </button>
+          </div>
+
+          <div id="bikeMaintenanceList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Công việc Xe Máy</h3>
+          <div id="motorbikeTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- TAB 6: MÈO MUN & BÔNG -->
+      <div id="tab-cats" class="hidden space-y-4 tab-content">
+        <div
+          class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 rounded-2xl shadow-lg flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold">Mun & Bông 🐾</h2>
+            <p id="viewCatsInfo" class="text-xs text-amber-100 mt-1">Mun (4.2kg) • Bông (3.8kg)</p>
+          </div>
+          <div class="flex space-x-1.5">
+            <button onclick="openCatWeightHistoryModal()"
+              class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
+              Lịch sử 📋
+            </button>
+            <button onclick="toggleWeightForm()"
+              class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
+              + Thêm
+            </button>
+          </div>
+        </div>
+
+        <div id="weightForm"
+          class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/50 shadow-sm space-y-3">
+          <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase">Ghi nhận cân nặng mới</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Mèo</label>
+              <select id="weightCatName"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+                <option value="Mun">Mun 🐱</option>
+                <option value="Bông">Bông 🐱</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Cân nặng (kg)</label>
+              <input type="number" step="0.1" id="weightVal" placeholder="4.2"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Ngày cân</label>
+              <input type="date" id="weightDate"
+                class="w-full px-1.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+          </div>
+          <button onclick="addCatWeight()"
+            class="w-full py-2 bg-amber-500 text-white rounded-xl text-xs font-semibold shadow-sm">
+            Lưu chỉ số
+          </button>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Biểu đồ Cân Nặng (kg)</h3>
+            <div class="flex space-x-3 text-xs font-semibold">
+              <span class="flex items-center"><i
+                  class="fa-solid fa-circle text-amber-500 mr-1 text-[8px]"></i>Mun</span>
+              <span class="flex items-center"><i
+                  class="fa-solid fa-circle text-rose-500 mr-1 text-[8px]"></i>Bông</span>
+            </div>
+          </div>
+          <div class="w-full h-48 relative">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch chăm sóc Mun & Bông</h3>
+          <div id="catsTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- TAB 7: SỨC KHỎE -->
+      <div id="tab-health" class="hidden space-y-4 tab-content">
+        <div class="bg-emerald-600 text-white p-5 rounded-2xl shadow-lg space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-semibold text-emerald-100">SỨC KHỎE</span>
+            <i class="fa-solid fa-heart-pulse text-xl"></i>
+          </div>
+          <div class="text-2xl font-bold">Chạy bộ & Cầu lông</div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch tập luyện & Sức khỏe</h3>
+          <div id="healthTodoList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- TAB 8: CÀI ĐẶT -->
+      <div id="tab-setting" class="hidden space-y-5 tab-content">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <h3
+            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
+            <i class="fa-solid fa-cat text-amber-500 mr-2"></i>Thông tin Mun & Bông
+          </h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Mun
+                  (Giống)</label>
+                <input type="text" id="setMunBreed" placeholder="Mèo cưng"
+                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Bông
+                  (Giống)</label>
+                <input type="text" id="setBongBreed" placeholder="Mèo cưng"
+                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <h3
+            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
+            <i class="fa-solid fa-motorcycle text-sky-600 mr-2"></i>Thông tin Xe Máy
+          </h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Biển
+                  số</label>
+                <input type="text" id="setNmaxPlate"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Odo
+                  (km)</label>
+                <input type="number" id="setNmaxOdo"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 border-t border-gray-50 dark:border-slate-700/50 pt-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Biển
+                  số</label>
+                <input type="text" id="setGrandePlate"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Odo
+                  (km)</label>
+                <input type="number" id="setGrandeOdo"
+                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveSettings()"
+          class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">
+          Lưu Cài Đặt
+        </button>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM TAB BAR -->
+    <nav
+      class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 py-2 flex justify-between items-center z-20 transition-colors">
+      <button onclick="switchTab('home', 'Tổng quan', this)"
+        class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[10px] font-medium">Tổng quan</span>
+      </button>
+
+      <button onclick="switchTab('todo', 'Công việc chung', this)"
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 relative">
+        <i class="fa-solid fa-list-check text-lg"></i>
+        <span class="text-[10px] font-medium">To-Do</span>
+        <span id="todoBadge"
+          class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('finance', 'Quản lý Thu Chi', this)"
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1">
+        <i class="fa-solid fa-coins text-lg"></i>
+        <span class="text-[10px] font-medium">Tài chính</span>
+      </button>
+    </nav>
+
+    <!-- SIDEBAR MENU -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-30">
+    </div>
+
+    <aside id="sidebar"
+      class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-40 -translate-x-full sidebar-transition shadow-2xl p-6 flex flex-col justify-between transition-colors">
+      <div class="space-y-6">
+        <div class="pt-6 pb-4 border-b border-gray-100 dark:border-slate-800 space-y-3">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Gia Đình</h3>
+          <div class="space-y-2">
+            <div class="bg-rose-50 dark:bg-rose-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+              <div
+                class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs">Đ
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Phước Đức (Đức)</p>
+              </div>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+              <div
+                class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">S
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Thu Sương (Sương)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="space-y-1.5">
+          <a href="#" onclick="switchTab('investment', 'Quản lý Đầu Tư'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <i class="fa-solid fa-chart-line text-xs"></i></div>
+            <span>Đầu Tư</span>
+          </a>
+
+          <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+              <i class="fa-solid fa-motorcycle text-xs"></i></div>
+            <span>Xe Máy</span>
+          </a>
+
+          <a href="#" onclick="switchTab('cats', 'Mun & Bông'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <i class="fa-solid fa-cat text-xs"></i></div>
+            <span>Mun, Bông</span>
+          </a>
+
+          <a href="#" onclick="switchTab('health', 'Sức Khỏe'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <i class="fa-solid fa-heart-pulse text-xs"></i></div>
+            <span>Sức Khỏe</span>
+          </a>
+
+          <a href="#" onclick="switchTab('setting', 'Cài Đặt'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors mt-4 border-t border-gray-100 dark:border-slate-800 pt-3">
+            <div
+              class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center">
+              <i class="fa-solid fa-gear text-xs"></i></div>
+            <span>Cài Đặt (Setting)</span>
+          </a>
+        </nav>
+      </div>
+
+      <div
+        class="text-xs text-gray-400 dark:text-slate-500 text-center border-t border-gray-100 dark:border-slate-800 pt-4">
+        <p class="font-semibold text-gray-500 dark:text-slate-400">DuoSpace PWA</p>
+        <p class="text-gray-400 dark:text-slate-600">v3.1</p>
+      </div>
+    </aside>
+
+    <!-- POPUP LỊCH SỬ CÂN NẶNG MUN & BÔNG -->
+    <div id="catHistoryModal" onclick="closeCatWeightHistoryModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[75vh] flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Lịch sử cân nặng Mun & Bông</h3>
+          <button onclick="closeCatWeightHistoryModal()"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+        <div id="catWeightHistoryList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD & EDIT MODAL -->
+    <div id="addModal" onclick="closeAddModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mb-2">
+          <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
+          <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+          </button>
+        </div>
+
+        <div id="typeSelector" class="grid grid-cols-3 gap-2 mb-2">
+          <button onclick="setAddType('todo')" id="typeBtn-todo"
+            class="py-2.5 px-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs border-2 border-blue-600">
+            <i class="fa-solid fa-list-check block text-sm mb-1"></i> To-Do
+          </button>
+          <button onclick="setAddType('expense')" id="typeBtn-expense"
+            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
+            <i class="fa-solid fa-money-bill block text-sm mb-1"></i> Chi Tiêu
+          </button>
+          <button onclick="setAddType('income')" id="typeBtn-income"
+            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
+            <i class="fa-solid fa-piggy-bank block text-sm mb-1"></i> Thu Nhập
+          </button>
+        </div>
+
+        <!-- Form To-Do -->
+        <div id="addTodoForm" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Tên công việc</label>
+            <input type="text" id="todoInput" placeholder="Nhập tên công việc..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân loại</label>
+              <select id="todoCategory"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Việc nhà">🏡 Việc nhà</option>
+                <option value="Mun & Bông">🐱 Mun & Bông</option>
+                <option value="Xe Máy">🛵 Xe Máy</option>
+                <option value="Sức Khỏe">❤️ Sức Khỏe</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân công</label>
+              <select id="todoUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Đ">Đức</option>
+                <option value="S">Sương</option>
+                <option value="Both" selected>Cả hai</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mức độ ưu tiên</label>
+            <select id="todoPriority"
+              class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="high">🔴 Cao</option>
+              <option value="medium" selected>🟡 Trung bình</option>
+              <option value="low">⚪ Thấp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="todoNotes" rows="2" placeholder="Chi tiết hoặc lưu ý bổ sung..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <button id="saveTodoBtn" onclick="saveTodoAction()"
+            class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            công việc</button>
+        </div>
+
+        <!-- Form Chi Tiêu -->
+        <div id="addExpenseForm" class="hidden space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
+            <input type="number" id="expenseAmount" placeholder="0"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Category (Danh
+                mục)</label>
+              <select id="expenseCategory"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="🍜 Ăn uống">🍜 Ăn uống</option>
+                <option value="🏠 Nhà cửa">🏠 Nhà cửa</option>
+                <option value="🛒 Siêu thị">🛒 Siêu thị</option>
+                <option value="🛵 Xe">🛵 Xe</option>
+                <option value="🐱 Mèo">🐱 Mèo</option>
+                <option value="💊 Sức khỏe">💊 Sức khỏe</option>
+                <option value="🎮 Giải trí">🎮 Giải trí</option>
+                <option value="💰 Tiết kiệm">💰 Tiết kiệm</option>
+                <option value="📦 Khác" selected>📦 Khác</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người chi trả</label>
+              <select id="expenseUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="Đ">Đức</option>
+                <option value="S">Sương</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả khoản chi</label>
+            <input type="text" id="expenseDesc" placeholder="Mô tả..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="expenseNotes" rows="2" placeholder="Ghi chú chi tiết..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+          </div>
+          <button id="saveExpenseBtn" onclick="saveExpenseAction()"
+            class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            khoản chi</button>
+        </div>
+
+        <!-- Form Thu Nhập -->
+        <div id="addIncomeForm" class="hidden space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
+            <input type="number" id="incomeAmount" placeholder="0"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Nguồn thu nhập</label>
+            <input type="text" id="incomeDesc" placeholder="Nguồn thu..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người gửi</label>
+            <select id="incomeUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="Đ">Đức</option>
+              <option value="S">Sương</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
+              (Notes)</label>
+            <textarea id="incomeNotes" rows="2" placeholder="Ghi chú thêm..."
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+          <button id="saveIncomeBtn" onclick="saveIncomeAction()"
+            class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            khoản thu</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- APPLICATION SCRIPTS (Ordered for dependency resolution) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui/theme.js"></script>
+  <script src="js/ui/sidebar.js"></script>
+  <script src="js/ui/tabs.js"></script>
+  <script src="js/ui/modal.js"></script>
+  <script src="js/charts/budget.js"></script>
+  <script src="js/charts/weight.js"></script>
+  <script src="js/charts/investment.js"></script>
+  <script src="js/modules/home.js"></script>
+  <script src="js/modules/todo.js"></script>
+  <script src="js/modules/finance.js"></script>
+  <script src="js/modules/investment.js"></script>
+  <script src="js/modules/motorbike.js"></script>
+  <script src="js/modules/cats.js"></script>
+  <script src="js/modules/health.js"></script>
+  <script src="js/modules/settings.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

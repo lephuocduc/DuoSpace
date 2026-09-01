@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DuoSpaceDataSchema",
+  "description": "Schema mô tả toàn bộ cấu trúc dữ liệu lưu trong localStorage (key: duoSpaceData)",
+  "type": "object",
+  "properties": {
+    "isDarkMode": {
+      "type": "boolean",
+      "description": "Trạng thái giao diện tối/sáng"
+    },
+    "usdRate": {
+      "type": "number",
+      "description": "Tỷ giá quy đổi VNĐ/USD hiện tại (mặc định ~25400)"
+    },
+    "todos": {
+      "type": "array",
+      "description": "Danh sách công việc To-Do",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "user": { "type": "string", "enum": ["Đ", "S", "Both"] },
+          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+          "notes": { "type": "string" },
+          "done": { "type": "boolean" },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["title", "category", "user", "priority", "done", "date"]
+      }
+    },
+    "incomes": {
+      "type": "array",
+      "description": "Danh sách các khoản thu nhập",
+      "items": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "number" },
+          "desc": { "type": "string" },
+          "user": { "type": "string", "enum": ["Đ", "S"] },
+          "notes": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["amount", "desc", "user", "date"]
+      }
+    },
+    "expenses": {
+      "type": "array",
+      "description": "Danh sách các khoản chi tiêu",
+      "items": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "number" },
+          "desc": { "type": "string" },
+          "category": { "type": "string" },
+          "user": { "type": "string", "enum": ["Đ", "S"] },
+          "notes": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["amount", "desc", "category", "user", "date"]
+      }
+    },
+    "investments": {
+      "type": "array",
+      "description": "Danh mục tài sản đầu tư",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "quantity": { "type": "number" },
+          "buyPrice": { "type": "number" },
+          "currentPrice": { "type": "number" },
+          "isUsd": { "type": "boolean" },
+          "targetWeight": { "type": ["number", "null"] },
+          "notes": { "type": "string" }
+        },
+        "required": ["name", "type", "quantity", "buyPrice", "currentPrice"]
+      }
+    },
+    "bikeMaintenances": {
+      "type": "array",
+      "description": "Lịch sử bảo dưỡng xe",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bike": { "type": "string", "enum": ["NMAX", "Grande"] },
+          "title": { "type": "string" },
+          "odo": { "type": "number" },
+          "cost": { "type": "number" },
+          "date": { "type": "string" }
+        },
+        "required": ["bike", "title", "odo", "cost", "date"]
+      }
+    },
+    "catWeights": {
+      "type": "array",
+      "description": "Lịch sử cân nặng của mèo",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string" },
+          "mun": { "type": "number" },
+          "bong": { "type": "number" }
+        },
+        "required": ["date", "mun", "bong"]
+      }
+    },
+    "monthlyBudgets": {
+      "type": "array",
+      "description": "Dữ liệu ngân sách so sánh theo tháng cho biểu đồ",
+      "items": {
+        "type": "object",
+        "properties": {
+          "month": { "type": "string" },
+          "budget": { "type": "number" },
+          "spent": { "type": "number" }
+        },
+        "required": ["month", "budget", "spent"]
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Cấu hình xe và thú cưng",
+      "properties": {
+        "munBreed": { "type": "string" },
+        "bongBreed": { "type": "string" },
+        "nmaxPlate": { "type": "string" },
+        "nmaxOdo": { "type": "number" },
+        "grandePlate": { "type": "string" },
+        "grandeOdo": { "type": "number" }
+      }
+    }
+  }
+}

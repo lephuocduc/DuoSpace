@@ -1,0 +1,119 @@
+/**
+ * DuoSpace - Main Entry Point & App State Coordinator
+ */
+class DuoSpaceApp {
+  constructor() {
+    this.storage = new Storage();
+    this.data = this.storage.getData();
+
+    // Chart Controllers
+    this.budgetChart = new BudgetChart();
+    this.weightChart = new WeightChart();
+    this.investmentChart = new InvestmentChart();
+
+    this.charts = {
+      renderBudgetChart: () => this.budgetChart.render(this.data, this.data.isDarkMode),
+      renderCatChart: () => this.weightChart.render(this.data.catWeights, this.data.isDarkMode),
+      renderAssetAllocationChart: () => this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode)
+    };
+
+    // Feature Modules
+    this.home = new HomeModule(this);
+    this.todo = new TodoModule(this);
+    this.finance = new FinanceModule(this);
+    this.investment = new InvestmentModule(this);
+    this.motorbike = new MotorbikeModule(this);
+    this.cats = new CatsModule(this);
+    this.health = new HealthModule(this);
+    this.settings = new SettingsModule(this);
+
+    this.init();
+  }
+
+  init() {
+    // Setup Dark Mode & System theme listener
+    ThemeManager.init(this);
+
+    // Populate Initial UI inputs
+    const usdRateInput = document.getElementById('usdRateInput');
+    if (usdRateInput) usdRateInput.value = this.data.usdRate || 25400;
+
+    const weightDate = document.getElementById('weightDate');
+    if (weightDate) weightDate.valueAsDate = new Date();
+
+    const maintDate = document.getElementById('maintDate');
+    if (maintDate) maintDate.valueAsDate = new Date();
+
+    this.settings.loadSettingsToForm();
+
+    // Setup global listeners
+    this.setupEventListeners();
+
+    // Fetch realtime USD rate & Render all
+    this.investment.fetchRealtimeUsdRate();
+    this.render();
+  }
+
+  setupEventListeners() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        ModalManager.closeAddModal();
+        ModalManager.closeCatHistoryModal();
+        SidebarManager.close();
+      }
+    });
+  }
+
+  save() {
+    this.storage.save(this.data);
+  }
+
+  render() {
+    this.home.render();
+    this.todo.render();
+    this.finance.render();
+    this.investment.render();
+    this.motorbike.render();
+    this.cats.render();
+    this.health.render();
+  }
+
+  renderCategoryList(category, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const list = (this.data.todos || []).filter(t => t.category === category && !t.done);
+
+    if (list.length === 0) {
+      container.innerHTML = '<p class="text-xs text-gray-400 dark:text-slate-500 text-center py-2">Không có việc cần làm</p>';
+      return;
+    }
+
+    container.innerHTML = list.map(todo => {
+      const realIndex = this.data.todos.indexOf(todo);
+      const createdDate = todo.date ? Utils.formatDate(todo.date) : '';
+      const userText = todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai';
+
+      return `
+        <div class="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-1 rounded-lg">
+          <div class="flex items-center space-x-2 flex-1">
+            <input type="checkbox" onclick="event.stopPropagation()" onchange="window.app.todo.toggleTodo(${realIndex})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
+            <span onclick="window.app.todo.editTodo(${realIndex})" class="text-sm text-gray-800 dark:text-slate-200 flex-1 cursor-pointer">${todo.title}</span>
+          </div>
+          <div onclick="window.app.todo.editTodo(${realIndex})" class="text-right cursor-pointer">
+            <span class="text-[10px] text-gray-400 dark:text-slate-500 block">${userText}</span>
+            ${createdDate ? `<span class="text-[9px] text-gray-400 block">${createdDate}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// Global chart rendering functions for event calls
+function renderBudgetChart() { if (window.app && window.app.charts) window.app.charts.renderBudgetChart(); }
+function renderAssetAllocationChart() { if (window.app && window.app.charts) window.app.charts.renderAssetAllocationChart(); }
+
+// Initialize DuoSpace Application on DOM Ready
+document.addEventListener('DOMContentLoaded', () => {
+  window.app = new DuoSpaceApp();
+});
