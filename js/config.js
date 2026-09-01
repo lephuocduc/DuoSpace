@@ -18,6 +18,7 @@ const CONFIG = {
       '💊 Sức khỏe',
       '🎮 Giải trí',
       '💰 Tiết kiệm',
+      '💼 Đầu tư',
       '📦 Khác'
     ],
     INVESTMENT: [
