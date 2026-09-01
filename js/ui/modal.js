@@ -5,7 +5,6 @@ const ModalManager = {
   editingType: null,
   editingIndex: -1,
 
-  openAddModal() {
     if (this.editingIndex < 0) {
       document.getElementById('modalMainTitle').innerText = "Thêm mới";
       document.getElementById('typeSelector').classList.remove('hidden');
@@ -21,14 +20,44 @@ const ModalManager = {
       document.getElementById('incomeAmount').value = '';
       document.getElementById('incomeDesc').value = '';
       document.getElementById('incomeNotes').value = '';
+
+      // Auto default category based on current active tab
+      const currentTab = (window.TabsManager && window.TabsManager.currentTab) || 'home';
+      const defaultCategory = typeof getDefaultCategoryByTab === 'function' ? getDefaultCategoryByTab(currentTab) : '';
+
+      if (defaultCategory) {
+        const todoCatEl = document.getElementById('todoCategory');
+        if (todoCatEl) {
+          // Check if option exists in select, else leave default
+          const hasOption = Array.from(todoCatEl.options).some(opt => opt.value === defaultCategory);
+          if (hasOption) todoCatEl.value = defaultCategory;
+        }
+
+        const expCatEl = document.getElementById('expenseCategory');
+        if (expCatEl) {
+          // If defaultCategory matches one of expense categories
+          const hasOption = Array.from(expCatEl.options).some(opt => opt.value.includes(defaultCategory) || defaultCategory.includes(opt.value));
+          if (hasOption) {
+            const matched = Array.from(expCatEl.options).find(opt => opt.value.includes(defaultCategory) || defaultCategory.includes(opt.value));
+            if (matched) expCatEl.value = matched.value;
+          }
+        }
+      }
     }
 
     const modal = document.getElementById('addModal');
     if (!modal) return;
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform').classList.remove('translate-y-full');
-    if (this.editingIndex < 0) this.setAddType('todo');
-  },
+    
+    if (this.editingIndex < 0) {
+      const currentTab = (window.TabsManager && window.TabsManager.currentTab) || 'home';
+      if (currentTab === 'finance') {
+        this.setAddType('expense');
+      } else {
+        this.setAddType('todo');
+      }
+    }
 
   closeAddModal() {
     const modal = document.getElementById('addModal');

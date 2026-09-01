@@ -1,11 +1,24 @@
 /**
  * DuoSpace Modules - Finance Tab Logic (Thu - Chi)
+ * v2.6.2: Thêm Phân trang (Load more theo 7 ngày) + Bộ lọc theo khoảng ngày (Date Range Filter)
  */
 class FinanceModule {
   constructor(app) {
     this.app = app;
     this.currentFilter = 'all';
     this.searchQuery = '';
+
+    // Pagination & Filter States
+    this.financeState = {
+      daysLoaded: 7,
+      hasMore: true
+    };
+
+    this.filterState = {
+      isActive: false,
+      dateFrom: null,
+      dateTo: null
+    };
   }
 
   render() {
@@ -31,28 +44,125 @@ class FinanceModule {
     this.renderFinanceList();
   }
 
+  // ──────────────────────────────────────────────
+  // DATE RANGE FILTER LOGIC
+  // ──────────────────────────────────────────────
+
+  applyDateFilter() {
+    const fromVal = document.getElementById('filterDateFrom')?.value;
+    const toVal = document.getElementById('filterDateTo')?.value;
+
+    if (!fromVal || !toVal) {
+      alert('Vui lòng chọn cả từ ngày và đến ngày!');
+      return;
+    }
+
+    const from = new Date(fromVal);
+    const to = new Date(toVal);
+
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+      alert('Ngày đã chọn không hợp lệ!');
+      return;
+    }
+
+    if (from > to) {
+      alert('Từ ngày phải trước hoặc bằng Đến ngày!');
+      return;
+    }
+
+    from.setHours(0, 0, 0, 0);
+    to.setHours(23, 59, 59, 999);
+
+    this.filterState.isActive = true;
+    this.filterState.dateFrom = from;
+    this.filterState.dateTo = to;
+
+    this.renderFinanceList();
+  }
+
+  resetDateFilter() {
+    const fromInput = document.getElementById('filterDateFrom');
+    const toInput = document.getElementById('filterDateTo');
+    const summaryEl = document.getElementById('filterSummary');
+
+    if (fromInput) fromInput.value = '';
+    if (toInput) toInput.value = '';
+    if (summaryEl) summaryEl.innerText = '';
+
+    this.filterState.isActive = false;
+    this.filterState.dateFrom = null;
+    this.filterState.dateTo = null;
+    this.financeState.daysLoaded = 7;
+
+    this.renderFinanceList();
+  }
+
+  setDateFilterRange(range) {
+    const today = new Date();
+    let from, to = new Date(today);
+
+    switch(range) {
+      case 'thisMonth':
+        from = new Date(today.getFullYear(), today.getMonth(), 1);
+        to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case 'lastMonth':
+        from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        to = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case 'last30Days':
+        from = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'thisYear':
+        from = new Date(today.getFullYear(), 0, 1);
+        break;
+      default:
+        from = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    }
+
+    const fromInput = document.getElementById('filterDateFrom');
+    const toInput = document.getElementById('filterDateTo');
+
+    if (fromInput) fromInput.value = from.toISOString().split('T')[0];
+    if (toInput) toInput.value = to.toISOString().split('T')[0];
+
+    this.applyDateFilter();
+  }
+
+  // ──────────────────────────────────────────────
+  // PAGINATION (LOAD MORE)
+  // ──────────────────────────────────────────────
+
+  loadMoreTransactions() {
+    this.financeState.daysLoaded += 7;
+    this.renderFinanceList();
+  }
+
+  // ──────────────────────────────────────────────
+  // RENDER TRANSACTIONS
+  // ──────────────────────────────────────────────
+
   renderFinanceList() {
     const financeList = document.getElementById('financeList');
     if (!financeList) return;
 
-    let combined = [
+    let allCombined = [
       ...(this.app.data.expenses || []).map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
       ...(this.app.data.incomes || []).map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (this.currentFilter !== 'all') {
-      combined = combined.filter(item => item.type === this.currentFilter);
+    // Calculate overall Totals for Top Summary (regardless of search, or based on date filter if active)
+    let summaryBase = allCombined;
+    if (this.filterState.isActive && this.filterState.dateFrom && this.filterState.dateTo) {
+      summaryBase = summaryBase.filter(item => {
+        if (!item.date) return false;
+        const d = new Date(item.date);
+        return d >= this.filterState.dateFrom && d <= this.filterState.dateTo;
+      });
     }
 
-    if (this.searchQuery) {
-      combined = combined.filter(item =>
-        (item.desc && item.desc.toLowerCase().includes(this.searchQuery)) ||
-        (item.notes && item.notes.toLowerCase().includes(this.searchQuery))
-      );
-    }
-
-    const totalIncome = (this.app.data.incomes || []).reduce((sum, i) => sum + i.amount, 0);
-    const totalExpense = (this.app.data.expenses || []).reduce((sum, e) => sum + e.amount, 0);
+    const totalIncome = summaryBase.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0);
+    const totalExpense = summaryBase.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
 
     const incomeTotalEl = document.getElementById('incomeTotal');
     if (incomeTotalEl) incomeTotalEl.innerText = Utils.formatCurrency(totalIncome);
@@ -60,12 +170,84 @@ class FinanceModule {
     const expenseTotalEl = document.getElementById('expenseTotal');
     if (expenseTotalEl) expenseTotalEl.innerText = Utils.formatCurrency(totalExpense);
 
-    if (combined.length === 0) {
-      financeList.innerHTML = '<p class="text-sm text-gray-400 dark:text-slate-500 text-center py-4">Chưa có giao dịch nào</p>';
+    // Apply Filter type (expense/income/all)
+    let processed = allCombined;
+    if (this.currentFilter !== 'all') {
+      processed = processed.filter(item => item.type === this.currentFilter);
+    }
+
+    // Apply Search Query
+    if (this.searchQuery) {
+      processed = processed.filter(item =>
+        (item.desc && item.desc.toLowerCase().includes(this.searchQuery)) ||
+        (item.notes && item.notes.toLowerCase().includes(this.searchQuery)) ||
+        (item.category && item.category.toLowerCase().includes(this.searchQuery))
+      );
+    }
+
+    // Apply Date Range OR Pagination Days
+    let displayed = [];
+    const summaryEl = document.getElementById('filterSummary');
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    if (this.filterState.isActive && this.filterState.dateFrom && this.filterState.dateTo) {
+      // Date Range Filter Mode
+      displayed = processed.filter(item => {
+        if (!item.date) return false;
+        const d = new Date(item.date);
+        return d >= this.filterState.dateFrom && d <= this.filterState.dateTo;
+      });
+
+      if (summaryEl) {
+        summaryEl.innerText = `Hiển thị: ${Utils.formatDate(this.filterState.dateFrom)} - ${Utils.formatDate(this.filterState.dateTo)} (${displayed.length} giao dịch)`;
+        summaryEl.classList.remove('hidden');
+      }
+
+      // In Custom Date Filter mode, show all matching within range
+      if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
+    } else {
+      // Pagination Mode (Recent X days)
+      if (summaryEl) {
+        summaryEl.innerText = '';
+        summaryEl.classList.add('hidden');
+      }
+
+      const now = new Date();
+      const cutoffDate = new Date(now.getTime() - this.financeState.daysLoaded * 24 * 60 * 60 * 1000);
+      cutoffDate.setHours(0, 0, 0, 0);
+
+      displayed = processed.filter(item => {
+        if (!item.date) return true;
+        const d = new Date(item.date);
+        return d >= cutoffDate;
+      });
+
+      // Check if there are older transactions beyond cutoffDate
+      const olderItems = processed.filter(item => {
+        if (!item.date) return false;
+        const d = new Date(item.date);
+        return d < cutoffDate;
+      });
+
+      if (loadMoreContainer) {
+        if (olderItems.length > 0) {
+          loadMoreContainer.classList.remove('hidden');
+          if (loadMoreBtn) {
+            loadMoreBtn.innerHTML = `📥 Tải thêm (Xem thêm 7 ngày trước · Còn ${olderItems.length} giao dịch)`;
+          }
+        } else {
+          loadMoreContainer.classList.add('hidden');
+        }
+      }
+    }
+
+    if (displayed.length === 0) {
+      financeList.innerHTML = '<p class="text-sm text-gray-400 dark:text-slate-500 text-center py-4">Chưa có giao dịch nào phù hợp</p>';
       return;
     }
 
-    financeList.innerHTML = combined.map(item => {
+    financeList.innerHTML = displayed.map(item => {
       const isExpense = item.type === 'expense';
       const icon = isExpense ? (item.category ? item.category.split(' ')[0] : '💸') : '💰';
       const color = isExpense ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
@@ -89,7 +271,7 @@ class FinanceModule {
             </div>
             <div class="flex items-center space-x-2">
               <span class="font-bold text-sm ${color}">${sign}${Utils.formatCurrency(item.amount)}</span>
-              <button onclick="event.stopPropagation(); window.app.finance.deleteFinance('${item.type}', ${item.rawIdx})" class="text-gray-300 hover:text-red-500 text-xs">
+              <button onclick="event.stopPropagation(); window.app.finance.deleteFinance('${item.type}', ${item.rawIdx})" class="text-gray-300 hover:text-red-500 text-xs p-1" title="Xóa">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -214,3 +396,7 @@ function deleteFinance(type, idx) { window.app.finance.deleteFinance(type, idx);
 function editFinance(type, idx) { window.app.finance.editFinance(type, idx); }
 function saveExpenseAction() { window.app.finance.saveExpenseAction(); }
 function saveIncomeAction() { window.app.finance.saveIncomeAction(); }
+function applyDateFilter() { window.app.finance.applyDateFilter(); }
+function resetDateFilter() { window.app.finance.resetDateFilter(); }
+function setDateFilterRange(range) { window.app.finance.setDateFilterRange(range); }
+function loadMoreTransactions() { window.app.finance.loadMoreTransactions(); }

@@ -125,6 +125,20 @@ class DuoSpaceApp {
   }
 }
 
+// Global helper for tab-aware category
+function getDefaultCategoryByTab(tabName) {
+  const categoryMap = {
+    'finance': 'Chi Tiêu',
+    'motorbike': 'Xe Máy',
+    'todo': 'Việc nhà',
+    'cats': 'Mun & Bông',
+    'health': 'Sức Khỏe',
+    'investment': '',
+    'home': ''
+  };
+  return categoryMap[tabName] || '';
+}
+
 // Global chart rendering functions for event calls
 function renderBudgetChart() { if (window.app && window.app.charts) window.app.charts.renderBudgetChart(); }
 function renderAssetAllocationChart() { if (window.app && window.app.charts) window.app.charts.renderAssetAllocationChart(); }

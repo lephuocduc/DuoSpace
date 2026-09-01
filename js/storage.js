@@ -117,4 +117,36 @@ class Storage {
   getData() {
     return this.data;
   }
+
+  // ── Helper functions for Date Filtering & Pagination ──
+  getAllTransactions() {
+    return [
+      ...(this.data.expenses || []).map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
+      ...(this.data.incomes || []).map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  getTransactionsByDateRange(startDate, endDate, limit = null) {
+    const transactions = this.getAllTransactions();
+    const filtered = transactions.filter(t => {
+      if (!t.date) return false;
+      const tDate = new Date(t.date);
+      return tDate >= startDate && tDate <= endDate;
+    });
+    return limit ? filtered.slice(0, limit) : filtered;
+  }
+
+  getRecentTransactions(daysBack = 7) {
+    const now = new Date();
+    const startDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+    startDate.setHours(0, 0, 0, 0);
+    return this.getTransactionsByDateRange(startDate, now);
+  }
+
+  getTransactionsBefore(targetDate, daysRange = 7, limit = null) {
+    const endDate = new Date(targetDate.getTime() - 1);
+    const startDate = new Date(endDate.getTime() - daysRange * 24 * 60 * 60 * 1000);
+    startDate.setHours(0, 0, 0, 0);
+    return this.getTransactionsByDateRange(startDate, endDate, limit);
+  }
 }
