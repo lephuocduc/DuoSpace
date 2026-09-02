@@ -5,7 +5,7 @@
  *
  * v4.0: Bỏ cấu hình thủ công nguồn giá & mã tài sản.
  *       Hệ thống tự động suy luận nguồn giá dựa trên tên tài sản từ catalog.
- *       Gold API: vang.today (CORS OK, free, cập nhật 5 phút/lần)
+ *       Gold API: local Puppeteer DOJI scraper, with vang.today fallback.
  */
 class PriceUpdater {
   constructor() {
@@ -97,29 +97,99 @@ class PriceUpdater {
   }
 
   /**
-   * Fetch giá vàng SJC/DOJI trong nước (VND/lượng)
+   * Fetch giá vàng DOJI từ local Puppeteer scraper (VND/lượng).
    * @returns {number|null}
    */
   async fetchVnGoldPrice() {
-    return this._fetchVangToday(PRICE_CONFIG.GOLD.sjcCode, 'sell');
+    const cacheKey = 'gold:DOJI_NHAN_9999';
+    const cached = this._getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+      const res = await fetch(PRICE_CONFIG.GOLD.dojiScraperApi, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      const gold = data.results?.[0];
+      if (!gold) throw new Error('Không có dữ liệu vàng DOJI');
+
+      const rawPrice = gold.buy ?? gold.buyPrice ?? gold.buy_price ?? gold.gia_mua ??
+        gold.purchase ?? gold.purchase_price ?? gold.sell ?? gold.sellPrice ?? gold.sell_price;
+      let price = typeof rawPrice === 'number'
+        ? rawPrice
+        : Number(String(rawPrice || '').replace(/[^0-9]/g, ''));
+      // DOJI displays thousand VND, e.g. 89.500.
+      if (price > 0 && price < 10000000) price *= 1000;
+      if (price >= 10000000 && price <= 200000000) {
+        this._setCache(cacheKey, price);
+        return price;
+      }
+      throw new Error('Giá DOJI không hợp lệ');
+    } catch (err) {
+      console.warn('[PriceUpdater] DOJI scraper fetch error:', err);
+    }
+
+    // Fallback: vang.today (SJC) when DOJI is temporarily unavailable.
+    const fallback = await this._fetchVangToday(PRICE_CONFIG.GOLD.sjcCode, 'sell');
+    if (fallback !== null) {
+      this._setCache(cacheKey, fallback);
+      return fallback;
+    }
+
+    return null;
   }
 
   /**
-   * Fetch giá vàng thế giới (USD/troy oz)
-   * @returns {number|null}
+   * Fetch giá vàng thế giới từ chartgoldprice.com (USD/troy oz)
+   * Endpoint: https://www.chartgoldprice.com/api/data
+   * Response: { prices: { gold: { troy_ounce, gram } }, meta: { updated_at } }
+   * @returns {number|null} - USD/troy oz
    */
   async fetchGoldPriceUsd() {
-    // vang.today XAUUSD trả về price trong trường 'buy' (USD/oz)
-    const price = await this._fetchVangToday(PRICE_CONFIG.GOLD.xauCode, 'buy');
-    if (price !== null) return price;
-    // Fallback: metals.live
+    const cacheKey = 'gold:XAU_USD';
+    const cached = this._getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    // 1. Fetch từ chartgoldprice.com — đúng path: data.prices.gold.troy_ounce
+    try {
+      const url = PRICE_CONFIG.GOLD.chartGoldPriceApi || 'https://www.chartgoldprice.com/api/data';
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        // Đúng theo API response: { prices: { gold: { troy_ounce, gram } }, meta: {...} }
+        const price =
+          data?.prices?.gold?.troy_ounce ??
+          data?.prices?.gold?.gram * 31.1035 ??  // fallback: gram * 31.1035 = troy oz
+          (typeof data.price === 'number' ? data.price : null);
+        if (price !== null && price > 500 && price < 10000) {
+          console.log('[PriceUpdater] XAU/USD (chartgoldprice.com):', price);
+          this._setCache(cacheKey, price);
+          return price;
+        }
+      }
+    } catch (err) {
+      console.warn('[PriceUpdater] chartgoldprice.com fetch error:', err);
+    }
+
+    // 2. Fallback: vang.today XAUUSD
+    const vtPrice = await this._fetchVangToday(PRICE_CONFIG.GOLD.xauCode, 'buy');
+    if (vtPrice !== null && vtPrice > 500) {
+      this._setCache(cacheKey, vtPrice);
+      return vtPrice;
+    }
+
+    // 3. Fallback: metals.live
     try {
       const res = await fetch('https://api.metals.live/v1/spot/gold');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const d = await res.json();
-      const p = typeof d.gold === 'number' ? d.gold : (typeof d[0]?.price === 'number' ? d[0].price : null);
-      if (p !== null) { this._setCache('gold:XAU_USD', p); return p; }
+      if (res.ok) {
+        const d = await res.json();
+        const p = typeof d.gold === 'number' ? d.gold : (typeof d[0]?.price === 'number' ? d[0].price : null);
+        if (p !== null) { this._setCache(cacheKey, p); return p; }
+      }
     } catch (_) {}
+
     return null;
   }
 

@@ -1,0 +1,10 @@
+{
+  "name": "duospace-doji-scraper",
+  "private": true,
+  "scripts": {
+    "doji-server": "node server/doji-price-server.cjs"
+  },
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}

@@ -146,9 +146,9 @@ class Storage {
       settings: {
         munBreed: "Mèo Cưng",
         bongBreed: "Mèo Cưng",
-        nmaxPlate: "59X1-123.45",
+        nmaxPlate: "50AD-539.09",
         nmaxOdo: 14850,
-        grandePlate: "59X2-678.90",
+        grandePlate: "50N2-461.30",
         grandeOdo: 8200
       }
     };

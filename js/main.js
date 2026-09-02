@@ -14,9 +14,13 @@ class DuoSpaceApp {
     this.charts = {
       renderBudgetChart: () => this.budgetChart.render(this.data, this.data.isDarkMode),
       renderCatChart: () => this.weightChart.render(this.data.catWeights, this.data.isDarkMode),
-      renderAssetAllocationChart: () => this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode),
+      renderAssetAllocationChart: () => {
+        const cs = this.investment ? this.investment.getCashSurplusVnd() : 0;
+        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode, cs);
+      },
       renderInvestmentCharts: () => {
-        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode);
+        const cs = this.investment ? this.investment.getCashSurplusVnd() : 0;
+        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode, cs);
         this.investmentChart.renderNetWorth(this.data.netWorthHistory, this.data.isDarkMode);
       }
     };
@@ -66,6 +70,11 @@ class DuoSpaceApp {
     // Fetch realtime USD rate & Render all
     this.investment.fetchRealtimeUsdRate();
     this.render();
+
+    // ── RESTORE ACTIVE TAB AFTER REFRESH ──
+    if (typeof TabsManager !== 'undefined' && typeof TabsManager.initFromStorage === 'function') {
+      TabsManager.initFromStorage();
+    }
 
     // ── AUTO PRICE UPDATE: fetch prices & start background timer ──
     if (typeof priceUpdater !== 'undefined') {

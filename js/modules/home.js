@@ -171,13 +171,13 @@ class HomeModule {
     if (viewNmaxOdo) viewNmaxOdo.innerText = `${(s.nmaxOdo || 0).toLocaleString('vi-VN')} km`;
 
     const viewNmaxPlate = document.getElementById('viewNmaxPlate');
-    if (viewNmaxPlate) viewNmaxPlate.innerText = `BS: ${s.nmaxPlate || 'N/A'}`;
+    if (viewNmaxPlate) viewNmaxPlate.innerText = `BS: ${CONFIG.VEHICLES.NMAX.plate}`;
 
     const viewGrandeOdo = document.getElementById('viewGrandeOdo');
     if (viewGrandeOdo) viewGrandeOdo.innerText = `${(s.grandeOdo || 0).toLocaleString('vi-VN')} km`;
 
     const viewGrandePlate = document.getElementById('viewGrandePlate');
-    if (viewGrandePlate) viewGrandePlate.innerText = `BS: ${s.grandePlate || 'N/A'}`;
+    if (viewGrandePlate) viewGrandePlate.innerText = `BS: ${CONFIG.VEHICLES.Grande.plate}`;
 
     const latestWeights = (this.app.data.catWeights && this.app.data.catWeights.length > 0)
       ? this.app.data.catWeights[this.app.data.catWeights.length - 1]

@@ -8,9 +8,9 @@ class FinanceModule {
     this.currentFilter = 'all';
     this.searchQuery = '';
 
-    // Pagination & Filter States
+    // Pagination & Filter States (Default 10 transactions)
     this.financeState = {
-      daysLoaded: 7,
+      countLoaded: 10,
       hasMore: true
     };
 
@@ -27,6 +27,7 @@ class FinanceModule {
 
   filter(type) {
     this.currentFilter = type;
+    this.financeState.countLoaded = 10;
     ['all', 'expense', 'income'].forEach(t => {
       const btn = document.getElementById(`finFilter-${t}`);
       if (!btn) return;
@@ -41,6 +42,7 @@ class FinanceModule {
 
   search(query) {
     this.searchQuery = (query || '').toLowerCase().trim();
+    this.financeState.countLoaded = 10;
     this.renderFinanceList();
   }
 
@@ -76,6 +78,7 @@ class FinanceModule {
     this.filterState.isActive = true;
     this.filterState.dateFrom = from;
     this.filterState.dateTo = to;
+    this.financeState.countLoaded = 10;
 
     this.renderFinanceList();
   }
@@ -92,7 +95,7 @@ class FinanceModule {
     this.filterState.isActive = false;
     this.filterState.dateFrom = null;
     this.filterState.dateTo = null;
-    this.financeState.daysLoaded = 7;
+    this.financeState.countLoaded = 10; // Đặt lại hiển thị mặc định 10 giao dịch
 
     this.renderFinanceList();
   }
@@ -130,11 +133,11 @@ class FinanceModule {
   }
 
   // ──────────────────────────────────────────────
-  // PAGINATION (LOAD MORE)
+  // PAGINATION (LOAD MORE +10 ITEMS)
   // ──────────────────────────────────────────────
 
   loadMoreTransactions() {
-    this.financeState.daysLoaded += 7;
+    this.financeState.countLoaded += 10;
     this.renderFinanceList();
   }
 
@@ -185,60 +188,42 @@ class FinanceModule {
       );
     }
 
-    // Apply Date Range OR Pagination Days
-    let displayed = [];
+    // Apply Date Filter if active
+    let filteredList = processed;
     const summaryEl = document.getElementById('filterSummary');
     const loadMoreContainer = document.getElementById('loadMoreContainer');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
 
     if (this.filterState.isActive && this.filterState.dateFrom && this.filterState.dateTo) {
-      // Date Range Filter Mode
-      displayed = processed.filter(item => {
+      filteredList = processed.filter(item => {
         if (!item.date) return false;
         const d = new Date(item.date);
         return d >= this.filterState.dateFrom && d <= this.filterState.dateTo;
       });
 
       if (summaryEl) {
-        summaryEl.innerText = `Hiển thị: ${Utils.formatDate(this.filterState.dateFrom)} - ${Utils.formatDate(this.filterState.dateTo)} (${displayed.length} giao dịch)`;
+        summaryEl.innerText = `Lọc: ${Utils.formatDate(this.filterState.dateFrom)} - ${Utils.formatDate(this.filterState.dateTo)} (${filteredList.length} giao dịch)`;
         summaryEl.classList.remove('hidden');
       }
-
-      // In Custom Date Filter mode, show all matching within range
-      if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
     } else {
-      // Pagination Mode (Recent X days)
       if (summaryEl) {
         summaryEl.innerText = '';
         summaryEl.classList.add('hidden');
       }
+    }
 
-      const now = new Date();
-      const cutoffDate = new Date(now.getTime() - this.financeState.daysLoaded * 24 * 60 * 60 * 1000);
-      cutoffDate.setHours(0, 0, 0, 0);
+    // Paginate by countLoaded (default 10)
+    const displayed = filteredList.slice(0, this.financeState.countLoaded);
+    const remainingCount = filteredList.length - displayed.length;
 
-      displayed = processed.filter(item => {
-        if (!item.date) return true;
-        const d = new Date(item.date);
-        return d >= cutoffDate;
-      });
-
-      // Check if there are older transactions beyond cutoffDate
-      const olderItems = processed.filter(item => {
-        if (!item.date) return false;
-        const d = new Date(item.date);
-        return d < cutoffDate;
-      });
-
-      if (loadMoreContainer) {
-        if (olderItems.length > 0) {
-          loadMoreContainer.classList.remove('hidden');
-          if (loadMoreBtn) {
-            loadMoreBtn.innerHTML = `📥 Tải thêm (Xem thêm 7 ngày trước · Còn ${olderItems.length} giao dịch)`;
-          }
-        } else {
-          loadMoreContainer.classList.add('hidden');
+    if (loadMoreContainer) {
+      if (remainingCount > 0) {
+        loadMoreContainer.classList.remove('hidden');
+        if (loadMoreBtn) {
+          loadMoreBtn.innerHTML = `📥 Xem thêm (Còn ${remainingCount} giao dịch · Hiển thị ${displayed.length}/${filteredList.length})`;
         }
+      } else {
+        loadMoreContainer.classList.add('hidden');
       }
     }
 

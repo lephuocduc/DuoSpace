@@ -40,4 +40,13 @@ duospace/
 
 ## 🚀 Hướng dẫn sử dụng
 
-Chỉ cần mở trực tiếp file `index.html` trên bất kỳ trình duyệt hiện đại nào (Chrome, Safari, Edge, Firefox) hoặc chạy thông qua Live Server/GitHub Pages mà không cần cài đặt môi trường build phức tạp.
+Mở trực tiếp file `index.html` trên bất kỳ trình duyệt hiện đại nào (Chrome, Safari, Edge, Firefox) hoặc chạy qua Live Server/GitHub Pages.
+
+Để lấy giá DOJI trực tiếp từ bảng giá đã render, mở thêm một terminal tại thư mục dự án và chạy:
+
+```bash
+npm install
+npm run doji-server
+```
+
+Sau khi server báo sẵn sàng ở cổng `3001`, ứng dụng sẽ tự gọi `http://127.0.0.1:3001/api/gold/doji`. Server này chạy Puppeteer, đợi bảng giá Angular của DOJI tải xong và lấy giá mua của “Nhẫn tròn 9999 Hưng Thịnh Vượng”.

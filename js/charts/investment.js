@@ -7,16 +7,16 @@ class InvestmentChart {
     this.netWorthChart = null;
   }
 
-  render(investments, usdRate, isDark) {
-    this.renderAssetAllocation(investments, usdRate, isDark);
+  render(investments, usdRate, isDark, cashSurplus = 0) {
+    this.renderAssetAllocation(investments, usdRate, isDark, cashSurplus);
   }
 
-  renderAssetAllocation(investments, usdRate, isDark) {
+  renderAssetAllocation(investments, usdRate, isDark, cashSurplus = 0) {
     const ctx = document.getElementById('assetAllocationChart');
     if (!ctx) return;
 
     const list = investments || [];
-    if (list.length === 0) {
+    if (list.length === 0 && cashSurplus <= 0) {
       this.destroyAllocation();
       return;
     }
@@ -33,8 +33,19 @@ class InvestmentChart {
       if (categoryTotals[key] <= 0) delete categoryTotals[key];
     });
 
+    // Thêm tiền dư thu chi vào biểu đồ phân bổ nếu > 0
+    if (cashSurplus > 0) {
+      categoryTotals['💵 Tiền dư VNĐ'] = cashSurplus;
+    }
+
     const labels = Object.keys(categoryTotals);
     const dataValues = Object.values(categoryTotals);
+    // Màu cuối cùng luôn dành cho Tiền dư VNĐ
+    const backgroundColors = [
+      '#6366f1', '#3b82f6', '#f59e0b', '#10b981',
+      '#ec4899', '#8b5cf6', '#06b6d4', '#64748b',
+      '#22c55e'  // xanh lá cho tiền dư VNĐ nếu là phần tử cuối
+    ];
 
     this.destroyAllocation();
 
@@ -44,7 +55,7 @@ class InvestmentChart {
         labels: labels,
         datasets: [{
           data: dataValues,
-          backgroundColor: ['#6366f1', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b'],
+          backgroundColor: backgroundColors.slice(0, labels.length),
           borderWidth: 2,
           borderColor: isDark ? '#0f172a' : '#ffffff'
         }]
@@ -59,6 +70,19 @@ class InvestmentChart {
               color: isDark ? '#94a3b8' : '#64748b',
               font: { size: 10 },
               boxWidth: 12
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const val = context.parsed;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                const formatted = val >= 1000000
+                  ? (val / 1000000).toFixed(1) + ' Tr đ'
+                  : val.toLocaleString('vi-VN') + ' đ';
+                return ` ${context.label}: ${formatted} (${pct}%)`;
+              }
             }
           }
         },

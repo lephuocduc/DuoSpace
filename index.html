@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
@@ -308,12 +308,17 @@
             </div>
           </div>
           
-          <div class="relative z-10">
-            <p class="text-[11px] text-indigo-200 font-medium mb-1">Tổng tài sản hiện tại</p>
+          <div class="relative z-10 space-y-1">
+            <p class="text-[11px] text-indigo-200 font-medium">Tổng tài sản (Danh mục + Tiền dư Thu Chi)</p>
             <div id="investTotalValue" class="text-3xl font-extrabold tracking-tight">0 đ</div>
+            <div id="investNetWorthBreakdown" class="flex items-center space-x-2 text-[10px] text-indigo-200/90 font-medium pt-0.5">
+              <span>Đầu tư: <b id="investAssetsOnly" class="text-white">0 đ</b></span>
+              <span>•</span>
+              <span>Tiền dư thu chi: <b id="investCashSurplus" class="text-emerald-300">0 đ</b></span>
+            </div>
           </div>
           
-          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/20 relative z-10">
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 relative z-10">
             <div>
               <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Tổng vốn đã đầu tư</p>
               <p id="investTotalCost" class="text-sm font-bold text-white">0 đ</p>
@@ -323,8 +328,14 @@
               <p id="investTotalPnL" class="text-sm font-bold text-emerald-400 drop-shadow-sm">+0 đ (0%)</p>
             </div>
           </div>
-          <!-- Auto / Manual badge tổng -->
-          <div id="investPriceBadges" class="flex space-x-1.5 relative z-10"></div>
+          <!-- Auto / Manual badge & Nút Refresh tất cả giá -->
+          <div class="flex items-center justify-between pt-2 relative z-10 border-t border-white/10">
+            <div id="investPriceBadges" class="flex flex-wrap gap-1.5 items-center"></div>
+            <button onclick="refreshAllInvestPrices()" id="btnRefreshAllPrices" class="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[10px] font-bold flex items-center space-x-1 backdrop-blur-md active:scale-95 transition-all">
+              <i class="fa-solid fa-rotate text-[10px]" id="refreshAllIcon"></i>
+              <span>Cập nhật giá</span>
+            </button>
+          </div>
         </div>
 
         <!-- BIỂU ĐỒ TỔNG TÀI SẢN THEO NGÀY (LINE CHART) -->
@@ -358,8 +369,8 @@
           
           <div class="flex space-x-2 overflow-x-auto custom-scrollbar pb-1">
             <button onclick="filterInvestment('all')" id="invFilter-all" class="shrink-0 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
-            <button onclick="filterInvestment('🪙 BTC')" id="invFilter-btc" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 BTC</button>
-            <button onclick="filterInvestment('🪙 BNB')" id="invFilter-bnb" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 BNB</button>
+            <button onclick="filterInvestment('🪙 BTC')" id="invFilter-btc" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700 inline-flex items-center gap-1.5"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/btc.png" alt="BTC" class="w-4 h-4">BTC</button>
+            <button onclick="filterInvestment('🪙 BNB')" id="invFilter-bnb" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700 inline-flex items-center gap-1.5"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/bnb.png" alt="BNB" class="w-4 h-4">BNB</button>
             <button onclick="filterInvestment('🥇 Vàng')" id="invFilter-gold" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🥇 Vàng</button>
             <button onclick="filterInvestment('💵 USD')" id="invFilter-usd" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">💵 USD</button>
             <button onclick="filterInvestment('🏦 Tiết kiệm')" id="invFilter-save" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🏦 Tiết kiệm</button>
@@ -406,20 +417,31 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="investBuyPrice" placeholder="Giá mua..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          <div class="space-y-2 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị <span class="text-red-500">*</span></label>
+                <input type="number" step="any" id="investBuyPrice" placeholder="Giá mua..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold">Giá thị trường <span class="text-red-500">*</span></label>
+                  <button type="button" onclick="fetchPriceForCurrentForm()" title="Lấy giá thị trường hiện tại từ Internet" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold">
+                    <i class="fa-solid fa-rotate text-[9px]"></i>
+                    <span>Lấy giá live</span>
+                  </button>
+                </div>
+                <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
             </div>
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá thị trường hiện tại <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-            </div>
-            <div class="col-span-2 flex items-center mt-1">
-              <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
-              <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
-                Giá trị nhập là USD (App tự động quy đổi sang VNĐ)
-              </label>
+            <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center">
+                <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
+                  Giá tính theo USD ($)
+                </label>
+              </div>
+              <span id="investAutoPriceHint" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ Tự động cập nhật giá</span>
             </div>
           </div>
 
@@ -445,9 +467,16 @@
         <div class="space-y-3 pb-6">
           <div class="flex justify-between items-center px-1">
             <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Danh mục tài sản chi tiết</h3>
-            <button onclick="openInvestmentForm(-1)" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all">
-              + Thêm tài sản
-            </button>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="openInvestmentForm(-1)" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Thêm tài sản</span>
+              </button>
+              <button onclick="openSellAssetModal()" class="text-xs bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-rose-200 active:scale-95 transition-all flex items-center space-x-1">
+                <i class="fa-solid fa-arrow-trend-down text-[10px]"></i>
+                <span>Bán bớt</span>
+              </button>
+            </div>
           </div>
 
           <div id="investmentList" class="space-y-3">
@@ -466,7 +495,7 @@
             </div>
             <div id="viewNmaxOdo" class="text-lg font-bold">14.850 km</div>
             <div class="flex justify-between items-center text-[10px] opacity-85">
-              <span id="viewNmaxPlate">BS: 59X1-123.45</span>
+              <span id="viewNmaxPlate">BS: 50AD-539.09</span>
               <span class="underline font-medium">Parts Status →</span>
             </div>
           </div>
@@ -477,8 +506,35 @@
             </div>
             <div id="viewGrandeOdo" class="text-lg font-bold">8.200 km</div>
             <div class="flex justify-between items-center text-[10px] opacity-85">
-              <span id="viewGrandePlate">BS: 59X2-678.90</span>
+              <span id="viewGrandePlate">BS: 50N2-461.30</span>
               <span class="underline font-medium">Parts Status →</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Thông tin xe</h3>
+            <button onclick="saveBikeInfo()" class="text-xs bg-sky-600 text-white px-2.5 py-1 rounded-lg font-semibold">Lưu</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[10px]">
+            <div>
+              <p class="text-gray-500 dark:text-slate-400 font-semibold">NMAX</p>
+              <p class="text-gray-700 dark:text-slate-200">BS: 50AD-539.09</p>
+              <p class="text-gray-500 dark:text-slate-400 break-all">Số khung: RLCSGB310TY001107</p>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">NMAX ODO (km)</label>
+              <input type="number" id="bikeNmaxOdo" placeholder="14850" class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-slate-400 font-semibold">Grande</p>
+              <p class="text-gray-700 dark:text-slate-200">BS: 50N2-461.30</p>
+              <p class="text-gray-500 dark:text-slate-400 break-all">Số khung: RLCSEK410NY006766</p>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Grande ODO (km)</label>
+              <input type="number" id="bikeGrandeOdo" placeholder="8200" class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
         </div>
@@ -653,99 +709,11 @@
 
       <!-- TAB 8: CÀI ĐẶT -->
       <div id="tab-setting" class="hidden space-y-5 tab-content">
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <h3
-            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
-            <i class="fa-solid fa-cat text-amber-500 mr-2"></i>Thông tin Mun & Bông
-          </h3>
-          <div class="space-y-3">
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Mun
-                  (Giống)</label>
-                <input type="text" id="setMunBreed" placeholder="Mèo cưng"
-                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Bé Bông
-                  (Giống)</label>
-                <input type="text" id="setBongBreed" placeholder="Mèo cưng"
-                  class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-            </div>
-          </div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700/60 text-center">
+          <i class="fa-solid fa-sliders text-2xl text-gray-300 dark:text-slate-600 mb-2"></i>
+          <p class="text-sm font-semibold text-gray-600 dark:text-slate-300">Chưa có cài đặt bổ sung</p>
+          <p class="text-xs text-gray-400 mt-1">Thông tin xe được quản lý trong mục Xe Máy.</p>
         </div>
-
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <h3
-            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
-            <i class="fa-solid fa-motorcycle text-sky-600 mr-2"></i>Thông tin Xe Máy
-          </h3>
-          <div class="space-y-3">
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Biển
-                  số</label>
-                <input type="text" id="setNmaxPlate"
-                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NMAX Odo
-                  (km)</label>
-                <input type="number" id="setNmaxOdo"
-                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2 border-t border-gray-50 dark:border-slate-700/50 pt-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Biển
-                  số</label>
-                <input type="text" id="setGrandePlate"
-                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Grande Odo
-                  (km)</label>
-                <input type="number" id="setGrandeOdo"
-                  class="w-full px-3 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- API Keys Section -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <h3
-            class="text-sm font-bold text-gray-800 dark:text-slate-200 border-b border-gray-100 dark:border-slate-700 pb-2">
-            <i class="fa-solid fa-plug text-indigo-500 mr-2"></i>API Keys & Tự động cập nhật giá
-          </h3>
-          <div>
-            <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">
-              Alpha Vantage API Key <span class="font-normal text-gray-400">(cho cổ phiếu)</span>
-            </label>
-            <input type="password" id="setAlphaVantageKey"
-              placeholder="Lấy miễn phí tại alphavantage.co"
-              class="w-full px-2.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-            <p class="text-[9px] text-gray-400 mt-1">Free tier: 500 calls/ngày. Để trống nếu không dùng cổ phiếu.</p>
-          </div>
-          <div class="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl border border-blue-100 dark:border-blue-900/50">
-            <p class="text-[10px] text-blue-700 dark:text-blue-300 font-semibold mb-1">ℹ️ Các nguồn giá miễn phí:</p>
-            <ul class="text-[9px] text-blue-600 dark:text-blue-400 space-y-0.5 list-disc list-inside">
-              <li>🪙 Crypto → CoinGecko (không cần key)</li>
-              <li>🥇 Vàng → Metals.live (không cần key)</li>
-              <li>💵 USD/VND → Open ER API (không cần key)</li>
-              <li>📈 Cổ phiếu → Alpha Vantage (cần key miễn phí)</li>
-            </ul>
-          </div>
-        </div>
-
-        <button onclick="saveSettings()"
-          class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">
-          Lưu Cài Đặt
-        </button>
       </div>
 
     </main>
@@ -887,6 +855,76 @@
           </button>
         </div>
         <div id="partsModalList" class="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-2">
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP BÁN TÀI SẢN ĐẦU TƯ -->
+    <div id="sellAssetModal" onclick="closeSellAssetModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3.5 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center text-rose-600 dark:text-rose-400">
+              <i class="fa-solid fa-arrow-trend-down mr-2"></i>Bán Bớt Tài Sản Đầu Tư
+            </h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">Hệ thống sẽ trừ số lượng và tự tính lại giá vốn trung bình</p>
+          </div>
+          <button onclick="closeSellAssetModal()"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-1">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Chọn tài sản muốn bán <span class="text-red-500">*</span></label>
+            <select id="sellAssetSelect" onchange="onSellAssetSelectChange()"
+              class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs font-semibold focus:ring-1 focus:ring-rose-500 outline-none">
+            </select>
+          </div>
+
+          <div id="sellAssetCurrentInfo" class="bg-gray-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700 text-xs space-y-1">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Số lượng đang có:</span>
+              <span id="sellCurrentQty" class="font-bold text-gray-800 dark:text-slate-200">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Giá vốn trung bình:</span>
+              <span id="sellCurrentAvgBuy" class="font-bold text-gray-800 dark:text-slate-200">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Giá thị trường hiện tại:</span>
+              <span id="sellCurrentPrice" class="font-bold text-emerald-600 dark:text-emerald-400">0</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng bán <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="sellQuantity" placeholder="Nhập SL bán..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá bán thực tế / 1 đơn vị <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="sellPrice" placeholder="Giá bán..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ngày bán</label>
+              <input type="date" id="sellDate" class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Lý do, Lãi chốt...)</label>
+              <input type="text" id="sellNotes" placeholder="Chốt lời, cơ cấu..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+            </div>
+          </div>
+
+          <button type="button" onclick="confirmSellAsset()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">
+            Xác nhận bán tài sản
+          </button>
         </div>
       </div>
     </div>

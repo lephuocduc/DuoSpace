@@ -6,6 +6,11 @@ const CONFIG = {
   STORAGE_KEY: 'duoSpaceData',
   USD_RATE_API: 'https://open.er-api.com/v6/latest/USD',
 
+  VEHICLES: {
+    NMAX: { plate: '50AD-539.09', chassis: 'RLCSGB310TY001107' },
+    Grande: { plate: '50N2-461.30', chassis: 'RLCSEK410NY006766' },
+  },
+
   // Categories definition
   CATEGORIES: {
     TODO: ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe'],

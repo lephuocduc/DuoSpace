@@ -31,14 +31,14 @@ const PRICE_CONFIG = {
     }
   },
 
-  // --- Gold: vang.today API (VN + Thế Giới, miễn phí, CORS OK) ---
-  // Endpoint: GET https://www.vang.today/api/prices?type={code}
-  // Vàng VN (SJC 9999): type=SJL1L10  → buy/sell (VND/lượng)
-  // Vàng thế giới (XAU/USD): type=XAUUSD → buy (USD/oz)
+  // --- Gold: DOJI Nhẫn tròn 9999 Hưng Thịnh Vượng & World Gold (chartgoldprice.com) ---
   GOLD: {
+    // Local Puppeteer service renders DOJI's Angular price table, so no API key
+    // is required. Start it with: npm run doji-server
+    dojiScraperApi: 'http://127.0.0.1:3001/api/gold/doji',
+    chartGoldPriceApi: 'https://www.chartgoldprice.com/api/data', // World gold API
     vangTodayApi: 'https://www.vang.today/api/prices',
-    sjcCode: 'SJL1L10',  // SJC 9999 - VND/lượng
-    xauCode: 'XAUUSD',   // World gold - USD/oz
+    sjcCode: 'SJL1L10',
     refreshInterval: 86400, // 1 ngày
     taelToOz: 1.2057,       // 1 lượng VN = 1.2057 troy oz
   },

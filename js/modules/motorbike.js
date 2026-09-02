@@ -9,8 +9,30 @@ class MotorbikeModule {
   }
 
   render() {
+    this.loadBikeInfoToForm();
     this.renderMaintenanceList();
     this.renderTodoList();
+  }
+
+  loadBikeInfoToForm() {
+    const s = this.app.data.settings || {};
+    const fields = {
+      bikeNmaxOdo: s.nmaxOdo || '',
+      bikeGrandeOdo: s.grandeOdo || '',
+    };
+    Object.entries(fields).forEach(([id, value]) => {
+      const input = document.getElementById(id);
+      if (input) input.value = value;
+    });
+  }
+
+  saveBikeInfo() {
+    const s = this.app.data.settings || (this.app.data.settings = {});
+    s.nmaxOdo = parseInt(document.getElementById('bikeNmaxOdo')?.value, 10) || 0;
+    s.grandeOdo = parseInt(document.getElementById('bikeGrandeOdo')?.value, 10) || 0;
+    this.app.save();
+    this.app.render();
+    alert('Đã cập nhật thông tin xe.');
   }
 
   toggleForm() {
@@ -233,10 +255,10 @@ class MotorbikeModule {
 
     const s = this.app.data.settings || {};
     const currentOdo = bike === 'NMAX' ? (s.nmaxOdo || 14850) : (s.grandeOdo || 8200);
-    const bikePlate = bike === 'NMAX' ? (s.nmaxPlate || '59X1-123.45') : (s.grandePlate || '59X2-678.90');
+    const bikeInfo = CONFIG.VEHICLES[bike];
 
     if (titleEl) titleEl.innerText = `Trạng Thái Phụ Tùng: ${bike}`;
-    if (bikeOdoEl) bikeOdoEl.innerText = `ODO Hiện tại: ${currentOdo.toLocaleString('vi-VN')} km • BS: ${bikePlate}`;
+    if (bikeOdoEl) bikeOdoEl.innerText = `ODO Hiện tại: ${currentOdo.toLocaleString('vi-VN')} km • BS: ${bikeInfo.plate} • Số khung: ${bikeInfo.chassis}`;
 
     if (!container) return;
 
@@ -333,3 +355,4 @@ function saveBikeMaintenance() { window.app.motorbike.saveBikeMaintenance(); }
 function deleteBikeMaintenance(idx) { window.app.motorbike.deleteBikeMaintenance(idx); }
 function openPartsStatusModal(bike) { window.app.motorbike.openPartsStatusModal(bike); }
 function closePartsStatusModal() { window.app.motorbike.closePartsStatusModal(); }
+function saveBikeInfo() { window.app.motorbike.saveBikeInfo(); }
