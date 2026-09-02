@@ -37,7 +37,8 @@ class Storage {
       netWorthHistory: Array.isArray(saved.netWorthHistory) ? saved.netWorthHistory : (defaults.netWorthHistory || []),
       bikeMaintenances: Array.isArray(saved.bikeMaintenances) ? saved.bikeMaintenances : defaults.bikeMaintenances,
       catWeights: Array.isArray(saved.catWeights) ? saved.catWeights : defaults.catWeights,
-      monthlyBudgets: Array.isArray(saved.monthlyBudgets) ? saved.monthlyBudgets : defaults.monthlyBudgets
+      monthlyBudgets: Array.isArray(saved.monthlyBudgets) ? saved.monthlyBudgets : defaults.monthlyBudgets,
+      logs: Array.isArray(saved.logs) ? saved.logs : defaults.logs
     };
   }
 
@@ -143,6 +144,7 @@ class Storage {
         { date: "2026-07-01", mun: 4.1, bong: 3.6 },
         { date: "2026-08-01", mun: 4.2, bong: 3.8 }
       ],
+      logs: [],
       settings: {
         munBreed: "Mèo Cưng",
         bongBreed: "Mèo Cưng",

@@ -34,6 +34,7 @@ class DuoSpaceApp {
     this.cats = new CatsModule(this);
     this.health = new HealthModule(this);
     this.settings = new SettingsModule(this);
+    this.log = new LogModule(this);
 
     this.init();
   }
@@ -105,6 +106,7 @@ class DuoSpaceApp {
     this.motorbike.render();
     this.cats.render();
     this.health.render();
+    this.log.render();
   }
 
   renderCategoryList(category, containerId) {

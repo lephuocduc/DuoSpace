@@ -8,11 +8,13 @@ const TabsManager = {
     'home': 'Tổng quan',
     'todo': 'Công việc chung',
     'finance': 'Quản lý Thu Chi',
-    'investment': 'Quản lý Đầu Tư',
+    'investment': 'Tài Sản',
     'motorbike': 'Xe Máy',
     'cats': 'Mun & Bông',
     'health': 'Sức Khỏe',
-    'setting': 'Cài Đặt'
+    'setting': 'Cài Đặt',
+    'log': 'Nhật ký hệ thống',
+    'guide': 'Hướng dẫn sử dụng'
   },
 
   initFromStorage() {
@@ -29,7 +31,7 @@ const TabsManager = {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = actualTitle;
 
-    const tabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting'];
+    const tabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting', 'log', 'guide'];
     tabs.forEach(id => {
       const el = document.getElementById(`tab-${id}`);
       if (el) el.classList.add('hidden');

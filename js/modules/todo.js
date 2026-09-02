@@ -5,7 +5,6 @@ class TodoModule {
   constructor(app) {
     this.app = app;
     this.currentSubTab = 'active';
-    this.currentTimeFilter = 'month';
     this.currentUserFilter = 'all';
     this.searchQuery = '';
   }
@@ -29,20 +28,6 @@ class TodoModule {
       if (btnActive) btnActive.className = "flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 font-medium";
       if (header) header.innerText = "Việc đã hoàn thành";
     }
-    this.renderTodoList();
-  }
-
-  filterTime(time) {
-    this.currentTimeFilter = time;
-    ['today', 'week', 'month', 'all'].forEach(t => {
-      const btn = document.getElementById(`todoTime-${t}`);
-      if (!btn) return;
-      if (t === time) {
-        btn.className = "px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold shadow-sm";
-      } else {
-        btn.className = "px-2.5 py-1 rounded-lg text-gray-500 dark:text-slate-400";
-      }
-    });
     this.renderTodoList();
   }
 
@@ -77,22 +62,15 @@ class TodoModule {
       filtered = filtered.filter(t => t.user === this.currentUserFilter);
     }
 
-    const now = new Date();
-    if (this.currentTimeFilter === 'today') {
-      filtered = filtered.filter(t => new Date(t.date).toDateString() === now.toDateString());
-    } else if (this.currentTimeFilter === 'month') {
-      filtered = filtered.filter(t => {
-        const d = new Date(t.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-    }
-
     if (this.searchQuery) {
       filtered = filtered.filter(t =>
         (t.title && t.title.toLowerCase().includes(this.searchQuery)) ||
         (t.notes && t.notes.toLowerCase().includes(this.searchQuery))
       );
     }
+
+    const priorityRank = { high: 0, medium: 1, low: 2 };
+    filtered.sort((a, b) => (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1) || new Date(b.date || 0) - new Date(a.date || 0));
 
     const todoCountEl = document.getElementById('todoCount');
     if (todoCountEl) todoCountEl.innerText = filtered.length;
@@ -111,6 +89,12 @@ class TodoModule {
           : '<span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-semibold">Cả hai</span>';
 
       const categoryBadge = `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">${todo.category || 'Việc nhà'}</span>`;
+      const priorityMeta = {
+        high: ['Cao', 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'],
+        medium: ['Trung bình', 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'],
+        low: ['Thấp', 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400']
+      }[todo.priority] || ['Trung bình', 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'];
+      const priorityBadge = `<span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${priorityMeta[1]}">Ưu tiên ${priorityMeta[0]}</span>`;
       const dateStr = todo.date ? Utils.formatDate(todo.date) : '';
 
       return `
@@ -123,6 +107,7 @@ class TodoModule {
                 <div class="flex items-center space-x-1.5 mt-1 flex-wrap gap-y-1">
                   ${userBadge}
                   ${categoryBadge}
+                  ${priorityBadge}
                   ${dateStr ? `<span class="text-[10px] text-gray-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</span>` : ''}
                 </div>
               </div>
@@ -140,6 +125,7 @@ class TodoModule {
   toggleTodo(idx) {
     if (this.app.data.todos && this.app.data.todos[idx]) {
       this.app.data.todos[idx].done = !this.app.data.todos[idx].done;
+      this.app.log?.system(this.app.data.todos[idx].done ? 'Hoàn thành công việc' : 'Mở lại công việc', this.app.data.todos[idx].title);
       this.app.save();
       this.app.render();
     }
@@ -147,7 +133,9 @@ class TodoModule {
 
   deleteTodo(idx) {
     if (this.app.data.todos && this.app.data.todos[idx]) {
+      const todo = this.app.data.todos[idx];
       this.app.data.todos.splice(idx, 1);
+      this.app.log?.system('Xóa công việc', todo.title);
       this.app.save();
       this.app.render();
     }
@@ -202,6 +190,10 @@ class TodoModule {
       });
     }
 
+    this.app.log?.system(
+      ModalManager.editingIndex >= 0 ? 'Cập nhật công việc' : 'Thêm công việc',
+      title
+    );
     this.app.save();
     this.app.render();
     ModalManager.closeAddModal();
@@ -210,7 +202,6 @@ class TodoModule {
 
 // Global aliases for compatibility
 function switchTodoSubTab(subTab) { window.app.todo.switchSubTab(subTab); }
-function filterTodoTime(time) { window.app.todo.filterTime(time); }
 function filterTodoUser(user) { window.app.todo.filterUser(user); }
 function searchTodo(query) { window.app.todo.search(query); }
 function toggleTodo(idx) { window.app.todo.toggleTodo(idx); }

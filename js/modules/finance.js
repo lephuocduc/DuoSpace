@@ -268,6 +268,7 @@ class FinanceModule {
   }
 
   deleteFinance(type, idx) {
+    const item = type === 'expense' ? this.app.data.expenses?.[idx] : this.app.data.incomes?.[idx];
     if (type === 'expense') {
       if (this.app.data.expenses && this.app.data.expenses[idx]) {
         this.app.data.expenses.splice(idx, 1);
@@ -277,6 +278,7 @@ class FinanceModule {
         this.app.data.incomes.splice(idx, 1);
       }
     }
+    if (item) this.app.log?.system(type === 'expense' ? 'Xóa khoản chi' : 'Xóa khoản thu', `${item.desc || 'Không có mô tả'} · ${(item.amount || 0).toLocaleString('vi-VN')} VNĐ`);
     this.app.save();
     this.app.render();
   }
@@ -292,13 +294,25 @@ class FinanceModule {
 
     if (type === 'expense') {
       document.getElementById('expenseAmount').value = item.amount || '';
+      document.getElementById('expenseDate').value = (item.date || '').slice(0, 10);
       document.getElementById('expenseDesc').value = item.desc || '';
       document.getElementById('expenseCategory').value = item.category || '📦 Khác';
       document.getElementById('expenseUser').value = item.user || 'Đ';
       document.getElementById('expenseNotes').value = item.notes || '';
+      document.getElementById('expenseBike').value = item.bike || 'NMAX';
+      document.getElementById('expenseOdo').value = item.odo || '';
+      const itemSelect = document.getElementById('expenseVehicleItem');
+      if (itemSelect) {
+        const knownItem = Array.from(itemSelect.options).some(option => option.value === item.vehicleItem);
+        itemSelect.value = knownItem ? item.vehicleItem : 'Khác';
+        document.getElementById('expenseVehicleCustomItem').value = knownItem ? '' : (item.vehicleItem || '');
+      }
+      ModalManager.onExpenseCategoryChange();
+      ModalManager.onExpenseVehicleItemChange();
       document.getElementById('saveExpenseBtn').innerText = "Cập nhật khoản chi";
     } else {
       document.getElementById('incomeAmount').value = item.amount || '';
+      document.getElementById('incomeDate').value = (item.date || '').slice(0, 10);
       document.getElementById('incomeDesc').value = item.desc || '';
       document.getElementById('incomeUser').value = item.user || 'Đ';
       document.getElementById('incomeNotes').value = item.notes || '';
@@ -309,13 +323,32 @@ class FinanceModule {
   }
 
   saveExpenseAction() {
-    const amount = parseInt(document.getElementById('expenseAmount').value);
-    const desc = document.getElementById('expenseDesc').value.trim();
     const category = document.getElementById('expenseCategory').value;
+    const isInvestmentExpense = category.includes('Đầu tư');
+    if (isInvestmentExpense) ModalManager.updateExpenseInvestmentAmount();
+    const amount = Math.round(parseFloat(document.getElementById('expenseAmount').value));
+    let desc = document.getElementById('expenseDesc').value.trim();
     const user = document.getElementById('expenseUser').value;
     const notes = document.getElementById('expenseNotes').value.trim();
 
+    const isVehicleExpense = category.includes('Xe');
+    const bike = document.getElementById('expenseBike')?.value;
+    const odo = parseInt(document.getElementById('expenseOdo')?.value, 10);
+    const vehicleSelection = document.getElementById('expenseVehicleItem')?.value;
+    const vehicleItem = vehicleSelection === 'Khác'
+      ? document.getElementById('expenseVehicleCustomItem')?.value.trim()
+      : vehicleSelection;
+    if (isVehicleExpense && (!bike || !vehicleItem || isNaN(odo))) {
+      return alert('Vui lòng nhập xe, hạng mục và số ODO cho khoản chi xe.');
+    }
+
+    const investment = isInvestmentExpense ? this.readInvestmentExpenseFields() : null;
+    if (isInvestmentExpense && !investment) return;
+    if (isVehicleExpense) desc = `Bảo dưỡng ${bike}: ${vehicleItem}`;
+    if (isInvestmentExpense) desc = `Đầu tư ${investment.name}`;
     if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    const expenseDate = document.getElementById('expenseDate')?.value;
+    if (!expenseDate) return alert('Vui lòng chọn ngày chi.');
 
     if (ModalManager.editingType === 'expense' && ModalManager.editingIndex >= 0) {
       this.app.data.expenses[ModalManager.editingIndex] = {
@@ -324,7 +357,8 @@ class FinanceModule {
         desc,
         category,
         user,
-        notes
+        notes,
+        date: new Date(`${expenseDate}T12:00:00`).toISOString()
       };
     } else {
       this.app.data.expenses.push({
@@ -333,13 +367,66 @@ class FinanceModule {
         category,
         user,
         notes,
-        date: new Date().toISOString()
+        ...(isVehicleExpense ? { bike, odo, vehicleItem } : {}),
+        date: new Date(`${expenseDate}T12:00:00`).toISOString()
       });
     }
+
+    if (isVehicleExpense && ModalManager.editingIndex < 0) {
+      if (!this.app.data.bikeMaintenances) this.app.data.bikeMaintenances = [];
+      this.app.data.bikeMaintenances.push({ bike, title: vehicleItem, odo, cost: amount, date: new Date(`${expenseDate}T12:00:00`).toISOString(), source: 'expense' });
+      if (!this.app.data.settings) this.app.data.settings = {};
+      const odoKey = bike === 'NMAX' ? 'nmaxOdo' : 'grandeOdo';
+      this.app.data.settings[odoKey] = Math.max(this.app.data.settings[odoKey] || 0, odo);
+    }
+
+    if (isInvestmentExpense && ModalManager.editingIndex < 0) this.addInvestmentFromExpense(investment, notes, expenseDate);
+
+    this.app.log?.system(
+      ModalManager.editingIndex >= 0 ? 'Cập nhật khoản chi' : 'Thêm khoản chi',
+      `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ${isInvestmentExpense ? ' · Đã cập nhật danh mục đầu tư' : ''}${isVehicleExpense ? ' · Đã thêm lịch sử bảo dưỡng' : ''}`
+    );
 
     this.app.save();
     this.app.render();
     ModalManager.closeAddModal();
+  }
+
+  readInvestmentExpenseFields() {
+    const selected = document.getElementById('expenseInvestName')?.value;
+    const customName = document.getElementById('expenseInvestCustomName')?.value.trim();
+    const name = selected === 'Khác' ? customName : selected;
+    const quantity = parseFloat(document.getElementById('expenseInvestQuantity')?.value);
+    const buyPrice = parseFloat(document.getElementById('expenseInvestBuyPrice')?.value);
+    const currentPrice = parseFloat(document.getElementById('expenseInvestCurrentPrice')?.value);
+    if (!name || isNaN(quantity) || quantity <= 0 || isNaN(buyPrice) || isNaN(currentPrice)) {
+      alert('Vui lòng nhập đầy đủ thông tin tài sản: tên, số lượng, giá mua và giá hiện tại.');
+      return null;
+    }
+    return { name, quantity, buyPrice, currentPrice, targetWeight: parseFloat(document.getElementById('expenseInvestTarget')?.value) || null, isUsd: !!document.getElementById('expenseInvestIsUsd')?.checked };
+  }
+
+  addInvestmentFromExpense(item, notes, purchaseDate) {
+    const catalog = this.app.investment.getAssetCatalog();
+    const info = catalog[item.name] || {};
+    const type = info.type || (item.name.includes('BTC') ? '🪙 BTC' : item.name.includes('BNB') ? '🪙 BNB' : item.name.includes('Vàng') ? '🥇 Vàng' : item.name.includes('USD') ? '💵 USD' : '💼 Khác');
+    const priceSource = { type: info.psType || 'manual', symbol: info.psSymbol || '', refreshInterval: info.defaultInterval || 86400, lastUpdated: new Date(0).toISOString(), fetchStatus: 'pending' };
+    const purchase = { date: purchaseDate || new Date().toISOString().split('T')[0], quantity: item.quantity, buyPrice: item.buyPrice, notes };
+    if (!this.app.data.investments) this.app.data.investments = [];
+    const existing = this.app.data.investments.find(asset => asset.name.toLowerCase() === item.name.toLowerCase());
+    if (existing) {
+      const purchases = Array.isArray(existing.purchases) && existing.purchases.length ? [...existing.purchases] : [{ date: purchase.date, quantity: existing.quantity || 0, buyPrice: existing.buyPrice || 0, notes: existing.notes || '' }];
+      purchases.push(purchase);
+      const totalQty = purchases.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
+      existing.quantity = totalQty;
+      existing.buyPrice = purchases.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0) * (parseFloat(p.buyPrice) || 0), 0) / totalQty;
+      existing.currentPrice = item.currentPrice;
+      existing.isUsd = item.isUsd;
+      existing.purchases = purchases;
+      if (item.targetWeight !== null) existing.targetWeight = item.targetWeight;
+    } else {
+      this.app.data.investments.push({ ...item, type, notes, purchases: [purchase], priceSource });
+    }
   }
 
   saveIncomeAction() {
@@ -347,8 +434,10 @@ class FinanceModule {
     const desc = document.getElementById('incomeDesc').value.trim();
     const user = document.getElementById('incomeUser').value;
     const notes = document.getElementById('incomeNotes').value.trim();
+    const incomeDate = document.getElementById('incomeDate')?.value;
 
     if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    if (!incomeDate) return alert('Vui lòng chọn ngày nhận.');
 
     if (ModalManager.editingType === 'income' && ModalManager.editingIndex >= 0) {
       this.app.data.incomes[ModalManager.editingIndex] = {
@@ -356,7 +445,8 @@ class FinanceModule {
         amount,
         desc,
         user,
-        notes
+        notes,
+        date: new Date(`${incomeDate}T12:00:00`).toISOString()
       };
     } else {
       this.app.data.incomes.push({
@@ -364,9 +454,14 @@ class FinanceModule {
         desc,
         user,
         notes,
-        date: new Date().toISOString()
+        date: new Date(`${incomeDate}T12:00:00`).toISOString()
       });
     }
+
+    this.app.log?.system(
+      ModalManager.editingIndex >= 0 ? 'Cập nhật khoản thu' : 'Thêm khoản thu',
+      `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ`
+    );
 
     this.app.save();
     this.app.render();

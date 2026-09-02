@@ -238,6 +238,7 @@ class InvestmentModule {
       this.app.data.investments.push(newItem);
     }
 
+    this.app.log?.system(existingIndex >= 0 ? 'Thêm giao dịch mua tài sản' : 'Thêm tài sản đầu tư', `${name} · ${quantity} đơn vị · giá mua ${buyPrice.toLocaleString('vi-VN')}`);
     this.app.save();
     this.toggleForm();
     this.renderInvestmentList();
@@ -258,7 +259,9 @@ class InvestmentModule {
     const asset = this.app.data.investments[assetIdx];
     if (!asset || !asset.purchases || !asset.purchases[purchaseIdx]) return;
 
+    const purchase = asset.purchases[purchaseIdx];
     asset.purchases.splice(purchaseIdx, 1);
+    this.app.log?.system('Xóa giao dịch mua tài sản', `${asset.name} · ${purchase.quantity} đơn vị`);
 
     if (asset.purchases.length === 0) {
       // Nếu xóa hết lượt mua, xóa luôn asset
@@ -279,7 +282,9 @@ class InvestmentModule {
   deleteItem(idx) {
     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ tài sản này và lịch sử mua?')) {
       if (this.app.data.investments && this.app.data.investments[idx]) {
+        const item = this.app.data.investments[idx];
         this.app.data.investments.splice(idx, 1);
+        this.app.log?.system('Xóa tài sản đầu tư', item.name);
         this.app.save();
         this.renderInvestmentList();
         this.recordDailyNetWorth();
@@ -727,6 +732,20 @@ class InvestmentModule {
   // FETCH PRICE FOR FORM (Khi đang thêm/sửa tài sản)
   // ──────────────────────────────────────────────
 
+  async fetchMarketPrice(name) {
+    const catalog = this.getAssetCatalog();
+    const info = catalog[name] || {};
+    const upperName = name.toUpperCase();
+    const psType = info.psType || (upperName.includes('BTC') || upperName.includes('BNB') ? 'crypto' : (name.includes('Vàng') ? 'gold_vn' : 'manual'));
+    const psSymbol = info.psSymbol || (upperName.includes('BTC') ? 'BTC' : (upperName.includes('BNB') ? 'BNB' : ''));
+    if (psType === 'manual') return null;
+    if (psType === 'crypto') return priceUpdater.fetchCryptoPrice(psSymbol);
+    if (psType === 'gold_vn') return priceUpdater.fetchVnGoldPrice();
+    if (psType === 'gold_world') return priceUpdater.fetchGoldPriceUsd();
+    if (psType === 'usd') return priceUpdater.fetchUsdRate();
+    return null;
+  }
+
   async fetchPriceForCurrentForm() {
     const nameSelect = document.getElementById('investName');
     let name = nameSelect ? nameSelect.value : '';
@@ -738,7 +757,6 @@ class InvestmentModule {
     const catalog = this.getAssetCatalog();
     const info = catalog[name] || {};
     const psType = info.psType || (name.toUpperCase().includes('BTC') ? 'crypto' : (name.toUpperCase().includes('BNB') ? 'crypto' : (name.includes('Vàng') ? 'gold_vn' : 'manual')));
-    const psSymbol = info.psSymbol || (name.toUpperCase().includes('BTC') ? 'BTC' : (name.toUpperCase().includes('BNB') ? 'BNB' : ''));
 
     if (psType === 'manual') {
       alert(`Tài sản "${name}" là loại thủ công, bạn vui lòng tự nhập giá.`);
@@ -746,18 +764,7 @@ class InvestmentModule {
     }
 
     const priceInput = document.getElementById('investCurrentPrice');
-    const usdRate = this.app.data.usdRate || 25400;
-
-    let price = null;
-    if (psType === 'crypto') {
-      price = await priceUpdater.fetchCryptoPrice(psSymbol);
-    } else if (psType === 'gold_vn') {
-      price = await priceUpdater.fetchVnGoldPrice();
-    } else if (psType === 'gold_world') {
-      price = await priceUpdater.fetchGoldPriceUsd();
-    } else if (psType === 'usd') {
-      price = await priceUpdater.fetchUsdRate();
-    }
+    const price = await this.fetchMarketPrice(name);
 
     if (price !== null && !isNaN(price)) {
       if (priceInput) priceInput.value = parseFloat(price.toFixed(8));

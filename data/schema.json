@@ -55,6 +55,9 @@
           "category": { "type": "string" },
           "user": { "type": "string", "enum": ["Đ", "S"] },
           "notes": { "type": "string" },
+          "bike": { "type": "string", "enum": ["NMAX", "Grande"] },
+          "odo": { "type": "number" },
+          "vehicleItem": { "type": "string" },
           "date": { "type": "string", "format": "date-time" }
         },
         "required": ["amount", "desc", "category", "user", "date"]
@@ -104,6 +107,19 @@
           "bong": { "type": "number" }
         },
         "required": ["date", "mun", "bong"]
+      }
+    },
+    "logs": {
+      "type": "array",
+      "description": "Nhật ký và ghi chú chung",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "notes": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["title", "date"]
       }
     },
     "monthlyBudgets": {

@@ -22,7 +22,6 @@ const CONFIG = {
       '🐱 Mèo',
       '💊 Sức khỏe',
       '🎮 Giải trí',
-      '💰 Tiết kiệm',
       '💼 Đầu tư',
       '📦 Khác'
     ],

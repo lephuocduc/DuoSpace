@@ -75,15 +75,7 @@ class MotorbikeModule {
     if (bike === 'NMAX') this.app.data.settings.nmaxOdo = Math.max(this.app.data.settings.nmaxOdo || 0, odo);
     if (bike === 'Grande') this.app.data.settings.grandeOdo = Math.max(this.app.data.settings.grandeOdo || 0, odo);
 
-    if (!this.app.data.expenses) this.app.data.expenses = [];
-    this.app.data.expenses.push({
-      amount: cost,
-      desc: `Bảo dưỡng ${bike}: ${title}`,
-      category: "🛵 Xe",
-      user: "Đ",
-      notes: `Mốc Odo: ${odo.toLocaleString('vi-VN')} km`,
-      date: new Date(date).toISOString()
-    });
+    this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km`);
 
     this.app.save();
     this.app.render();
@@ -96,7 +88,9 @@ class MotorbikeModule {
 
   deleteBikeMaintenance(idx) {
     if (this.app.data.bikeMaintenances && this.app.data.bikeMaintenances[idx]) {
+      const item = this.app.data.bikeMaintenances[idx];
       this.app.data.bikeMaintenances.splice(idx, 1);
+      this.app.log?.system('Xóa lịch sử bảo dưỡng', `${item.bike} · ${item.title}`);
       this.app.save();
       this.app.render();
     }

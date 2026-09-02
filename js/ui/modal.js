@@ -9,7 +9,7 @@ const ModalManager = {
     // Detect currently visible active tab
     let currentTab = (window.TabsManager && window.TabsManager.currentTab) || '';
     if (!currentTab) {
-      const allTabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting'];
+      const allTabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting', 'log', 'guide'];
       const activeEl = allTabs.find(id => {
         const el = document.getElementById(`tab-${id}`);
         return el && !el.classList.contains('hidden');
@@ -27,9 +27,22 @@ const ModalManager = {
       document.getElementById('todoInput').value = '';
       document.getElementById('todoNotes').value = '';
       document.getElementById('expenseAmount').value = '';
+      document.getElementById('expenseDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('expenseDesc').value = '';
       document.getElementById('expenseNotes').value = '';
+      document.getElementById('expenseCategory').value = '📦 Khác';
+      document.getElementById('expenseUser').value = 'Đ';
+      document.getElementById('expenseBike').value = 'NMAX';
+      document.getElementById('expenseInvestName').value = 'BTC';
+      ['expenseOdo', 'expenseVehicleCustomItem', 'expenseInvestCustomName', 'expenseInvestQuantity', 'expenseInvestBuyPrice', 'expenseInvestCurrentPrice', 'expenseInvestTarget'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.value = '';
+      });
+      const expenseUsd = document.getElementById('expenseInvestIsUsd');
+      if (expenseUsd) expenseUsd.checked = false;
+      document.getElementById('expenseVehicleItem').value = 'Thay nhớt máy';
       document.getElementById('incomeAmount').value = '';
+      document.getElementById('incomeDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('incomeDesc').value = '';
       document.getElementById('incomeNotes').value = '';
 
@@ -72,6 +85,7 @@ const ModalManager = {
           if (matchedExp) expCatEl.value = matchedExp.value;
         }
       }
+      this.onExpenseCategoryChange();
     }
 
     const modal = document.getElementById('addModal');
@@ -104,6 +118,58 @@ const ModalManager = {
     });
   },
 
+  onExpenseCategoryChange() {
+    const category = document.getElementById('expenseCategory')?.value || '';
+    document.getElementById('expenseVehicleFields')?.classList.toggle('hidden', !category.includes('Xe'));
+    document.getElementById('expenseInvestmentFields')?.classList.toggle('hidden', !category.includes('Đầu tư'));
+    document.getElementById('expenseDescriptionRow')?.classList.toggle('hidden', category.includes('Xe') || category.includes('Đầu tư'));
+    if (category.includes('Đầu tư')) {
+      this.updateExpenseInvestmentAmount();
+      this.onExpenseInvestmentNameChange();
+    }
+  },
+
+  onExpenseVehicleItemChange() {
+    const isCustom = document.getElementById('expenseVehicleItem')?.value === 'Khác';
+    document.getElementById('expenseVehicleCustomItem')?.classList.toggle('hidden', !isCustom);
+  },
+
+  onExpenseInvestmentNameChange() {
+    const isCustom = document.getElementById('expenseInvestName')?.value === 'Khác';
+    document.getElementById('expenseInvestCustomName')?.classList.toggle('hidden', !isCustom);
+    const asset = window.app?.investment?.getAssetCatalog()?.[document.getElementById('expenseInvestName')?.value];
+    const usd = document.getElementById('expenseInvestIsUsd');
+    if (asset && usd) usd.checked = asset.defaultIsUsd;
+    this.fetchPriceForExpenseInvestment(true);
+  },
+
+  updateExpenseInvestmentAmount() {
+    const quantity = parseFloat(document.getElementById('expenseInvestQuantity')?.value);
+    const buyPrice = parseFloat(document.getElementById('expenseInvestBuyPrice')?.value);
+    const amount = !isNaN(quantity) && !isNaN(buyPrice) ? quantity * buyPrice : 0;
+    const amountInput = document.getElementById('expenseAmount');
+    const hint = document.getElementById('expenseInvestmentAmountHint');
+    if (amountInput) amountInput.value = amount > 0 ? Math.round(amount) : '';
+    if (hint) hint.textContent = amount > 0
+      ? `Số tiền chi tự tính: ${Math.round(amount).toLocaleString('vi-VN')} VNĐ.`
+      : 'Số tiền chi = số lượng × giá mua/đơn vị.';
+  },
+
+  async fetchPriceForExpenseInvestment(silent = false) {
+    const selected = document.getElementById('expenseInvestName')?.value;
+    const name = selected === 'Khác' ? document.getElementById('expenseInvestCustomName')?.value.trim() : selected;
+    if (!name) return silent ? null : alert('Vui lòng chọn hoặc nhập tên tài sản trước!');
+    const price = await window.app?.investment?.fetchMarketPrice(name);
+    if (price === null || price === undefined || isNaN(price)) {
+      if (!silent) alert('Không thể lấy giá tự động cho tài sản này. Bạn có thể nhập giá thủ công.');
+      return null;
+    }
+    const input = document.getElementById('expenseInvestCurrentPrice');
+    if (input) input.value = parseFloat(price.toFixed(8));
+    if (!silent) alert(`Đã lấy giá thị trường: ${price.toLocaleString('vi-VN')}`);
+    return price;
+  },
+
   openCatHistoryModal() {
     if (window.app && window.app.cats) {
       window.app.cats.renderCatWeightHistory();
@@ -128,5 +194,10 @@ const ModalManager = {
 function openAddModal() { ModalManager.openAddModal(); }
 function closeAddModal() { ModalManager.closeAddModal(); }
 function setAddType(type) { ModalManager.setAddType(type); }
+function onExpenseCategoryChange() { ModalManager.onExpenseCategoryChange(); }
+function onExpenseInvestmentNameChange() { ModalManager.onExpenseInvestmentNameChange(); }
+function onExpenseVehicleItemChange() { ModalManager.onExpenseVehicleItemChange(); }
+function updateExpenseInvestmentAmount() { ModalManager.updateExpenseInvestmentAmount(); }
+function fetchPriceForExpenseInvestment() { ModalManager.fetchPriceForExpenseInvestment(); }
 function openCatWeightHistoryModal() { ModalManager.openCatHistoryModal(); }
 function closeCatWeightHistoryModal() { ModalManager.closeCatHistoryModal(); }
