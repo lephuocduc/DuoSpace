@@ -707,8 +707,8 @@
           <h2 class="text-base font-bold text-gray-800 dark:text-slate-100">Hướng dẫn sử dụng</h2>
           <div><p class="font-semibold text-gray-800 dark:text-slate-200">Công việc</p><p class="text-xs mt-1">Thêm việc bằng nút +, chọn người thực hiện và mức ưu tiên. Danh sách luôn ưu tiên việc Cao trước, sau đó Trung bình và Thấp.</p></div>
           <div><p class="font-semibold text-gray-800 dark:text-slate-200">Thu chi</p><p class="text-xs mt-1">Nhấn nút + tại trang Thu chi, chọn Chi tiêu hoặc Thu nhập, điền số tiền, danh mục, người thanh toán và mô tả rồi lưu. Có thể chọn một giao dịch trong danh sách để sửa hoặc xóa. Số dư và biểu đồ được cập nhật ngay sau khi lưu.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Chi tiêu xe & bảo dưỡng</p><p class="text-xs mt-1">Chọn danh mục Xe để hiện thông tin xe. Chọn xe, số ODO và hạng mục bảo dưỡng từ danh sách; chọn Khác nếu cần tự nhập. Khi lưu khoản chi, hệ thống đồng thời tạo một dòng lịch sử bảo dưỡng với đúng chi phí và ODO. Ghi nhận từ trang Xe chỉ thêm lịch sử bảo dưỡng, không tạo khoản chi.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Đầu tư & tài sản</p><p class="text-xs mt-1">Khi chọn danh mục Đầu tư, nhập số lượng và giá mua/đơn vị; số tiền chi sẽ tự tính bằng số lượng × giá mua. Chọn tài sản có hỗ trợ để hệ thống tự lấy giá thị trường; vẫn có thể sửa giá thủ công. Khi lưu, giao dịch được thêm vào danh mục Tài sản và các lần mua cùng tên sẽ được gộp để tính giá vốn trung bình.</p></div>
+          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Chi tiêu xe & bảo dưỡng</p><p class="text-xs mt-1">Chọn danh mục Xe để hiện thông tin xe. Chọn xe, số ODO và hạng mục bảo dưỡng từ danh sách; chọn Khác nếu cần tự nhập. Khoản chi và lịch sử bảo dưỡng luôn được liên kết: thêm, sửa hoặc xóa ở một bên sẽ tự đồng bộ bên còn lại.</p></div>
+          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Đầu tư & tài sản</p><p class="text-xs mt-1">Khi chọn danh mục Đầu tư, nhập số lượng và giá mua/đơn vị; số tiền chi sẽ tự tính bằng số lượng × giá mua. Chọn tài sản có hỗ trợ để hệ thống tự lấy giá thị trường; vẫn có thể sửa giá thủ công. Giao dịch mua và khoản chi được liên kết hai chiều, nên xóa ở một bên cũng sẽ xóa bản ghi còn lại.</p></div>
           <div><p class="font-semibold text-gray-800 dark:text-slate-200">Xe máy</p><p class="text-xs mt-1">Cập nhật ODO hiện tại của từng xe tại phần Thông tin xe. Dùng nút + Bảo dưỡng để ghi lịch sử độc lập, xem lần bảo dưỡng gần nhất và theo dõi tình trạng phụ tùng.</p></div>
           <div><p class="font-semibold text-gray-800 dark:text-slate-200">Nhật ký hệ thống</p><p class="text-xs mt-1">Trang này tự ghi các thay đổi dữ liệu quan trọng để tiện kiểm tra. Đây không phải nơi ghi nhật ký hoặc ghi chú cá nhân.</p></div>
         </section>
@@ -718,7 +718,7 @@
 
     <!-- BOTTOM TAB BAR -->
     <nav
-      class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 py-2 flex justify-between items-center z-20 transition-colors">
+      class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-4 py-2 flex justify-between items-center z-20 transition-colors">
       <button onclick="switchTab('home', 'Tổng quan', this)"
         class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1">
         <i class="fa-solid fa-house text-lg"></i>
@@ -731,6 +731,12 @@
         <span class="text-[10px] font-medium">To-Do</span>
         <span id="todoBadge"
           class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('investment', 'Tài Sản', this)"
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1">
+        <i class="fa-solid fa-chart-line text-lg"></i>
+        <span class="text-[10px] font-medium">Tài sản</span>
       </button>
 
       <button onclick="switchTab('finance', 'Quản lý Thu Chi', this)"
@@ -771,14 +777,6 @@
         </div>
 
         <nav class="space-y-1.5">
-          <a href="#" onclick="switchTab('investment', 'Tài Sản'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-sm transition-colors">
-            <div
-              class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <i class="fa-solid fa-chart-line text-xs"></i></div>
-            <span>Tài Sản</span>
-          </a>
-
           <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
             <div
@@ -941,7 +939,7 @@
     <div id="addModal" onclick="closeAddModal()"
       class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end">
       <div onclick="event.stopPropagation()"
-        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800">
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-2">
           <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
           <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">

@@ -169,7 +169,9 @@ class TodoModule {
 
     if (!title) return alert('Vui lòng nhập tên công việc!');
 
-    if (ModalManager.editingType === 'todo' && ModalManager.editingIndex >= 0) {
+    const editingTodo = ModalManager.editingType === 'todo' && ModalManager.editingIndex >= 0;
+    const previousTodo = editingTodo ? { ...this.app.data.todos[ModalManager.editingIndex] } : null;
+    if (editingTodo) {
       this.app.data.todos[ModalManager.editingIndex] = {
         ...this.app.data.todos[ModalManager.editingIndex],
         title,
@@ -190,10 +192,14 @@ class TodoModule {
       });
     }
 
-    this.app.log?.system(
-      ModalManager.editingIndex >= 0 ? 'Cập nhật công việc' : 'Thêm công việc',
-      title
-    );
+    const todo = this.app.data.todos[editingTodo ? ModalManager.editingIndex : this.app.data.todos.length - 1];
+    const changes = editingTodo ? [
+      previousTodo.title !== todo.title && `Tên: ${previousTodo.title} → ${todo.title}`,
+      previousTodo.category !== todo.category && `Phân loại: ${previousTodo.category} → ${todo.category}`,
+      previousTodo.user !== todo.user && `Phân công: ${previousTodo.user} → ${todo.user}`,
+      previousTodo.priority !== todo.priority && `Ưu tiên: ${previousTodo.priority} → ${todo.priority}`
+    ].filter(Boolean).join(' · ') : title;
+    this.app.log?.system(editingTodo ? 'Cập nhật công việc' : 'Thêm công việc', changes || 'Không thay đổi dữ liệu');
     this.app.save();
     this.app.render();
     ModalManager.closeAddModal();

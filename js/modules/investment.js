@@ -185,7 +185,10 @@ class InvestmentModule {
       existingIndex = this.app.data.investments.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
     }
 
+    const expenseId = Utils.createId('expense');
     const newPurchase = {
+      id: Utils.createId('purchase'),
+      expenseId,
       date: purchaseDate,
       quantity: quantity,
       buyPrice: buyPrice,
@@ -238,6 +241,17 @@ class InvestmentModule {
       this.app.data.investments.push(newItem);
     }
 
+    if (!this.app.data.expenses) this.app.data.expenses = [];
+    this.app.data.expenses.push({
+      id: expenseId,
+      amount: Math.round(quantity * buyPrice),
+      desc: `Đầu tư ${name}`,
+      category: '💼 Đầu tư',
+      user: 'Đ',
+      notes,
+      date: new Date(`${purchaseDate}T12:00:00`).toISOString()
+    });
+
     this.app.log?.system(existingIndex >= 0 ? 'Thêm giao dịch mua tài sản' : 'Thêm tài sản đầu tư', `${name} · ${quantity} đơn vị · giá mua ${buyPrice.toLocaleString('vi-VN')}`);
     this.app.save();
     this.toggleForm();
@@ -254,12 +268,43 @@ class InvestmentModule {
     this.renderInvestmentList(false);
   }
 
+  recalculateAsset(asset) {
+    const purchases = asset.purchases || [];
+    const totalQty = purchases.reduce((sum, purchase) => sum + (parseFloat(purchase.quantity) || 0), 0);
+    const totalCost = purchases.reduce((sum, purchase) => sum + (parseFloat(purchase.quantity) || 0) * (parseFloat(purchase.buyPrice) || 0), 0);
+    asset.quantity = totalQty;
+    asset.buyPrice = totalQty > 0 ? totalCost / totalQty : 0;
+  }
+
+  removePurchaseByExpenseId(expenseId) {
+    const assetIndex = (this.app.data.investments || []).findIndex(asset => (asset.purchases || []).some(purchase => purchase.expenseId === expenseId));
+    if (assetIndex < 0) return false;
+    const asset = this.app.data.investments[assetIndex];
+    asset.purchases = asset.purchases.filter(purchase => purchase.expenseId !== expenseId);
+    if (!asset.purchases.length) this.app.data.investments.splice(assetIndex, 1);
+    else this.recalculateAsset(asset);
+    return true;
+  }
+
+  updatePurchaseByExpenseId(expenseId, details, date, notes) {
+    const asset = (this.app.data.investments || []).find(item => (item.purchases || []).some(purchase => purchase.expenseId === expenseId));
+    if (!asset) return false;
+    const purchase = asset.purchases.find(item => item.expenseId === expenseId);
+    Object.assign(purchase, { date, quantity: details.quantity, buyPrice: details.buyPrice, notes });
+    asset.currentPrice = details.currentPrice;
+    asset.isUsd = details.isUsd;
+    if (details.targetWeight !== null) asset.targetWeight = details.targetWeight;
+    this.recalculateAsset(asset);
+    return true;
+  }
+
   deletePurchase(assetIdx, purchaseIdx) {
     if (!confirm('Bạn có chắc muốn xóa lần mua này?')) return;
     const asset = this.app.data.investments[assetIdx];
     if (!asset || !asset.purchases || !asset.purchases[purchaseIdx]) return;
 
     const purchase = asset.purchases[purchaseIdx];
+    if (purchase.expenseId) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => expense.id !== purchase.expenseId);
     asset.purchases.splice(purchaseIdx, 1);
     this.app.log?.system('Xóa giao dịch mua tài sản', `${asset.name} · ${purchase.quantity} đơn vị`);
 
@@ -283,6 +328,8 @@ class InvestmentModule {
     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ tài sản này và lịch sử mua?')) {
       if (this.app.data.investments && this.app.data.investments[idx]) {
         const item = this.app.data.investments[idx];
+        const linkedExpenseIds = (item.purchases || []).map(purchase => purchase.expenseId).filter(Boolean);
+        if (linkedExpenseIds.length) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => !linkedExpenseIds.includes(expense.id));
         this.app.data.investments.splice(idx, 1);
         this.app.log?.system('Xóa tài sản đầu tư', item.name);
         this.app.save();

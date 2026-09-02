@@ -270,6 +270,17 @@ class FinanceModule {
   deleteFinance(type, idx) {
     const item = type === 'expense' ? this.app.data.expenses?.[idx] : this.app.data.incomes?.[idx];
     if (type === 'expense') {
+      if (item?.linkedMaintenanceId) {
+        this.app.data.bikeMaintenances = (this.app.data.bikeMaintenances || []).filter(m => m.id !== item.linkedMaintenanceId);
+      } else if (item?.category?.includes('Xe')) {
+        this.app.data.bikeMaintenances = (this.app.data.bikeMaintenances || []).filter(maintenance => !(
+          maintenance.source === 'expense' &&
+          maintenance.bike === item.bike &&
+          maintenance.title === item.vehicleItem &&
+          Number(maintenance.cost) === Number(item.amount)
+        ));
+      }
+      if (item?.id) this.app.investment?.removePurchaseByExpenseId(item.id);
       if (this.app.data.expenses && this.app.data.expenses[idx]) {
         this.app.data.expenses.splice(idx, 1);
       }
@@ -309,6 +320,22 @@ class FinanceModule {
       }
       ModalManager.onExpenseCategoryChange();
       ModalManager.onExpenseVehicleItemChange();
+      if ((item.category || '').includes('Đầu tư')) {
+        const asset = (this.app.data.investments || []).find(candidate => (candidate.purchases || []).some(purchase => purchase.expenseId === item.id));
+        const purchase = asset?.purchases?.find(candidate => candidate.expenseId === item.id);
+        if (asset && purchase) {
+          const nameSelect = document.getElementById('expenseInvestName');
+          const hasName = Array.from(nameSelect.options).some(option => option.value === asset.name);
+          nameSelect.value = hasName ? asset.name : 'Khác';
+          document.getElementById('expenseInvestCustomName').value = hasName ? '' : asset.name;
+          document.getElementById('expenseInvestQuantity').value = purchase.quantity;
+          document.getElementById('expenseInvestBuyPrice').value = purchase.buyPrice;
+          document.getElementById('expenseInvestCurrentPrice').value = asset.currentPrice;
+          document.getElementById('expenseInvestTarget').value = asset.targetWeight || '';
+          document.getElementById('expenseInvestIsUsd').checked = !!asset.isUsd;
+          document.getElementById('expenseInvestCustomName').classList.toggle('hidden', hasName);
+        }
+      }
       document.getElementById('saveExpenseBtn').innerText = "Cập nhật khoản chi";
     } else {
       document.getElementById('incomeAmount').value = item.amount || '';
@@ -346,45 +373,52 @@ class FinanceModule {
     if (isInvestmentExpense && !investment) return;
     if (isVehicleExpense) desc = `Bảo dưỡng ${bike}: ${vehicleItem}`;
     if (isInvestmentExpense) desc = `Đầu tư ${investment.name}`;
-    if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    if (isNaN(amount) || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
     const expenseDate = document.getElementById('expenseDate')?.value;
     if (!expenseDate) return alert('Vui lòng chọn ngày chi.');
 
-    if (ModalManager.editingType === 'expense' && ModalManager.editingIndex >= 0) {
+    const editingExpense = ModalManager.editingType === 'expense' && ModalManager.editingIndex >= 0;
+    const previousExpense = editingExpense ? { ...this.app.data.expenses[ModalManager.editingIndex] } : null;
+    const expenseId = editingExpense ? (this.app.data.expenses[ModalManager.editingIndex].id || Utils.createId('expense')) : Utils.createId('expense');
+    const expenseRecord = {
+      id: expenseId,
+      amount,
+      desc,
+      category,
+      user,
+      notes,
+      ...(isVehicleExpense ? { bike, odo, vehicleItem } : {}),
+      date: new Date(`${expenseDate}T12:00:00`).toISOString()
+    };
+
+    if (editingExpense) {
       this.app.data.expenses[ModalManager.editingIndex] = {
         ...this.app.data.expenses[ModalManager.editingIndex],
-        amount,
-        desc,
-        category,
-        user,
-        notes,
-        date: new Date(`${expenseDate}T12:00:00`).toISOString()
+        ...expenseRecord
       };
     } else {
-      this.app.data.expenses.push({
-        amount,
-        desc,
-        category,
-        user,
-        notes,
-        ...(isVehicleExpense ? { bike, odo, vehicleItem } : {}),
-        date: new Date(`${expenseDate}T12:00:00`).toISOString()
-      });
+      this.app.data.expenses.push(expenseRecord);
     }
 
-    if (isVehicleExpense && ModalManager.editingIndex < 0) {
+    if (isVehicleExpense && !editingExpense) {
       if (!this.app.data.bikeMaintenances) this.app.data.bikeMaintenances = [];
-      this.app.data.bikeMaintenances.push({ bike, title: vehicleItem, odo, cost: amount, date: new Date(`${expenseDate}T12:00:00`).toISOString(), source: 'expense' });
+      const maintenanceId = Utils.createId('maintenance');
+      this.app.data.bikeMaintenances.push({ id: maintenanceId, expenseId, bike, title: vehicleItem, odo, cost: amount, date: new Date(`${expenseDate}T12:00:00`).toISOString(), source: 'expense' });
+      expenseRecord.linkedMaintenanceId = maintenanceId;
       if (!this.app.data.settings) this.app.data.settings = {};
       const odoKey = bike === 'NMAX' ? 'nmaxOdo' : 'grandeOdo';
       this.app.data.settings[odoKey] = Math.max(this.app.data.settings[odoKey] || 0, odo);
     }
 
-    if (isInvestmentExpense && ModalManager.editingIndex < 0) this.addInvestmentFromExpense(investment, notes, expenseDate);
+    if (isVehicleExpense && editingExpense) this.syncLinkedMaintenance(this.app.data.expenses[ModalManager.editingIndex]);
 
+    if (isInvestmentExpense && !editingExpense) this.addInvestmentFromExpense(investment, notes, expenseDate, expenseId);
+    if (isInvestmentExpense && editingExpense) this.app.investment?.updatePurchaseByExpenseId(expenseId, investment, expenseDate, notes);
+
+    const updatedExpense = this.app.data.expenses[editingExpense ? ModalManager.editingIndex : this.app.data.expenses.length - 1];
     this.app.log?.system(
-      ModalManager.editingIndex >= 0 ? 'Cập nhật khoản chi' : 'Thêm khoản chi',
-      `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ${isInvestmentExpense ? ' · Đã cập nhật danh mục đầu tư' : ''}${isVehicleExpense ? ' · Đã thêm lịch sử bảo dưỡng' : ''}`
+      editingExpense ? 'Cập nhật khoản chi' : 'Thêm khoản chi',
+      editingExpense ? this.describeChanges(previousExpense, updatedExpense) : `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ${isInvestmentExpense ? ' · Đã cập nhật danh mục đầu tư' : ''}${isVehicleExpense ? ' · Đã thêm lịch sử bảo dưỡng' : ''}`
     );
 
     this.app.save();
@@ -406,12 +440,34 @@ class FinanceModule {
     return { name, quantity, buyPrice, currentPrice, targetWeight: parseFloat(document.getElementById('expenseInvestTarget')?.value) || null, isUsd: !!document.getElementById('expenseInvestIsUsd')?.checked };
   }
 
-  addInvestmentFromExpense(item, notes, purchaseDate) {
+  syncLinkedMaintenance(expense) {
+    const maintenance = (this.app.data.bikeMaintenances || []).find(item =>
+      item.id === expense.linkedMaintenanceId ||
+      item.expenseId === expense.id ||
+      // Bản ghi tạo từ phiên bản cũ chỉ có source: 'expense', chưa có mã liên kết.
+      (item.source === 'expense' && item.bike === expense.bike && item.title === expense.vehicleItem)
+    );
+    if (!maintenance) return;
+    if (!maintenance.id) maintenance.id = Utils.createId('maintenance');
+    Object.assign(maintenance, { bike: expense.bike, title: expense.vehicleItem, odo: expense.odo, cost: expense.amount, date: expense.date, expenseId: expense.id });
+    expense.linkedMaintenanceId = maintenance.id;
+  }
+
+  describeChanges(before, after) {
+    const labels = { amount: 'Số tiền', desc: 'Mô tả', category: 'Danh mục', user: 'Người chi', odo: 'ODO', vehicleItem: 'Hạng mục', date: 'Ngày' };
+    const changes = Object.keys(labels).filter(key => String(before?.[key] ?? '') !== String(after?.[key] ?? '')).map(key => {
+      const format = value => key === 'amount' ? `${Number(value || 0).toLocaleString('vi-VN')} VNĐ` : (value || 'trống');
+      return `${labels[key]}: ${format(before[key])} → ${format(after[key])}`;
+    });
+    return changes.length ? changes.join(' · ') : 'Không thay đổi dữ liệu';
+  }
+
+  addInvestmentFromExpense(item, notes, purchaseDate, expenseId) {
     const catalog = this.app.investment.getAssetCatalog();
     const info = catalog[item.name] || {};
     const type = info.type || (item.name.includes('BTC') ? '🪙 BTC' : item.name.includes('BNB') ? '🪙 BNB' : item.name.includes('Vàng') ? '🥇 Vàng' : item.name.includes('USD') ? '💵 USD' : '💼 Khác');
     const priceSource = { type: info.psType || 'manual', symbol: info.psSymbol || '', refreshInterval: info.defaultInterval || 86400, lastUpdated: new Date(0).toISOString(), fetchStatus: 'pending' };
-    const purchase = { date: purchaseDate || new Date().toISOString().split('T')[0], quantity: item.quantity, buyPrice: item.buyPrice, notes };
+    const purchase = { id: Utils.createId('purchase'), expenseId, date: purchaseDate || new Date().toISOString().split('T')[0], quantity: item.quantity, buyPrice: item.buyPrice, notes };
     if (!this.app.data.investments) this.app.data.investments = [];
     const existing = this.app.data.investments.find(asset => asset.name.toLowerCase() === item.name.toLowerCase());
     if (existing) {
@@ -436,10 +492,12 @@ class FinanceModule {
     const notes = document.getElementById('incomeNotes').value.trim();
     const incomeDate = document.getElementById('incomeDate')?.value;
 
-    if (!amount || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    if (isNaN(amount) || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
     if (!incomeDate) return alert('Vui lòng chọn ngày nhận.');
 
-    if (ModalManager.editingType === 'income' && ModalManager.editingIndex >= 0) {
+    const editingIncome = ModalManager.editingType === 'income' && ModalManager.editingIndex >= 0;
+    const previousIncome = editingIncome ? { ...this.app.data.incomes[ModalManager.editingIndex] } : null;
+    if (editingIncome) {
       this.app.data.incomes[ModalManager.editingIndex] = {
         ...this.app.data.incomes[ModalManager.editingIndex],
         amount,
@@ -458,10 +516,8 @@ class FinanceModule {
       });
     }
 
-    this.app.log?.system(
-      ModalManager.editingIndex >= 0 ? 'Cập nhật khoản thu' : 'Thêm khoản thu',
-      `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ`
-    );
+    const updatedIncome = this.app.data.incomes[editingIncome ? ModalManager.editingIndex : this.app.data.incomes.length - 1];
+    this.app.log?.system(editingIncome ? 'Cập nhật khoản thu' : 'Thêm khoản thu', editingIncome ? this.describeChanges(previousIncome, updatedIncome) : `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ`);
 
     this.app.save();
     this.app.render();
