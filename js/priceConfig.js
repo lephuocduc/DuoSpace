@@ -31,18 +31,19 @@ const PRICE_CONFIG = {
     }
   },
 
-  // --- Gold: Metals.live Free API ---
+  // --- Gold: vang.today API (VN + Thế Giới, miễn phí, CORS OK) ---
+  // Endpoint: GET https://www.vang.today/api/prices?type={code}
+  // Vàng VN (SJC 9999): type=SJL1L10  → buy/sell (VND/lượng)
+  // Vàng thế giới (XAU/USD): type=XAUUSD → buy (USD/oz)
   GOLD: {
-    api: 'https://api.metals.live/v1/spot',
-    endpoint: '/gold',
+    vangTodayApi: 'https://www.vang.today/api/prices',
+    sjcCode: 'SJL1L10',  // SJC 9999 - VND/lượng
+    xauCode: 'XAUUSD',   // World gold - USD/oz
     refreshInterval: 86400, // 1 ngày
-    // Trả về USD/troy oz. 1 tael VN ≈ 37.5g, 1 troy oz ≈ 31.1g
-    // 1 lượng = 37.5g = 1.2057 troy oz
-    taelToOz: 1.2057,
-    // Đơn vị trọng lượng cho vàng VN: 'tael' hoặc 'oz'
+    taelToOz: 1.2057,       // 1 lượng VN = 1.2057 troy oz
   },
 
-  // --- USD/VND: Open Exchange Rates (đã dùng) ---
+  // --- USD/VND: Open Exchange Rates ---
   USD: {
     api: 'https://open.er-api.com/v6/latest',
     endpoint: '/USD',

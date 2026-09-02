@@ -14,7 +14,11 @@ class DuoSpaceApp {
     this.charts = {
       renderBudgetChart: () => this.budgetChart.render(this.data, this.data.isDarkMode),
       renderCatChart: () => this.weightChart.render(this.data.catWeights, this.data.isDarkMode),
-      renderAssetAllocationChart: () => this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode)
+      renderAssetAllocationChart: () => this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode),
+      renderInvestmentCharts: () => {
+        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode);
+        this.investmentChart.renderNetWorth(this.data.netWorthHistory, this.data.isDarkMode);
+      }
     };
 
     // Feature Modules
@@ -133,8 +137,8 @@ function getDefaultCategoryByTab(tabName) {
     'todo': 'Việc nhà',
     'cats': 'Mun & Bông',
     'health': 'Sức Khỏe',
-    'investment': '',
-    'home': ''
+    'investment': 'Đầu tư',
+    'home': 'Việc nhà'
   };
   return categoryMap[tabName] || '';
 }

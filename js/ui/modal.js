@@ -6,6 +6,17 @@ const ModalManager = {
   editingIndex: -1,
 
   openAddModal() {
+    // Detect currently visible active tab
+    let currentTab = (window.TabsManager && window.TabsManager.currentTab) || '';
+    if (!currentTab) {
+      const allTabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'setting'];
+      const activeEl = allTabs.find(id => {
+        const el = document.getElementById(`tab-${id}`);
+        return el && !el.classList.contains('hidden');
+      });
+      currentTab = activeEl || 'home';
+    }
+
     if (this.editingIndex < 0) {
       document.getElementById('modalMainTitle').innerText = "Thêm mới";
       document.getElementById('typeSelector').classList.remove('hidden');
@@ -22,21 +33,43 @@ const ModalManager = {
       document.getElementById('incomeDesc').value = '';
       document.getElementById('incomeNotes').value = '';
 
-      // Auto default category based on current active tab
-      const currentTab = (window.TabsManager && window.TabsManager.currentTab) || 'home';
+      // Set form type (finance tab defaults to expense form; others default to todo form)
+      if (currentTab === 'finance') {
+        this.setAddType('expense');
+      } else {
+        this.setAddType('todo');
+      }
+
+      // Auto select category based on active tab
       const defaultCategory = typeof getDefaultCategoryByTab === 'function' ? getDefaultCategoryByTab(currentTab) : '';
 
       if (defaultCategory) {
         const todoCatEl = document.getElementById('todoCategory');
         if (todoCatEl) {
-          const hasOption = Array.from(todoCatEl.options).some(opt => opt.value === defaultCategory);
-          if (hasOption) todoCatEl.value = defaultCategory;
+          const matchedTodo = Array.from(todoCatEl.options).find(opt => 
+            opt.value === defaultCategory || 
+            opt.value.toLowerCase().includes(defaultCategory.toLowerCase()) || 
+            defaultCategory.toLowerCase().includes(opt.value.toLowerCase()) ||
+            (defaultCategory === 'Mun & Bông' && opt.value.includes('Mun')) ||
+            (defaultCategory === 'Xe Máy' && opt.value.includes('Xe')) ||
+            (defaultCategory === 'Sức Khỏe' && opt.value.includes('Sức')) ||
+            (defaultCategory === 'Đầu tư' && opt.value.includes('Đầu tư'))
+          );
+          if (matchedTodo) todoCatEl.value = matchedTodo.value;
         }
 
         const expCatEl = document.getElementById('expenseCategory');
         if (expCatEl) {
-          const matched = Array.from(expCatEl.options).find(opt => opt.value.includes(defaultCategory) || defaultCategory.includes(opt.value));
-          if (matched) expCatEl.value = matched.value;
+          const matchedExp = Array.from(expCatEl.options).find(opt => 
+            opt.value === defaultCategory || 
+            opt.value.toLowerCase().includes(defaultCategory.toLowerCase()) || 
+            defaultCategory.toLowerCase().includes(opt.value.toLowerCase()) ||
+            (defaultCategory === 'Mun & Bông' && (opt.value.includes('Mèo') || opt.value.includes('Mun'))) ||
+            (defaultCategory === 'Xe Máy' && opt.value.includes('Xe')) ||
+            (defaultCategory === 'Sức Khỏe' && opt.value.includes('Sức')) ||
+            (defaultCategory === 'Đầu tư' && opt.value.includes('Đầu tư'))
+          );
+          if (matchedExp) expCatEl.value = matchedExp.value;
         }
       }
     }
@@ -45,15 +78,6 @@ const ModalManager = {
     if (!modal) return;
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform').classList.remove('translate-y-full');
-
-    if (this.editingIndex < 0) {
-      const currentTab = (window.TabsManager && window.TabsManager.currentTab) || 'home';
-      if (currentTab === 'finance') {
-        this.setAddType('expense');
-      } else {
-        this.setAddType('todo');
-      }
-    }
   },
 
   closeAddModal() {

@@ -327,9 +327,22 @@
           <div id="investPriceBadges" class="flex space-x-1.5 relative z-10"></div>
         </div>
 
+        <!-- BIỂU ĐỒ TỔNG TÀI SẢN THEO NGÀY (LINE CHART) -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">
+              <i class="fa-solid fa-chart-line text-indigo-500 mr-1.5"></i>Biến động tổng tài sản (VNĐ)
+            </h3>
+            <span class="text-[10px] text-gray-400">Cập nhật lúc 00:00 mỗi ngày</span>
+          </div>
+          <div class="w-full h-44 relative">
+            <canvas id="netWorthLineChart"></canvas>
+          </div>
+        </div>
+
         <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-          <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ tài sản</h3>
+          <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ danh mục</h3>
           <div class="w-full h-44 relative flex justify-center">
             <canvas id="assetAllocationChart"></canvas>
           </div>
@@ -339,16 +352,16 @@
         <div class="space-y-3">
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" oninput="searchInvestment(this.value)" placeholder="Tìm kiếm tài sản (BTC, VNM...)"
+            <input type="text" oninput="searchInvestment(this.value)" placeholder="Tìm kiếm tài sản (BTC, BNB, Vàng...)"
               class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-slate-200 shadow-sm">
           </div>
           
           <div class="flex space-x-2 overflow-x-auto custom-scrollbar pb-1">
             <button onclick="filterInvestment('all')" id="invFilter-all" class="shrink-0 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-sm">Tất cả</button>
-            <button onclick="filterInvestment('🪙 Crypto')" id="invFilter-crypto" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 Crypto</button>
-            <button onclick="filterInvestment('📈 Cổ phiếu')" id="invFilter-stock" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">📈 Cổ phiếu</button>
-            <button onclick="filterInvestment('💵 USD')" id="invFilter-usd" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">💵 USD</button>
+            <button onclick="filterInvestment('🪙 BTC')" id="invFilter-btc" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 BTC</button>
+            <button onclick="filterInvestment('🪙 BNB')" id="invFilter-bnb" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🪙 BNB</button>
             <button onclick="filterInvestment('🥇 Vàng')" id="invFilter-gold" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🥇 Vàng</button>
+            <button onclick="filterInvestment('💵 USD')" id="invFilter-usd" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">💵 USD</button>
             <button onclick="filterInvestment('🏦 Tiết kiệm')" id="invFilter-save" class="shrink-0 px-3 py-1.5 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-xs font-semibold rounded-lg border border-gray-200 dark:border-slate-700">🏦 Tiết kiệm</button>
           </div>
         </div>
@@ -356,111 +369,72 @@
         <!-- FORM THÊM / SỬA TÀI SẢN -->
         <div id="investmentForm" class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-md space-y-3">
           <div class="flex justify-between items-center mb-1">
-            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Tài Sản Đầu Tư</h3>
+            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Giao Dịch Đầu Tư</h3>
             <button onclick="toggleInvestmentForm()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
           </div>
           
-          <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-2">
             <div>
               <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tên tài sản <span class="text-red-500">*</span></label>
-              <input type="text" id="investName" placeholder="Ví dụ: BTC, VNM..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-            </div>
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Phân loại</label>
-              <select id="investType" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-                <option value="🪙 Crypto">🪙 Crypto</option>
-                <option value="📈 Cổ phiếu">📈 Cổ phiếu</option>
-                <option value="🥇 Vàng">🥇 Vàng</option>
-                <option value="💵 USD">💵 USD</option>
-                <option value="🏦 Tiết kiệm">🏦 Tiết kiệm</option>
-                <option value="💼 Khác">💼 Khác</option>
+              <select id="investName" onchange="onAssetNameChange()"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none">
+                <option value="BTC" selected>🪙 Bitcoin (BTC)</option>
+                <option value="BNB">🪙 Binance Coin (BNB)</option>
+                <option value="Vàng DOJI / SJC (VND/lượng)">🥇 Vàng DOJI / SJC (VND/lượng)</option>
+                <option value="Vàng thế giới (XAU/USD)">🥇 Vàng thế giới (XAU/USD)</option>
+                <option value="Tiết kiệm USD">💵 Tiết kiệm USD</option>
+                <option value="Tiết kiệm VNĐ">🏦 Tiết kiệm VNĐ</option>
+                <option value="Khác">💼 Khác (Nhập tên riêng)</option>
               </select>
+            </div>
+
+            <div id="investCustomNameRow" class="hidden">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Nhập tên tài sản riêng</label>
+              <input type="text" id="investCustomName" placeholder="Ví dụ: NEAR, AVAX, Trái phiếu..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng <span class="text-red-500">*</span></label>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng mua <span class="text-red-500">*</span></label>
               <input type="number" step="any" id="investQuantity" placeholder="0" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ (%)</label>
-              <input type="number" step="1" id="investTarget" placeholder="VD: 20" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ngày mua</label>
+              <input type="date" id="investPurchaseDate" class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua trung bình <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="investBuyPrice" placeholder="Giá vốn / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investBuyPrice" placeholder="Giá mua..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá trị hiện tại <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT / 1 đvị" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá thị trường hiện tại <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div class="col-span-2 flex items-center mt-1">
               <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
               <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
-                Giá trị nhập là USD (App sẽ tự động nhân với tỷ giá VNĐ/USD)
+                Giá trị nhập là USD (App tự động quy đổi sang VNĐ)
               </label>
             </div>
           </div>
 
-          <div>
-            <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Nơi lưu trữ...)</label>
-            <input type="text" id="investNotes" placeholder="Ví Binance, Sổ TK Vietcombank..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ (%)</label>
+              <input type="number" step="1" id="investTarget" placeholder="VD: 30" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Ví, Sổ TK...)</label>
+              <input type="text" id="investNotes" placeholder="Binance, Trust Wallet..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
           </div>
           
-          <!-- ✨ Price Source Config -->
-          <fieldset class="border border-indigo-200 dark:border-indigo-800/60 rounded-xl p-3 space-y-2.5">
-            <legend class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 px-2">🔄 Tự động cập nhật giá</legend>
 
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Nguồn giá</label>
-              <select id="investPriceSourceType" onchange="updatePriceSourceFields()"
-                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-                <option value="manual">✋ Thủ công (không tự động)</option>
-                <option value="crypto">🪙 Crypto (CoinGecko – miễn phí)</option>
-                <option value="gold">🥇 Vàng thế giới (Metals.live – miễn phí)</option>
-                <option value="usd">💵 Tỷ giá USD/VND (Open ER – miễn phí)</option>
-                <option value="stock">📈 Cổ phiếu (Alpha Vantage – cần key)</option>
-              </select>
-            </div>
-
-            <!-- Symbol row: ẩn với manual, usd, gold -->
-            <div id="priceSourceSymbolRow" class="hidden">
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mã tài sản</label>
-              <input type="text" id="investPriceSourceSymbol" placeholder="BTC, ETH, AAPL..."
-                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-              <p class="text-[9px] text-gray-400 mt-0.5">Crypto: BTC, ETH, SOL, BNB... &nbsp;|&nbsp; Stock: AAPL, MSFT...</p>
-            </div>
-
-            <!-- Gold unit: chỉ hiện khi gold -->
-            <div id="priceSourceGoldUnitRow" class="hidden">
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Đơn vị vàng</label>
-              <select id="investGoldUnit"
-                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-                <option value="oz">Troy oz (giá quốc tế $/oz)</option>
-                <option value="tael">Lượng vàng VN (1 lượng = 37.5g)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tần suất cập nhật</label>
-              <select id="investRefreshInterval"
-                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-                <option value="1800">Mỗi 30 phút</option>
-                <option value="3600" selected>Mỗi giờ</option>
-                <option value="21600">Mỗi 6 giờ</option>
-                <option value="86400">Mỗi ngày</option>
-                <option value="604800">Mỗi tuần</option>
-              </select>
-            </div>
-
-            <button type="button" id="testPriceBtn" onclick="testPriceFetch()" class="hidden w-full py-1.5 text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
-              <i class="fa-solid fa-flask mr-1"></i>Test Fetch Giá Ngay
-            </button>
-          </fieldset>
 
           <button id="saveInvestBtn" onclick="saveInvestment()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
             Lưu tài sản
@@ -485,21 +459,27 @@
       <!-- TAB 5: XE MÁY -->
       <div id="tab-motorbike" class="hidden space-y-4 tab-content">
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-sky-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+          <div onclick="openPartsStatusModal('NMAX')" class="bg-sky-600 hover:bg-sky-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
             <div class="flex justify-between items-center text-xs text-sky-200 font-semibold">
-              <span>NMAX</span>
-              <i class="fa-solid fa-motorcycle"></i>
+              <span>NMAX ⚙️</span>
+              <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
             </div>
             <div id="viewNmaxOdo" class="text-lg font-bold">14.850 km</div>
-            <p id="viewNmaxPlate" class="text-[10px] opacity-80">BS: 59X1-123.45</p>
+            <div class="flex justify-between items-center text-[10px] opacity-85">
+              <span id="viewNmaxPlate">BS: 59X1-123.45</span>
+              <span class="underline font-medium">Parts Status →</span>
+            </div>
           </div>
-          <div class="bg-indigo-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+          <div onclick="openPartsStatusModal('Grande')" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
             <div class="flex justify-between items-center text-xs text-indigo-200 font-semibold">
-              <span>GRANDE</span>
-              <i class="fa-solid fa-motorcycle"></i>
+              <span>GRANDE ⚙️</span>
+              <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
             </div>
             <div id="viewGrandeOdo" class="text-lg font-bold">8.200 km</div>
-            <p id="viewGrandePlate" class="text-[10px] opacity-80">BS: 59X2-678.90</p>
+            <div class="flex justify-between items-center text-[10px] opacity-85">
+              <span id="viewGrandePlate">BS: 59X2-678.90</span>
+              <span class="underline font-medium">Parts Status →</span>
+            </div>
           </div>
         </div>
 
@@ -521,10 +501,28 @@
                 class="w-full px-1.5 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
-          <div>
-            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục</label>
-            <input type="text" id="maintTitle" placeholder="Thay nhớt máy..."
-              class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục bảo dưỡng</label>
+              <select id="maintTitleSelect" onchange="onMaintTitleChange()"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200">
+                <option value="Thay nhớt máy" selected>🛢️ Thay nhớt máy (Engine Oil)</option>
+                <option value="Thay nhớt lap / Hộp số">💧 Thay nhớt lap / Hộp số (Gear Oil)</option>
+                <option value="Thay lọc gió">💨 Thay lọc gió (Air Filter)</option>
+                <option value="Thay bugi">⚡ Thay bugi (Spark Plug)</option>
+                <option value="Thay nước làm mát">🌡️ Thay nước làm mát (Coolant)</option>
+                <option value="Thay dây curoa & Bi nồi">🔄 Thay dây curoa & Bi nồi (V-Belt & Rollers)</option>
+                <option value="Thay má phanh / Bố thắng">🛑 Thay má phanh / Bố thắng (Brake Pads)</option>
+                <option value="Thay lốp xe">🔘 Thay lốp xe (Tires)</option>
+                <option value="Bảo dưỡng toàn bộ">🔧 Bảo dưỡng toàn bộ</option>
+                <option value="Khác">📝 Hạng mục khác (Tự nhập)</option>
+              </select>
+            </div>
+            <div id="maintCustomTitleRow" class="hidden">
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Tên hạng mục riêng</label>
+              <input type="text" id="maintCustomTitle" placeholder="Ví dụ: Rửa xe, thay bình ắc quy..."
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -873,6 +871,26 @@
       </div>
     </div>
 
+    <!-- POPUP TRẠNG THÁI PHỤ TÙNG XE MÁY -->
+    <div id="bikePartsModal" onclick="closePartsStatusModal()"
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      <div onclick="event.stopPropagation()"
+        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[82vh] flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
+          <div>
+            <h3 id="partsModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Trạng Thái Phụ Tùng</h3>
+            <p id="partsModalOdo" class="text-[11px] text-gray-400 mt-0.5">ODO Hiện tại: 0 km</p>
+          </div>
+          <button onclick="closePartsStatusModal()"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+        <div id="partsModalList" class="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-2">
+        </div>
+      </div>
+    </div>
+
     <!-- ADD & EDIT MODAL -->
     <div id="addModal" onclick="closeAddModal()"
       class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end">
@@ -916,6 +934,7 @@
                 <option value="Mun & Bông">🐱 Mun & Bông</option>
                 <option value="Xe Máy">🛵 Xe Máy</option>
                 <option value="Sức Khỏe">❤️ Sức Khỏe</option>
+                <option value="Đầu tư">💼 Đầu tư</option>
               </select>
             </div>
             <div>

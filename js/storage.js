@@ -34,6 +34,7 @@ class Storage {
       expenses: Array.isArray(saved.expenses) ? saved.expenses : defaults.expenses,
       incomes: Array.isArray(saved.incomes) ? saved.incomes : defaults.incomes,
       investments: Array.isArray(saved.investments) ? saved.investments : defaults.investments,
+      netWorthHistory: Array.isArray(saved.netWorthHistory) ? saved.netWorthHistory : (defaults.netWorthHistory || []),
       bikeMaintenances: Array.isArray(saved.bikeMaintenances) ? saved.bikeMaintenances : defaults.bikeMaintenances,
       catWeights: Array.isArray(saved.catWeights) ? saved.catWeights : defaults.catWeights,
       monthlyBudgets: Array.isArray(saved.monthlyBudgets) ? saved.monthlyBudgets : defaults.monthlyBudgets
@@ -80,9 +81,57 @@ class Storage {
         { bike: "NMAX", title: "Thay nhớt", odo: 12100, cost: 300000, date: "2026-05-15" }
       ],
       investments: [
-        { name: "Bitcoin Spot", type: "🪙 Crypto", quantity: 0.05, buyPrice: 60000, currentPrice: 65000, isUsd: true, targetWeight: 30, notes: "Tính theo USD trên Binance" },
-        { name: "Cổ phiếu VNM", type: "📈 Cổ phiếu", quantity: 500, buyPrice: 65000, currentPrice: 68000, isUsd: false, targetWeight: 40, notes: "Tích sản VNĐ" },
-        { name: "Tiết kiệm USD", type: "💵 USD", quantity: 1000, buyPrice: 1, currentPrice: 1, isUsd: true, targetWeight: 30, notes: "Tài khoản USD" }
+        { 
+          name: "BTC", 
+          type: "🪙 BTC", 
+          quantity: 0.05, 
+          buyPrice: 60000, 
+          currentPrice: 65000, 
+          isUsd: true, 
+          targetWeight: 40, 
+          notes: "Binance Spot",
+          purchases: [
+            { date: "2026-07-10", quantity: 0.03, buyPrice: 58000, notes: "DCA tháng 7" },
+            { date: "2026-08-05", quantity: 0.02, buyPrice: 63000, notes: "DCA tháng 8" }
+          ],
+          priceSource: { type: 'crypto', symbol: 'BTC', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
+        },
+        { 
+          name: "BNB", 
+          type: "🪙 BNB", 
+          quantity: 4.5, 
+          buyPrice: 520, 
+          currentPrice: 580, 
+          isUsd: true, 
+          targetWeight: 20, 
+          notes: "Binance Vault",
+          purchases: [
+            { date: "2026-07-20", quantity: 4.5, buyPrice: 520, notes: "Mua tích sản" }
+          ],
+          priceSource: { type: 'crypto', symbol: 'BNB', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
+        },
+        { 
+          name: "Tiết kiệm USD", 
+          type: "💵 USD", 
+          quantity: 1000, 
+          buyPrice: 1, 
+          currentPrice: 1, 
+          isUsd: true, 
+          targetWeight: 40, 
+          notes: "Tài khoản USD",
+          purchases: [
+            { date: "2026-06-01", quantity: 1000, buyPrice: 1, notes: "Quỹ dự phòng" }
+          ],
+          priceSource: { type: 'usd', symbol: 'USD', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
+        }
+      ],
+      netWorthHistory: [
+        { date: "2026-08-28", value: 162500000 },
+        { date: "2026-08-29", value: 164200000 },
+        { date: "2026-08-30", value: 163800000 },
+        { date: "2026-08-31", value: 167500000 },
+        { date: "2026-09-01", value: 171200000 },
+        { date: "2026-09-02", value: 174500000 }
       ],
       monthlyBudgets: [
         { month: "T6/2026", budget: 15000000, spent: 10200000 },

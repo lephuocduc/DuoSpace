@@ -21,7 +21,7 @@ const TabsManager = {
     if (window.app && window.app.charts) {
       if (tabId === 'cats') setTimeout(() => window.app.charts.renderCatChart(), 100);
       if (tabId === 'home') setTimeout(() => window.app.charts.renderBudgetChart(), 100);
-      if (tabId === 'investment') setTimeout(() => window.app.charts.renderAssetAllocationChart(), 100);
+      if (tabId === 'investment') setTimeout(() => window.app.charts.renderInvestmentCharts(), 100);
     }
 
     document.querySelectorAll('.tab-btn').forEach(b => {
