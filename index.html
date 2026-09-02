@@ -699,8 +699,16 @@
           <p class="text-xs text-gray-500 dark:text-slate-400">Tự động lưu các thao tác quan trọng như thêm, cập nhật hoặc xóa dữ liệu. Mục này chỉ để theo dõi, không dùng làm ghi chú cá nhân.</p>
         </section>
         <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Hoạt động gần đây</h3>
+          <div class="flex items-center justify-between gap-3 mb-3"><h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Hoạt động gần đây</h3><span id="logCount" class="text-[10px] text-gray-400"></span></div>
+          <div class="flex gap-1.5 overflow-x-auto pb-2 custom-scrollbar text-[11px]">
+            <button onclick="filterSystemLog('all')" id="logFilter-all" class="shrink-0 px-2.5 py-1 rounded-lg bg-blue-600 text-white font-semibold">Tất cả</button>
+            <button onclick="filterSystemLog('add')" id="logFilter-add" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Thêm</button>
+            <button onclick="filterSystemLog('update')" id="logFilter-update" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Cập nhật</button>
+            <button onclick="filterSystemLog('delete')" id="logFilter-delete" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Xóa</button>
+            <button onclick="filterSystemLog('other')" id="logFilter-other" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Khác</button>
+          </div>
           <div id="logList" class="space-y-2"></div>
+          <button id="loadMoreLogsBtn" onclick="loadMoreSystemLogs()" class="hidden w-full mt-3 py-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold">Tải thêm</button>
         </section>
       </div>
 

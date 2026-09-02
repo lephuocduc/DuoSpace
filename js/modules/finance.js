@@ -468,7 +468,8 @@ class FinanceModule {
       };
       return `${labels[key]}: ${format(before[key])} → ${format(after[key])}`;
     });
-    return changes.length ? changes.join(' · ') : 'Không thay đổi dữ liệu';
+    const transactionLabel = `${after.desc || before.desc || 'Không có mô tả'} · ngày ${Utils.formatDate(after.date || before.date)}`;
+    return `${transactionLabel} — ${changes.length ? changes.join(' · ') : 'Không thay đổi dữ liệu'}`;
   }
 
   addInvestmentFromExpense(item, notes, purchaseDate, expenseId) {
