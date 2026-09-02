@@ -94,9 +94,10 @@ class MotorbikeModule {
   deleteBikeMaintenance(idx) {
     if (this.app.data.bikeMaintenances && this.app.data.bikeMaintenances[idx]) {
       const item = this.app.data.bikeMaintenances[idx];
+      if (!confirm(`Xóa lịch sử bảo dưỡng “${item.title}” của ${item.bike}? Khoản chi liên kết cũng sẽ bị xóa.`)) return;
       this.app.data.bikeMaintenances.splice(idx, 1);
       if (item.expenseId) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => expense.id !== item.expenseId);
-      this.app.log?.system('Xóa lịch sử bảo dưỡng', `${item.bike} · ${item.title}`);
+      this.app.log?.system('Xóa lịch sử bảo dưỡng', `${item.bike} · ${item.title} · ${Number(item.cost).toLocaleString('vi-VN')} VNĐ · ODO ${Number(item.odo).toLocaleString('vi-VN')} km${item.expenseId ? ' · Đồng thời xóa khoản chi liên kết' : ''}`);
       this.app.save();
       this.app.render();
     }
@@ -121,7 +122,7 @@ class MotorbikeModule {
           <div>
             <div class="flex items-center space-x-1.5">
               <span class="font-bold text-sky-600 dark:text-sky-400">[${item.bike}]</span>
-              <span class="font-semibold text-gray-800 dark:text-slate-200">${item.title}</span>
+              <span class="font-semibold text-gray-800 dark:text-slate-200">${Utils.escapeHtml(item.title)}</span>
             </div>
             <p class="text-[10px] text-gray-400 mt-0.5">📅 ${formattedDate} • 📍 ${Number(item.odo).toLocaleString('vi-VN')} km</p>
           </div>

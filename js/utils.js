@@ -5,6 +5,17 @@ const Utils = {
   createId(prefix = 'id') {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   },
+  sanitizeText(value, maxLength = 500) {
+    return String(value || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
+  },
+  notify(message, type = 'error') {
+    const toast = document.getElementById('appToast');
+    if (!toast) return alert(message);
+    toast.textContent = message;
+    toast.className = `fixed left-1/2 -translate-x-1/2 bottom-20 z-[60] max-w-[90%] rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${type === 'error' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}`;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => toast.classList.add('hidden'), 4500);
+  },
   /**
    * Format number as Vietnamese Currency (đ)
    * @param {number} amount

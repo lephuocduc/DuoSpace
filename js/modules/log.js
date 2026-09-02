@@ -14,8 +14,8 @@ class LogModule {
     }
     container.innerHTML = logs.map(entry => {
       return `<div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/60 border border-gray-100 dark:border-slate-700/60">
-        <div class="flex justify-between gap-3"><p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${entry.title}</p><i class="fa-solid fa-gear text-blue-400 text-xs mt-1" title="Hoạt động hệ thống"></i></div>
-        ${entry.notes ? `<p class="text-xs text-gray-500 dark:text-slate-400 mt-1 whitespace-pre-wrap">${entry.notes}</p>` : ''}
+        <div class="flex justify-between gap-3"><p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${Utils.escapeHtml(entry.title)}</p><i class="fa-solid fa-gear text-blue-400 text-xs mt-1" title="Hoạt động hệ thống"></i></div>
+        ${entry.notes ? `<p class="text-xs text-gray-500 dark:text-slate-400 mt-1 whitespace-pre-wrap">${Utils.escapeHtml(entry.notes)}</p>` : ''}
         <p class="text-[10px] text-gray-400 mt-2">${new Date(entry.date).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}</p>
       </div>`;
     }).join('');

@@ -250,7 +250,7 @@ class FinanceModule {
             <div class="flex items-center space-x-3 flex-1">
               <span class="text-base">${icon}</span>
               <div>
-                <p class="text-sm font-medium text-gray-800 dark:text-slate-200">${item.desc} ${catTag}</p>
+                <p class="text-sm font-medium text-gray-800 dark:text-slate-200">${Utils.escapeHtml(item.desc)} ${catTag}</p>
                 <p class="text-[11px] text-gray-400 dark:text-slate-500">${dateStr} • ${byLabel} <strong class="text-gray-600 dark:text-slate-300">${userText}</strong></p>
               </div>
             </div>
@@ -261,7 +261,7 @@ class FinanceModule {
               </button>
             </div>
           </div>
-          ${item.notes ? `<p class="text-[10px] text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-900/60 p-1.5 rounded border border-gray-100 dark:border-slate-800">📝 ${item.notes}</p>` : ''}
+          ${item.notes ? `<p class="text-[10px] text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-900/60 p-1.5 rounded border border-gray-100 dark:border-slate-800">📝 ${Utils.escapeHtml(item.notes)}</p>` : ''}
         </div>
       `;
     }).join('');
@@ -269,6 +269,7 @@ class FinanceModule {
 
   deleteFinance(type, idx) {
     const item = type === 'expense' ? this.app.data.expenses?.[idx] : this.app.data.incomes?.[idx];
+    if (!item || !confirm(`Xóa ${type === 'expense' ? 'khoản chi' : 'khoản thu'} “${item.desc || 'không có mô tả'}”?`)) return;
     if (type === 'expense') {
       if (item?.linkedMaintenanceId) {
         this.app.data.bikeMaintenances = (this.app.data.bikeMaintenances || []).filter(m => m.id !== item.linkedMaintenanceId);
@@ -289,9 +290,12 @@ class FinanceModule {
         this.app.data.incomes.splice(idx, 1);
       }
     }
-    if (item) this.app.log?.system(type === 'expense' ? 'Xóa khoản chi' : 'Xóa khoản thu', `${item.desc || 'Không có mô tả'} · ${(item.amount || 0).toLocaleString('vi-VN')} VNĐ`);
+    if (item) this.app.log?.system(
+      type === 'expense' ? 'Xóa khoản chi' : 'Xóa khoản thu',
+      `${item.desc || 'Không có mô tả'} · ${(item.amount || 0).toLocaleString('vi-VN')} VNĐ · Ngày ${Utils.formatDate(item.date)}${item.linkedMaintenanceId ? ' · Đồng thời xóa lịch sử bảo dưỡng liên kết' : ''}${item.category?.includes('Đầu tư') ? ' · Đồng thời xóa giao dịch mua tài sản liên kết' : ''}`
+    );
     this.app.save();
-    this.app.render();
+    this.app.renderParts(['home', 'finance', 'investment', 'motorbike', 'log']);
   }
 
   editFinance(type, index) {
@@ -354,9 +358,9 @@ class FinanceModule {
     const isInvestmentExpense = category.includes('Đầu tư');
     if (isInvestmentExpense) ModalManager.updateExpenseInvestmentAmount();
     const amount = Math.round(parseFloat(document.getElementById('expenseAmount').value));
-    let desc = document.getElementById('expenseDesc').value.trim();
+    let desc = Utils.sanitizeText(document.getElementById('expenseDesc').value);
     const user = document.getElementById('expenseUser').value;
-    const notes = document.getElementById('expenseNotes').value.trim();
+    const notes = Utils.sanitizeText(document.getElementById('expenseNotes').value);
 
     const isVehicleExpense = category.includes('Xe');
     const bike = document.getElementById('expenseBike')?.value;
@@ -422,13 +426,13 @@ class FinanceModule {
     );
 
     this.app.save();
-    this.app.render();
+    this.app.renderParts(['home', 'finance', 'investment', 'motorbike', 'log']);
     ModalManager.closeAddModal();
   }
 
   readInvestmentExpenseFields() {
     const selected = document.getElementById('expenseInvestName')?.value;
-    const customName = document.getElementById('expenseInvestCustomName')?.value.trim();
+    const customName = Utils.sanitizeText(document.getElementById('expenseInvestCustomName')?.value);
     const name = selected === 'Khác' ? customName : selected;
     const quantity = parseFloat(document.getElementById('expenseInvestQuantity')?.value);
     const buyPrice = parseFloat(document.getElementById('expenseInvestBuyPrice')?.value);
@@ -454,9 +458,14 @@ class FinanceModule {
   }
 
   describeChanges(before, after) {
-    const labels = { amount: 'Số tiền', desc: 'Mô tả', category: 'Danh mục', user: 'Người chi', odo: 'ODO', vehicleItem: 'Hạng mục', date: 'Ngày' };
+    const labels = { amount: 'Số tiền', desc: 'Mô tả', category: 'Danh mục', user: 'Người chi', odo: 'ODO', vehicleItem: 'Hạng mục', date: 'Ngày', notes: 'Ghi chú' };
     const changes = Object.keys(labels).filter(key => String(before?.[key] ?? '') !== String(after?.[key] ?? '')).map(key => {
-      const format = value => key === 'amount' ? `${Number(value || 0).toLocaleString('vi-VN')} VNĐ` : (value || 'trống');
+      const format = value => {
+        if (key === 'amount') return `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`;
+        if (key === 'date') return value ? Utils.formatDate(value) : 'trống';
+        if (key === 'user') return value === 'Đ' ? 'Đức' : value === 'S' ? 'Sương' : (value || 'trống');
+        return value || 'trống';
+      };
       return `${labels[key]}: ${format(before[key])} → ${format(after[key])}`;
     });
     return changes.length ? changes.join(' · ') : 'Không thay đổi dữ liệu';
@@ -487,9 +496,9 @@ class FinanceModule {
 
   saveIncomeAction() {
     const amount = parseInt(document.getElementById('incomeAmount').value);
-    const desc = document.getElementById('incomeDesc').value.trim();
+    const desc = Utils.sanitizeText(document.getElementById('incomeDesc').value);
     const user = document.getElementById('incomeUser').value;
-    const notes = document.getElementById('incomeNotes').value.trim();
+    const notes = Utils.sanitizeText(document.getElementById('incomeNotes').value);
     const incomeDate = document.getElementById('incomeDate')?.value;
 
     if (isNaN(amount) || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
@@ -520,7 +529,7 @@ class FinanceModule {
     this.app.log?.system(editingIncome ? 'Cập nhật khoản thu' : 'Thêm khoản thu', editingIncome ? this.describeChanges(previousIncome, updatedIncome) : `${desc} · ${amount.toLocaleString('vi-VN')} VNĐ`);
 
     this.app.save();
-    this.app.render();
+    this.app.renderParts(['home', 'finance', 'investment', 'motorbike', 'log']);
     ModalManager.closeAddModal();
   }
 }

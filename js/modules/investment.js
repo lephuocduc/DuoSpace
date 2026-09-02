@@ -147,7 +147,7 @@ class InvestmentModule {
     const nameSelect = document.getElementById('investName');
     let name = nameSelect ? nameSelect.value : '';
     if (name === 'Khác') {
-      name = (document.getElementById('investCustomName')?.value || '').trim() || 'Tài sản khác';
+      name = Utils.sanitizeText(document.getElementById('investCustomName')?.value, 100) || 'Tài sản khác';
     }
 
     const quantity = parseFloat(document.getElementById('investQuantity').value);
@@ -155,7 +155,7 @@ class InvestmentModule {
     const currentPrice = parseFloat(document.getElementById('investCurrentPrice').value);
     const targetWeight = parseFloat(document.getElementById('investTarget').value) || null;
     const isUsd = document.getElementById('investIsUsd').checked;
-    const notes = document.getElementById('investNotes').value.trim();
+    const notes = Utils.sanitizeText(document.getElementById('investNotes').value);
     const purchaseDate = document.getElementById('investPurchaseDate')?.value || new Date().toISOString().split('T')[0];
 
     if (!name || isNaN(quantity) || isNaN(buyPrice) || isNaN(currentPrice) || quantity <= 0) {
@@ -306,7 +306,7 @@ class InvestmentModule {
     const purchase = asset.purchases[purchaseIdx];
     if (purchase.expenseId) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => expense.id !== purchase.expenseId);
     asset.purchases.splice(purchaseIdx, 1);
-    this.app.log?.system('Xóa giao dịch mua tài sản', `${asset.name} · ${purchase.quantity} đơn vị`);
+    this.app.log?.system('Xóa giao dịch mua tài sản', `${asset.name} · ${purchase.quantity} đơn vị · Giá mua ${Number(purchase.buyPrice).toLocaleString('vi-VN')}${purchase.expenseId ? ' · Đồng thời xóa khoản chi đầu tư liên kết' : ''}`);
 
     if (asset.purchases.length === 0) {
       // Nếu xóa hết lượt mua, xóa luôn asset
@@ -331,7 +331,7 @@ class InvestmentModule {
         const linkedExpenseIds = (item.purchases || []).map(purchase => purchase.expenseId).filter(Boolean);
         if (linkedExpenseIds.length) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => !linkedExpenseIds.includes(expense.id));
         this.app.data.investments.splice(idx, 1);
-        this.app.log?.system('Xóa tài sản đầu tư', item.name);
+        this.app.log?.system('Xóa tài sản đầu tư', `${item.name} · ${item.quantity} đơn vị · Xóa ${linkedExpenseIds.length} khoản chi đầu tư liên kết`);
         this.app.save();
         this.renderInvestmentList();
         this.recordDailyNetWorth();
@@ -565,6 +565,7 @@ class InvestmentModule {
         const dollarSign    = item.isUsd ? '$' : '';
         const priceFormat   = item.isUsd ? 'en-US' : 'vi-VN';
         const priceBadge    = this._priceBadge(item.priceSource);
+        const assetNameArg = JSON.stringify(item.name).replace(/"/g, '&quot;');
 
         const purchases = Array.isArray(item.purchases) && item.purchases.length > 0 
           ? item.purchases 
@@ -625,7 +626,7 @@ class InvestmentModule {
           <div class="mt-2.5 pt-2.5 border-t border-gray-100 dark:border-slate-700/80 ${isExpanded ? '' : 'hidden'}">
             <div class="flex justify-between items-center mb-1.5">
               <span class="text-[11px] font-bold text-gray-700 dark:text-slate-300">Lịch sử giao dịch</span>
-              <button onclick="window.app.investment.openForm(-1, '${item.name}')" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-md hover:underline">
+              <button onclick="window.app.investment.openForm(-1, ${assetNameArg})" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-md hover:underline">
                 + Thêm lần mua
               </button>
             </div>
@@ -648,7 +649,7 @@ class InvestmentModule {
                         <span class="ml-2 font-bold ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${item.isUsd ? 'đơn vị' : 'lượng'}</span>
                       </div>
                       <div class="text-gray-400 mt-0.5">
-                        ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)} ${p.notes ? '• ' + p.notes : ''}
+                        ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)} ${p.notes ? '• ' + Utils.escapeHtml(p.notes) : ''}
                       </div>
                     </div>
                     <div class="flex items-center space-x-2.5">
@@ -671,7 +672,7 @@ class InvestmentModule {
                 </div>
                 <div>
                   <div class="flex items-center space-x-2">
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">${item.name}</h4>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">${Utils.escapeHtml(item.name)}</h4>
                     ${histBadge}
                   </div>
                   <p class="text-[10px] text-gray-500 font-medium">${item.type} • Tỷ trọng: <span class="font-bold text-indigo-600 dark:text-indigo-400">${weight.toFixed(1)}%</span></p>
@@ -692,13 +693,13 @@ class InvestmentModule {
                 <p>Tổng SL: <span class="font-semibold text-gray-800 dark:text-slate-200">${item.quantity.toLocaleString(priceFormat, { maximumFractionDigits: 6 })}</span></p>
                 <div class="flex space-x-1.5 justify-end mt-1 items-center">
                   ${refreshBtn}
-                  <button onclick="window.app.investment.toggleCardHistory('${item.name}')" title="Xem lịch sử mua" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center justify-center transition-colors active:scale-95">
+                  <button onclick="window.app.investment.toggleCardHistory(${assetNameArg})" title="Xem lịch sử mua" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center justify-center transition-colors active:scale-95">
                     <i class="fa-solid fa-clock-rotate-left text-sm"></i>
                   </button>
                   <button onclick="window.app.investment.openForm(${item.rawIdx})" title="Thêm lần mua mới" class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 flex items-center justify-center transition-colors active:scale-95">
                     <i class="fa-solid fa-plus text-sm"></i>
                   </button>
-                  <button onclick="window.app.investment.openSellModal('${item.name}')" title="Bán bớt tài sản này" class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 flex items-center justify-center transition-colors active:scale-95">
+                  <button onclick="window.app.investment.openSellModal(${assetNameArg})" title="Bán bớt tài sản này" class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 flex items-center justify-center transition-colors active:scale-95">
                     <i class="fa-solid fa-arrow-trend-down text-sm"></i>
                   </button>
                   <button onclick="window.app.investment.deleteItem(${item.rawIdx})" title="Xóa tài sản" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-500 hover:text-rose-600 flex items-center justify-center transition-colors active:scale-95">
@@ -711,7 +712,7 @@ class InvestmentModule {
             <!-- Price source badge row -->
             <div class="flex items-center justify-between mt-2">
               ${priceBadge}
-              ${item.notes ? `<p class="text-[10px] text-gray-400 italic truncate max-w-[60%]"><i class="fa-solid fa-circle-info mr-1 text-[8px]"></i>${item.notes}</p>` : '<span></span>'}
+              ${item.notes ? `<p class="text-[10px] text-gray-400 italic truncate max-w-[60%]"><i class="fa-solid fa-circle-info mr-1 text-[8px]"></i>${Utils.escapeHtml(item.notes)}</p>` : '<span></span>'}
             </div>
 
             ${targetHtml}
@@ -839,7 +840,7 @@ class InvestmentModule {
     }
 
     select.innerHTML = list.map((item, idx) => `
-      <option value="${idx}">${item.name} (${item.quantity} ${item.isUsd ? '$' : 'đ'})</option>
+      <option value="${idx}">${Utils.escapeHtml(item.name)} (${item.quantity} ${item.isUsd ? '$' : 'đ'})</option>
     `).join('');
 
     if (preselectName) {
@@ -948,6 +949,10 @@ class InvestmentModule {
   // ──────────────────────────────────────────────
 
   async fetchRealtimeUsdRate() {
+    const button = document.getElementById('usdRateRefreshBtn');
+    const status = document.getElementById('usdRateStatus');
+    if (button) button.classList.add('animate-spin');
+    if (status) status.textContent = 'Đang cập nhật tỷ giá USD.';
     try {
       const rate = await priceUpdater.fetchUsdRate();
       if (rate) {
@@ -957,9 +962,15 @@ class InvestmentModule {
         this.app.save();
         this.renderInvestmentList(true);
         this.recordDailyNetWorth();
+        if (status) status.textContent = `Đã cập nhật tỷ giá: ${rate.toLocaleString('vi-VN')} VNĐ cho một USD.`;
+      } else {
+        if (status) status.textContent = 'Không nhận được tỷ giá mới; đang dùng tỷ giá đã lưu.';
       }
     } catch (err) {
       console.log('Không thể lấy tỷ giá tự động:', err);
+      if (status) status.textContent = 'Không thể cập nhật tỷ giá. Đang dùng tỷ giá đã lưu.';
+    } finally {
+      if (button) button.classList.remove('animate-spin');
     }
   }
 

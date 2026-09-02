@@ -160,8 +160,11 @@ class Storage {
     this.data = data;
     try {
       localStorage.setItem(this.key, JSON.stringify(this.data));
+      return true;
     } catch (e) {
       console.error('Failed to save to localStorage:', e);
+      Utils.notify('Không thể lưu dữ liệu. Hãy kiểm tra dung lượng trình duyệt.', 'error');
+      return false;
     }
   }
 

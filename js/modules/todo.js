@@ -103,7 +103,7 @@ class TodoModule {
             <div class="flex items-center space-x-3 flex-1">
               <input type="checkbox" onclick="event.stopPropagation()" onchange="window.app.todo.toggleTodo(${realIndex})" ${todo.done ? 'checked' : ''} class="w-5 h-5 rounded text-blue-600 focus:ring-0 cursor-pointer">
               <div onclick="window.app.todo.editTodo(${realIndex})" class="flex-1 cursor-pointer">
-                <p class="text-sm font-medium text-gray-800 dark:text-slate-200 ${todo.done ? 'line-through text-gray-400 dark:text-slate-500' : ''}">${todo.title}</p>
+                <p class="text-sm font-medium text-gray-800 dark:text-slate-200 ${todo.done ? 'line-through text-gray-400 dark:text-slate-500' : ''}">${Utils.escapeHtml(todo.title)}</p>
                 <div class="flex items-center space-x-1.5 mt-1 flex-wrap gap-y-1">
                   ${userBadge}
                   ${categoryBadge}
@@ -116,7 +116,7 @@ class TodoModule {
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
           </div>
-          ${todo.notes ? `<p onclick="window.app.todo.editTodo(${realIndex})" class="text-[11px] text-gray-500 dark:text-slate-400 bg-white dark:bg-slate-900/60 p-2 rounded-lg border border-gray-100 dark:border-slate-800 mt-1 cursor-pointer">📝 ${todo.notes}</p>` : ''}
+          ${todo.notes ? `<p onclick="window.app.todo.editTodo(${realIndex})" class="text-[11px] text-gray-500 dark:text-slate-400 bg-white dark:bg-slate-900/60 p-2 rounded-lg border border-gray-100 dark:border-slate-800 mt-1 cursor-pointer">📝 ${Utils.escapeHtml(todo.notes)}</p>` : ''}
         </div>
       `;
     }).join('');
@@ -127,7 +127,7 @@ class TodoModule {
       this.app.data.todos[idx].done = !this.app.data.todos[idx].done;
       this.app.log?.system(this.app.data.todos[idx].done ? 'Hoàn thành công việc' : 'Mở lại công việc', this.app.data.todos[idx].title);
       this.app.save();
-      this.app.render();
+      this.app.renderParts(['home', 'todo', 'motorbike', 'cats', 'health', 'log']);
     }
   }
 
@@ -137,7 +137,7 @@ class TodoModule {
       this.app.data.todos.splice(idx, 1);
       this.app.log?.system('Xóa công việc', todo.title);
       this.app.save();
-      this.app.render();
+      this.app.renderParts(['home', 'todo', 'motorbike', 'cats', 'health', 'log']);
     }
   }
 
@@ -161,11 +161,11 @@ class TodoModule {
   }
 
   saveTodoAction() {
-    const title = document.getElementById('todoInput').value.trim();
+    const title = Utils.sanitizeText(document.getElementById('todoInput').value, 200);
     const category = document.getElementById('todoCategory').value;
     const user = document.getElementById('todoUser').value;
     const priority = document.getElementById('todoPriority').value;
-    const notes = document.getElementById('todoNotes').value.trim();
+    const notes = Utils.sanitizeText(document.getElementById('todoNotes').value);
 
     if (!title) return alert('Vui lòng nhập tên công việc!');
 
@@ -197,11 +197,12 @@ class TodoModule {
       previousTodo.title !== todo.title && `Tên: ${previousTodo.title} → ${todo.title}`,
       previousTodo.category !== todo.category && `Phân loại: ${previousTodo.category} → ${todo.category}`,
       previousTodo.user !== todo.user && `Phân công: ${previousTodo.user} → ${todo.user}`,
-      previousTodo.priority !== todo.priority && `Ưu tiên: ${previousTodo.priority} → ${todo.priority}`
+      previousTodo.priority !== todo.priority && `Ưu tiên: ${previousTodo.priority} → ${todo.priority}`,
+      previousTodo.notes !== todo.notes && `Ghi chú: ${previousTodo.notes || 'trống'} → ${todo.notes || 'trống'}`
     ].filter(Boolean).join(' · ') : title;
     this.app.log?.system(editingTodo ? 'Cập nhật công việc' : 'Thêm công việc', changes || 'Không thay đổi dữ liệu');
     this.app.save();
-    this.app.render();
+    this.app.renderParts(['home', 'todo', 'motorbike', 'cats', 'health', 'log']);
     ModalManager.closeAddModal();
   }
 }

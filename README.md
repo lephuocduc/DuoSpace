@@ -50,3 +50,13 @@ npm run doji-server
 ```
 
 Sau khi server báo sẵn sàng ở cổng `3001`, ứng dụng sẽ tự gọi `http://127.0.0.1:3001/api/gold/doji`. Server này chạy Puppeteer, đợi bảng giá Angular của DOJI tải xong và lấy giá mua của “Nhẫn tròn 9999 Hưng Thịnh Vượng”.
+
+## 💾 Sao lưu và khôi phục
+
+Vào **Cài đặt → Dữ liệu & sao lưu** để tải toàn bộ dữ liệu thành tệp JSON hoặc khôi phục từ một bản sao lưu trước đó. Khôi phục sẽ thay thế dữ liệu hiện có. Tại đây cũng có nút xuất toàn bộ thu chi thành tệp CSV, có thể mở bằng Excel hoặc Google Sheets.
+
+## 🛠 Khắc phục sự cố
+
+- Không thấy dữ liệu cũ: kiểm tra trình duyệt có đang chặn LocalStorage hoặc đang dùng cửa sổ ẩn danh không.
+- Không cập nhật được tỷ giá/giá tài sản: ứng dụng vẫn dùng giá đã lưu; thử lại khi có Internet.
+- Trước khi xóa hoặc khôi phục dữ liệu lớn: hãy tải một bản sao lưu JSON trong **Cài đặt**.

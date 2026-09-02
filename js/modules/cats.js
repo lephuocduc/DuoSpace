@@ -40,6 +40,7 @@ class CatsModule {
       });
     }
 
+    this.app.log?.system(existing ? 'Cập nhật cân nặng mèo' : 'Thêm cân nặng mèo', `${cat}: ${val} kg · ${date}`);
     this.app.save();
     if (this.app.charts) this.app.charts.renderCatChart();
     this.renderCatWeightHistory();
@@ -52,7 +53,9 @@ class CatsModule {
     const numVal = parseFloat(val);
     if (isNaN(numVal) || numVal <= 0) return;
     if (this.app.data.catWeights && this.app.data.catWeights[idx]) {
+      const before = this.app.data.catWeights[idx][cat];
       this.app.data.catWeights[idx][cat] = numVal;
+      this.app.log?.system('Cập nhật cân nặng mèo', `${cat === 'mun' ? 'Mun' : 'Bông'}: ${before} kg → ${numVal} kg`);
       this.app.save();
       if (this.app.charts) this.app.charts.renderCatChart();
       this.app.home.updateDynamicInfo();
@@ -61,7 +64,10 @@ class CatsModule {
 
   deleteWeightItem(idx) {
     if (this.app.data.catWeights && this.app.data.catWeights[idx]) {
+      const item = this.app.data.catWeights[idx];
+      if (!confirm(`Xóa dữ liệu cân nặng ngày ${item.date}?`)) return;
       this.app.data.catWeights.splice(idx, 1);
+      this.app.log?.system('Xóa cân nặng mèo', `${item.date} · Mun ${item.mun} kg · Bông ${item.bong} kg`);
       this.app.save();
       if (this.app.charts) this.app.charts.renderCatChart();
       this.renderCatWeightHistory();

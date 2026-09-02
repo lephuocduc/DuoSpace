@@ -92,12 +92,22 @@ class DuoSpaceApp {
         SidebarManager.close();
       }
     });
+    window.addEventListener('error', event => {
+      console.error('DuoSpace runtime error:', event.error || event.message);
+      Utils.notify('Đã xảy ra lỗi. Dữ liệu chưa lưu vẫn giữ trên màn hình; hãy thử lại.', 'error');
+    });
+    window.addEventListener('unhandledrejection', event => {
+      console.error('DuoSpace async error:', event.reason);
+      Utils.notify('Không thể hoàn tất thao tác. Vui lòng kiểm tra kết nối và thử lại.', 'error');
+    });
   }
 
+  /** Lưu trạng thái ứng dụng hiện tại vào LocalStorage. */
   save() {
     this.storage.save(this.data);
   }
 
+  /** Render các mô-đun sau khi dữ liệu thay đổi. */
   render() {
     this.home.render();
     this.todo.render();
@@ -107,6 +117,16 @@ class DuoSpaceApp {
     this.cats.render();
     this.health.render();
     this.log.render();
+  }
+
+  /** Chỉ render các phần bị ảnh hưởng để tránh render toàn bộ dữ liệu. */
+  renderParts(parts = []) {
+    const renderers = {
+      home: () => this.home.render(), todo: () => this.todo.render(), finance: () => this.finance.render(),
+      investment: () => this.investment.render(), motorbike: () => this.motorbike.render(), cats: () => this.cats.render(),
+      health: () => this.health.render(), log: () => this.log.render()
+    };
+    [...new Set(parts)].forEach(part => renderers[part]?.());
   }
 
   renderCategoryList(category, containerId) {
@@ -128,7 +148,7 @@ class DuoSpaceApp {
         <div class="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-1 rounded-lg">
           <div class="flex items-center space-x-2 flex-1">
             <input type="checkbox" onclick="event.stopPropagation()" onchange="window.app.todo.toggleTodo(${realIndex})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
-            <span onclick="window.app.todo.editTodo(${realIndex})" class="text-sm text-gray-800 dark:text-slate-200 flex-1 cursor-pointer">${todo.title}</span>
+            <span onclick="window.app.todo.editTodo(${realIndex})" class="text-sm text-gray-800 dark:text-slate-200 flex-1 cursor-pointer">${Utils.escapeHtml(todo.title)}</span>
           </div>
           <div onclick="window.app.todo.editTodo(${realIndex})" class="text-right cursor-pointer">
             <span class="text-[10px] text-gray-400 dark:text-slate-500 block">${userText}</span>

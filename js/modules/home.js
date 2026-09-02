@@ -107,7 +107,7 @@ class HomeModule {
     container.innerHTML = sortedCategories.map(item => `
       <div class="space-y-1">
         <div class="flex justify-between items-center text-xs">
-          <span class="font-medium text-gray-700 dark:text-slate-300">${item.name}</span>
+          <span class="font-medium text-gray-700 dark:text-slate-300">${Utils.escapeHtml(item.name)}</span>
           <div class="space-x-2">
             <span class="font-bold text-gray-900 dark:text-white">${Utils.formatCurrency(item.amount)}</span>
             <span class="text-[10px] text-gray-400">${item.pct}%</span>
@@ -150,7 +150,7 @@ class HomeModule {
           <div class="flex items-center space-x-3 flex-1">
             <input type="checkbox" onchange="window.app.todo.toggleTodo(${realIdx})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
             <div onclick="window.app.todo.editTodo(${realIdx})" class="flex-1 cursor-pointer">
-              <p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${todo.title}</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${Utils.escapeHtml(todo.title)}</p>
               <p class="text-[11px] text-gray-400 dark:text-slate-500">${todo.category} • ${userText}${createdDate ? ' • 📅 ' + createdDate : ''}</p>
             </div>
           </div>
