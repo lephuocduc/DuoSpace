@@ -55,8 +55,22 @@ Sau khi server báo sẵn sàng ở cổng `3001`, ứng dụng sẽ tự gọi 
 
 Vào **Cài đặt → Dữ liệu & sao lưu** để tải toàn bộ dữ liệu thành tệp JSON hoặc khôi phục từ một bản sao lưu trước đó. Khôi phục sẽ thay thế dữ liệu hiện có. Tại đây cũng có nút xuất toàn bộ thu chi thành tệp CSV, có thể mở bằng Excel hoặc Google Sheets.
 
+## 🔐 Cấu hình Google Authentication (Firebase Auth)
+
+DuoSpace được tích hợp Google Authentication qua Firebase để bảo vệ dữ liệu, kèm cơ chế Whitelist chỉ cho phép đúng 2 tài khoản của Đức và Sương:
+
+1. Truy cập [Firebase Console](https://console.firebase.google.com/) và tạo một Project mới.
+2. Vào **Build → Authentication → Sign-in method**, bấm **Add new provider** và chọn **Google**, sau đó bật **Enable**.
+3. Vào **Project Settings (biểu tượng bánh răng) → General → Your apps**, thêm Web app (`</>`) để lấy mã cấu hình `firebaseConfig`.
+4. Mở file [js/authConfig.js](file:///g:/My%20Drive/L%C3%AA%20Ph%C6%B0%E1%BB%9Bc%20%C4%90%E1%BB%A9c/Personal%20App/js/authConfig.js):
+   - Dán `firebaseConfig` của bạn vào `firebaseConfig`.
+   - Cập nhật đúng địa chỉ Gmail của Đức và Sương trong mảng `allowedUsers`.
+5. Nếu chạy trên tên miền riêng hoặc `localhost`, đảm bảo domain đã được thêm vào **Authentication → Settings → Authorized domains**.
+
 ## 🛠 Khắc phục sự cố
 
 - Không thấy dữ liệu cũ: kiểm tra trình duyệt có đang chặn LocalStorage hoặc đang dùng cửa sổ ẩn danh không.
+- Báo lỗi "Tài khoản không có quyền truy cập": Kiểm tra địa chỉ Gmail đăng nhập đã được thêm chính xác vào `allowedUsers` trong `js/authConfig.js` chưa.
+
 - Không cập nhật được tỷ giá/giá tài sản: ứng dụng vẫn dùng giá đã lưu; thử lại khi có Internet.
 - Trước khi xóa hoặc khôi phục dữ liệu lớn: hãy tải một bản sao lưu JSON trong **Cài đặt**.

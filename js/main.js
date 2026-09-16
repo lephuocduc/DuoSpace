@@ -26,6 +26,8 @@ class DuoSpaceApp {
     };
 
     // Feature Modules
+    this.auth = window.authManager || new AuthModule(this);
+    this.auth.app = this;
     this.home = new HomeModule(this);
     this.todo = new TodoModule(this);
     this.finance = new FinanceModule(this);
@@ -178,7 +180,30 @@ function getDefaultCategoryByTab(tabName) {
 function renderBudgetChart() { if (window.app && window.app.charts) window.app.charts.renderBudgetChart(); }
 function renderAssetAllocationChart() { if (window.app && window.app.charts) window.app.charts.renderAssetAllocationChart(); }
 
+// Global auth helpers for direct inline button calls
+window.duoSignInWithGoogle = function() {
+  if (window.authManager) {
+    window.authManager.signInWithGoogle();
+  } else if (window.duoApp && window.duoApp.auth) {
+    window.duoApp.auth.signInWithGoogle();
+  }
+};
+
+window.duoMockLogin = function(userCode) {
+  if (window.authManager) {
+    window.authManager.mockLogin(userCode);
+  } else if (window.duoApp && window.duoApp.auth) {
+    window.duoApp.auth.mockLogin(userCode);
+  }
+};
+
+// Khởi tạo AuthManager ngay lập tức để màn hình login nhận lệnh bấm tức thì
+window.authManager = new AuthModule(null);
+
 // Initialize DuoSpace Application on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new DuoSpaceApp();
+  window.duoApp = window.app;
+  window.duoApp.auth = window.authManager;
+  window.authManager.app = window.duoApp;
 });
