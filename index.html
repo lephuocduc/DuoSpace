@@ -948,7 +948,7 @@
 
     <!-- ADD & EDIT MODAL -->
     <div id="addModal" onclick="closeAddModal()"
-      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end">
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
       <div onclick="event.stopPropagation()"
         class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-2">
@@ -1038,7 +1038,7 @@
             <div>
               <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Category (Danh
                 mục)</label>
-              <select id="expenseCategory" onchange="onExpenseCategoryChange()"
+              <select id="expenseCategory"
                 class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 <option value="🍜 Ăn uống">🍜 Ăn uống</option>
                 <option value="🏠 Nhà cửa">🏠 Nhà cửa</option>
@@ -1059,43 +1059,6 @@
                 <option value="S">Sương</option>
               </select>
             </div>
-          </div>
-          <div id="expenseVehicleFields" class="hidden space-y-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 p-3 border border-sky-100 dark:border-sky-900/50">
-            <p class="text-xs font-bold text-sky-700 dark:text-sky-300">Chi tiết xe — sẽ thêm vào lịch sử bảo dưỡng</p>
-            <div class="grid grid-cols-2 gap-2">
-              <select id="expenseBike" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm"><option value="NMAX">NMAX</option><option value="Grande">Grande</option></select>
-              <input id="expenseOdo" type="number" placeholder="Số ODO (km)" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-            </div>
-            <select id="expenseVehicleItem" onchange="onExpenseVehicleItemChange()" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-              <option value="Thay nhớt máy">🛢️ Thay nhớt máy</option>
-              <option value="Thay nhớt hộp số">⚙️ Thay nhớt hộp số</option>
-              <option value="Thay lọc gió">💨 Thay lọc gió</option>
-              <option value="Thay bugi">⚡ Thay bugi</option>
-              <option value="Thay lốp xe">🔘 Thay lốp xe</option>
-              <option value="Bảo dưỡng toàn bộ">🔧 Bảo dưỡng toàn bộ</option>
-              <option value="Khác">✏️ Khác (tự nhập)</option>
-            </select>
-            <input id="expenseVehicleCustomItem" type="text" placeholder="Nhập hạng mục bảo dưỡng" class="hidden w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-          </div>
-          <div id="expenseInvestmentFields" class="hidden space-y-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 p-3 border border-indigo-100 dark:border-indigo-900/50">
-            <p class="text-xs font-bold text-indigo-700 dark:text-indigo-300">Thông tin tài sản đầu tư</p>
-            <select id="expenseInvestName" onchange="onExpenseInvestmentNameChange()" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-              <option value="BTC">Bitcoin (BTC)</option><option value="BNB">Binance Coin (BNB)</option><option value="Vàng DOJI / SJC (VND/lượng)">Vàng DOJI / SJC</option><option value="Vàng thế giới (XAU/USD)">Vàng thế giới</option><option value="Tiết kiệm USD">Tiết kiệm USD</option><option value="Tiết kiệm VNĐ">Tiết kiệm VNĐ</option><option value="Khác">Khác (nhập tên)</option>
-            </select>
-            <input id="expenseInvestCustomName" type="text" placeholder="Tên tài sản" class="hidden w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-            <div class="grid grid-cols-2 gap-2">
-              <input id="expenseInvestQuantity" type="number" step="any" oninput="updateExpenseInvestmentAmount()" placeholder="Số lượng" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-              <input id="expenseInvestBuyPrice" type="number" step="any" oninput="updateExpenseInvestmentAmount()" placeholder="Giá mua / đơn vị" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div class="space-y-1">
-                <button type="button" onclick="fetchPriceForExpenseInvestment()" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"><i class="fa-solid fa-rotate text-[9px]"></i> Lấy giá thị trường</button>
-                <input id="expenseInvestCurrentPrice" type="number" step="any" placeholder="Giá hiện tại / đơn vị" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-              </div>
-              <input id="expenseInvestTarget" type="number" step="1" placeholder="Mục tiêu (%)" class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm">
-            </div>
-            <p id="expenseInvestmentAmountHint" class="text-[11px] text-indigo-700 dark:text-indigo-300 font-medium">Số tiền chi = số lượng × giá mua/đơn vị.</p>
-            <label class="flex items-center gap-2 text-xs"><input id="expenseInvestIsUsd" type="checkbox" class="w-4 h-4"> Giá theo USD</label>
           </div>
           <div id="expenseDescriptionRow">
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả khoản chi</label>
