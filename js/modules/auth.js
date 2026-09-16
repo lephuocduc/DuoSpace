@@ -47,21 +47,6 @@ class AuthModule {
   }
 
   bindEvents() {
-    const loginBtn = document.getElementById('googleSignInBtn');
-    if (loginBtn) {
-      loginBtn.addEventListener('click', () => this.signInWithGoogle());
-    }
-
-    const demoLoginDucBtn = document.getElementById('demoLoginDucBtn');
-    if (demoLoginDucBtn) {
-      demoLoginDucBtn.addEventListener('click', () => this.mockLogin('Đ'));
-    }
-
-    const demoLoginSuongBtn = document.getElementById('demoLoginSuongBtn');
-    if (demoLoginSuongBtn) {
-      demoLoginSuongBtn.addEventListener('click', () => this.mockLogin('S'));
-    }
-
     const logoutSidebarBtn = document.getElementById('logoutSidebarBtn');
     if (logoutSidebarBtn) {
       logoutSidebarBtn.addEventListener('click', () => this.signOut());
@@ -285,6 +270,8 @@ class AuthModule {
             </span>
           </div>
         `;
+      }
+
       // Highlight header avatar
       const ducHeader = document.getElementById('headerAvatarDuc');
       const suongHeader = document.getElementById('headerAvatarSuong');
