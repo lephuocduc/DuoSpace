@@ -242,7 +242,8 @@ export default {
               priority: t.priority,
               notes: t.notes || "",
               done: Boolean(t.done),
-              date: t.date
+              date: t.date,
+              createdAt: t.created_at || t.date
             })),
             incomes,
             expenses,
@@ -292,10 +293,11 @@ export default {
           statements.push(db.prepare("DELETE FROM todos"));
           for (const item of payload.todos) {
             const id = item.id || `todo-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = item.createdAt || item.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO todos (id, title, category, user, priority, notes, done, date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO todos (id, title, category, user, priority, notes, done, date, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 id,
                 item.title || "",
@@ -304,7 +306,8 @@ export default {
                 item.priority || "medium",
                 item.notes || "",
                 item.done ? 1 : 0,
-                item.date || new Date().toISOString()
+                item.date || new Date().toISOString(),
+                createdAt
               )
             );
           }
