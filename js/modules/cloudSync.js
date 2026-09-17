@@ -25,6 +25,12 @@ class CloudSync {
       const headers = { 'Content-Type': 'application/json' };
       if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
 
+      // Lấy Google ID Token từ AuthModule
+      const idToken = await window.authManager?.getIdToken();
+      if (idToken) {
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
+
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'GET',
         headers
@@ -74,6 +80,12 @@ class CloudSync {
         'X-User-Code': safeUserCode
       };
       if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
+
+      // Lấy Google ID Token từ AuthModule
+      const idToken = await window.authManager?.getIdToken();
+      if (idToken) {
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
 
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'POST',

@@ -128,6 +128,22 @@ class AuthModule {
     return true;
   }
 
+  /**
+   * Lấy Firebase Auth ID Token để xác thực các request gửi lên Cloudflare Worker API
+   * @param {boolean} forceRefresh - Bắt buộc làm mới token nếu cần
+   * @returns {Promise<string|null>}
+   */
+  async getIdToken(forceRefresh = false) {
+    try {
+      if (this.auth && this.auth.currentUser) {
+        return await this.auth.currentUser.getIdToken(forceRefresh);
+      }
+    } catch (err) {
+      console.warn('[DuoSpace Auth] Không thể lấy ID Token:', err);
+    }
+    return null;
+  }
+
   async rejectAccess(user, message) {
     console.warn('[DuoSpace Auth] Truy cập bị từ chối:', user?.email);
     this.showAuthError(message);
@@ -213,6 +229,10 @@ class AuthModule {
     this.updateProfileUI(this.currentUser, this.matchedProfile);
     if (typeof Utils !== 'undefined' && Utils.notify) {
       Utils.notify(`Chào mừng ${this.matchedProfile?.name || this.currentUser.displayName}!`, 'success');
+    }
+    // Kích hoạt đồng bộ Cloudflare D1 khi đăng nhập thành công
+    if (this.app && this.app.sync && this.app.sync.isEnabled) {
+      this.app.sync.pullFromCloud();
     }
   }
 

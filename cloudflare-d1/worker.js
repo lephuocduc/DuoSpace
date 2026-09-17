@@ -9,6 +9,17 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-Code, X-App-Secret"
 };
 
+// Cấu hình bảo mật DuoSpace
+const FIREBASE_PROJECT_ID = "duospace-94616";
+const ALLOWED_EMAILS = [
+  "leducst1@gmail.com",
+  "suongtranst1@gmail.com"
+];
+
+// Cache Google Public Keys trong bộ nhớ Worker instance
+let cachedJwks = null;
+let cachedJwksExpiry = 0;
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -19,17 +30,135 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+function base64UrlDecode(str) {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) base64 += "=";
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function base64UrlToUint8Array(str) {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) base64 += "=";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function getGoogleJwks() {
+  const now = Date.now();
+  if (cachedJwks && now < cachedJwksExpiry) {
+    return cachedJwks;
+  }
+  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Google JWKS: ${res.status}`);
+  }
+  const jwks = await res.json();
+  // Cache trong 1 giờ
+  cachedJwks = jwks;
+  cachedJwksExpiry = now + 3600 * 1000;
+  return jwks;
+}
+
+/**
+ * Xác thực Firebase Auth ID Token với Google public certificates
+ * Đảm bảo: chữ ký đúng RS256, chưa hết hạn, đúng project, và email thuộc Whitelist.
+ */
+async function authenticateRequest(request, env) {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { ok: false, status: 401, error: "Unauthorized: Missing or invalid Authorization header (Bearer token required)" };
+  }
+
+  const token = authHeader.substring(7).trim();
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    return { ok: false, status: 401, error: "Unauthorized: Invalid JWT format" };
+  }
+
+  let header, payload;
+  try {
+    header = JSON.parse(base64UrlDecode(parts[0]));
+    payload = JSON.parse(base64UrlDecode(parts[1]));
+  } catch (e) {
+    return { ok: false, status: 401, error: "Unauthorized: Malformed JWT token" };
+  }
+
+  // 1. Kiểm tra claims cơ bản
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (!payload.exp || payload.exp < nowSec) {
+    return { ok: false, status: 401, error: "Unauthorized: Token has expired" };
+  }
+
+  const expectedIssuer = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
+  if (payload.iss !== expectedIssuer) {
+    return { ok: false, status: 401, error: "Unauthorized: Invalid token issuer" };
+  }
+
+  if (payload.aud !== FIREBASE_PROJECT_ID) {
+    return { ok: false, status: 401, error: "Unauthorized: Invalid token audience" };
+  }
+
+  // 2. Kiểm tra email trong Whitelist (Chỉ Đức và Sương)
+  const userEmail = (payload.email || "").toLowerCase().trim();
+  if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
+    return { ok: false, status: 403, error: `Forbidden: Email '${userEmail}' is not authorized to access DuoSpace database` };
+  }
+
+  // 3. Xác thực chữ ký mã hóa RS256 với Google Public JWKS
+  try {
+    const jwks = await getGoogleJwks();
+    const keyMatch = jwks.keys?.find(k => k.kid === header.kid);
+    if (!keyMatch) {
+      return { ok: false, status: 401, error: "Unauthorized: Unknown signing key kid" };
+    }
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "jwk",
+      keyMatch,
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const encoder = new TextEncoder();
+    const dataToVerify = encoder.encode(`${parts[0]}.${parts[1]}`);
+    const signatureBytes = base64UrlToUint8Array(parts[2]);
+
+    const isValid = await crypto.subtle.verify(
+      "RSASSA-PKCS1-v1_5",
+      cryptoKey,
+      signatureBytes,
+      dataToVerify
+    );
+
+    if (!isValid) {
+      return { ok: false, status: 401, error: "Unauthorized: Invalid token signature" };
+    }
+  } catch (err) {
+    console.error("Token signature verification failed:", err);
+    return { ok: false, status: 401, error: `Unauthorized: Token verification failed (${err.message})` };
+  }
+
+  return { ok: true, user: payload };
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: CORS_HEADERS });
     }
 
-    // Kiểm tra Secret Key bảo vệ API
-    const expectedSecret = env.APP_SECRET || "0da0431f2db64e72a951af2a54198237";
-    const clientSecret = request.headers.get("X-App-Secret");
-    if (!clientSecret || clientSecret !== expectedSecret) {
-      return jsonResponse({ error: "Unauthorized: Invalid or missing X-App-Secret" }, 401);
+    // Xác thực Google Firebase Auth Token (Chỉ Đức & Sương)
+    const authResult = await authenticateRequest(request, env);
+    if (!authResult.ok) {
+      return jsonResponse({ error: authResult.error }, authResult.status);
     }
 
     const url = new URL(request.url);
