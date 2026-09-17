@@ -35,9 +35,9 @@ class CloudSync {
         // Merge dữ liệu từ Cloud vào LocalStorage
         const merged = this.storage.mergeWithDefaults(result.data);
         this.storage.save(merged);
-        if (window.app && typeof window.app.renderAll === 'function') {
+        if (window.app && typeof window.app.render === 'function') {
           window.app.data = merged;
-          window.app.renderAll();
+          window.app.render();
         }
         this.setSyncStatus('success', 'Đã đồng bộ từ Cloud');
         return true;

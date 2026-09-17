@@ -98,3 +98,14 @@ CREATE TABLE IF NOT EXISTS bike_maintenances (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_bike_date ON bike_maintenances(date);
+
+-- 9. Nhật ký hoạt động của hệ thống (System Logs)
+CREATE TABLE IF NOT EXISTS system_logs (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    notes TEXT,
+    type TEXT DEFAULT 'system',
+    date DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_logs_date ON system_logs(date);

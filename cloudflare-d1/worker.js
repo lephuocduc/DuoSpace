@@ -51,7 +51,8 @@ export default {
           netWorth,
           budgets,
           cats,
-          bikes
+          bikes,
+          logs
         ] = await Promise.all([
           db.prepare("SELECT * FROM app_state WHERE id = 'duospace_global_state'").first(),
           db.prepare("SELECT * FROM todos ORDER BY created_at DESC").all(),
@@ -60,7 +61,8 @@ export default {
           db.prepare("SELECT date, value FROM net_worth_history ORDER BY date ASC").all(),
           db.prepare("SELECT * FROM monthly_budgets").all(),
           db.prepare("SELECT date, mun, bong FROM cat_weights ORDER BY date ASC").all(),
-          db.prepare("SELECT * FROM bike_maintenances ORDER BY date DESC").all()
+          db.prepare("SELECT * FROM bike_maintenances ORDER BY date DESC").all(),
+          db.prepare("SELECT id, title, notes, type, date FROM system_logs ORDER BY date DESC LIMIT 200").all()
         ]);
 
         const expenses = [];
@@ -118,7 +120,14 @@ export default {
             netWorthHistory: netWorth.results || [],
             monthlyBudgets: budgets.results || [],
             catWeights: cats.results || [],
-            bikeMaintenances: bikes.results || []
+            bikeMaintenances: bikes.results || [],
+            logs: (logs.results || []).map(l => ({
+              id: l.id,
+              title: l.title,
+              notes: l.notes || "",
+              type: l.type || "system",
+              date: l.date
+            }))
           }
         });
       }
@@ -275,6 +284,20 @@ export default {
                 INSERT INTO bike_maintenances (id, bike, title, odo, cost, date, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `).bind(id, bm.bike || "NMAX", bm.title || "", bm.odo || 0, bm.cost || 0, bm.date || "", bm.notes || "")
+            );
+          }
+        }
+
+        // Sync System Logs
+        if (Array.isArray(payload.logs)) {
+          statements.push(db.prepare("DELETE FROM system_logs"));
+          for (const l of payload.logs.slice(-200)) {
+            const id = l.id || `log-${Math.random().toString(36).substr(2, 9)}`;
+            statements.push(
+              db.prepare(`
+                INSERT INTO system_logs (id, title, notes, type, date)
+                VALUES (?, ?, ?, ?, ?)
+              `).bind(id, l.title || "", l.notes || "", l.type || "system", l.date || new Date().toISOString())
             );
           }
         }

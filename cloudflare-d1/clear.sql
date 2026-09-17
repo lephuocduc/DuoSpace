@@ -6,6 +6,7 @@ DELETE FROM net_worth_history;
 DELETE FROM monthly_budgets;
 DELETE FROM cat_weights;
 DELETE FROM bike_maintenances;
+DELETE FROM system_logs;
 
 -- Đặt lại app state mặc định ban đầu
 INSERT OR REPLACE INTO app_state (id, usd_rate, settings_json, updated_by)
