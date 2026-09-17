@@ -43,14 +43,23 @@ class AuthModule {
 
         // Lắng nghe thay đổi trạng thái đăng nhập
         this.auth.onAuthStateChanged((user) => {
+          this.authStateResolved = true;
           this.handleAuthStateChange(user);
-          if (!this.authStateResolved) {
-            this.authStateResolved = true;
-            if (this._resolveAuthReady) this._resolveAuthReady(user);
-          }
+          if (this._resolveAuthReady) this._resolveAuthReady(user);
         });
+
+        // Fallback: nếu sau 3s mạng chậm hoặc không có phản hồi, hiển thị ngay nút đăng nhập
+        setTimeout(() => {
+          if (!this.authStateResolved && !this.currentUser) {
+            this.authStateResolved = true;
+            this.showLoginScreen();
+            if (this._resolveAuthReady) this._resolveAuthReady(null);
+          }
+        }, 3000);
       } else {
         console.error('[DuoSpace Auth] Thư viện Firebase SDK chưa được nạp.');
+        this.authStateResolved = true;
+        this.showLoginScreen();
         if (this._resolveAuthReady) this._resolveAuthReady(null);
       }
     } catch (err) {
