@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS app_state (
     id TEXT PRIMARY KEY,               -- e.g. 'duospace_global_state'
     usd_rate REAL DEFAULT 25400,
     settings_json TEXT,                -- Settings: { munBreed, bongBreed, nmaxPlate, nmaxOdo, etc. }
+    version INTEGER DEFAULT 1,         -- Tăng dần mỗi lần ghi để client kiểm tra nhanh
+    checksum TEXT,                     -- Mã băm state để so khớp ETag
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_by TEXT                    -- 'Đ' hoặc 'S' hoặc email người cập nhật gần nhất
 );

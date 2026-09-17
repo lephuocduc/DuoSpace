@@ -6,7 +6,8 @@
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-Code, X-App-Secret"
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-Code, X-App-Secret, If-None-Match, If-Modified-Since",
+  "Access-Control-Expose-Headers": "ETag, X-Data-Version, X-Updated-At"
 };
 
 // Cấu hình bảo mật DuoSpace
@@ -20,12 +21,13 @@ const ALLOWED_EMAILS = [
 let cachedJwks = null;
 let cachedJwksExpiry = 0;
 
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, customHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "Content-Type": "application/json",
-      ...CORS_HEADERS
+      ...CORS_HEADERS,
+      ...customHeaders
     }
   });
 }
@@ -170,8 +172,62 @@ export default {
     }
 
     try {
-      // 1. GET /api/sync: Lấy toàn bộ dữ liệu từ D1 về client (merge với local)
+      // 1. GET /api/sync/check: Kiểm tra nhanh phiên bản và thay đổi trên D1 (chỉ tốn 1 read nhẹ)
+      if (request.method === "GET" && path === "/api/sync/check") {
+        const clientVersion = parseInt(url.searchParams.get("v") || "0", 10);
+        const ifNoneMatch = request.headers.get("If-None-Match");
+        const appState = await db.prepare("SELECT version, checksum, updated_at, updated_by FROM app_state WHERE id = 'duospace_global_state'").first();
+
+        const currentVersion = appState ? (appState.version || 1) : 1;
+        const currentEtag = `W/"${currentVersion}-${appState?.checksum || 'v1'}"`;
+
+        if (ifNoneMatch && ifNoneMatch === currentEtag) {
+          return new Response(null, {
+            status: 304,
+            headers: {
+              ...CORS_HEADERS,
+              "ETag": currentEtag,
+              "X-Data-Version": String(currentVersion),
+              "X-Updated-At": appState?.updated_at || ""
+            }
+          });
+        }
+
+        const isChanged = !appState || (clientVersion !== currentVersion);
+        return jsonResponse({
+          success: true,
+          changed: isChanged,
+          version: currentVersion,
+          updatedAt: appState?.updated_at || null,
+          updatedBy: appState?.updated_by || null
+        }, 200, {
+          "ETag": currentEtag,
+          "X-Data-Version": String(currentVersion),
+          "X-Updated-At": appState?.updated_at || ""
+        });
+      }
+
+      // 2. GET /api/sync: Lấy toàn bộ dữ liệu từ D1 về client (merge với local)
       if (request.method === "GET" && path === "/api/sync") {
+        const ifNoneMatch = request.headers.get("If-None-Match");
+
+        // Kiểm tra ETag trước để tránh đọc 10 bảng nếu không có gì thay đổi
+        const stateCheck = await db.prepare("SELECT version, checksum, updated_at, updated_by FROM app_state WHERE id = 'duospace_global_state'").first();
+        const currentVersion = stateCheck ? (stateCheck.version || 1) : 1;
+        const currentEtag = `W/"${currentVersion}-${stateCheck?.checksum || 'v1'}"`;
+
+        if (ifNoneMatch && ifNoneMatch === currentEtag) {
+          return new Response(null, {
+            status: 304,
+            headers: {
+              ...CORS_HEADERS,
+              "ETag": currentEtag,
+              "X-Data-Version": String(currentVersion),
+              "X-Updated-At": stateCheck?.updated_at || ""
+            }
+          });
+        }
+
         const [
           appState,
           todos,
@@ -231,8 +287,12 @@ export default {
           try { parsedSettings = JSON.parse(appState.settings_json); } catch(e){}
         }
 
+        const dataVersion = appState ? (appState.version || 1) : 1;
+        const responseEtag = `W/"${dataVersion}-${appState?.checksum || 'v1'}"`;
+
         return jsonResponse({
           success: true,
+          version: dataVersion,
           data: {
             usdRate: appState?.usd_rate || 25400,
             settings: parsedSettings,
@@ -275,33 +335,42 @@ export default {
               date: l.date
             }))
           }
+        }, 200, {
+          "ETag": responseEtag,
+          "X-Data-Version": String(dataVersion),
+          "X-Updated-At": appState?.updated_at || ""
         });
       }
 
-      // 2. POST /api/sync: Đồng bộ toàn bộ state từ client lên D1 (batch transaction)
+      // 3. POST /api/sync: Đồng bộ toàn bộ state từ client lên D1 (batch transaction có tăng version)
       if (request.method === "POST" && path === "/api/sync") {
         const payload = await request.json();
         const userCode = request.headers.get("X-User-Code") || payload.userCode || "Đ";
         const statements = [];
 
-        // Save app state
-        if (payload.settings || payload.usdRate) {
-          statements.push(
-            db.prepare(`
-              INSERT INTO app_state (id, usd_rate, settings_json, updated_by, updated_at)
-              VALUES ('duospace_global_state', ?, ?, ?, CURRENT_TIMESTAMP)
-              ON CONFLICT(id) DO UPDATE SET
-                usd_rate = excluded.usd_rate,
-                settings_json = excluded.settings_json,
-                updated_by = excluded.updated_by,
-                updated_at = CURRENT_TIMESTAMP
-            `).bind(
-              payload.usdRate || 25400,
-              JSON.stringify(payload.settings || {}),
-              userCode
-            )
-          );
-        }
+        // Tạo checksum mới từ mốc thời gian và tổng lượng item
+        const countItems = (payload.todos?.length || 0) + (payload.expenses?.length || 0) + (payload.incomes?.length || 0);
+        const newChecksum = `${Date.now()}-${countItems}`;
+
+        // Save app state (luôn tăng version để các client khác nhận biết thay đổi)
+        statements.push(
+          db.prepare(`
+            INSERT INTO app_state (id, usd_rate, settings_json, version, checksum, updated_by, updated_at)
+            VALUES ('duospace_global_state', ?, ?, 1, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET
+              usd_rate = excluded.usd_rate,
+              settings_json = excluded.settings_json,
+              version = COALESCE(app_state.version, 0) + 1,
+              checksum = excluded.checksum,
+              updated_by = excluded.updated_by,
+              updated_at = CURRENT_TIMESTAMP
+          `).bind(
+            payload.usdRate || 25400,
+            JSON.stringify(payload.settings || {}),
+            newChecksum,
+            userCode
+          )
+        );
 
         // Sync Todos
         if (Array.isArray(payload.todos)) {
@@ -484,7 +553,21 @@ export default {
           await db.batch(statements);
         }
 
-        return jsonResponse({ success: true, message: "Sync successful" });
+        // Lấy lại version mới nhất sau khi update
+        const updatedState = await db.prepare("SELECT version, checksum, updated_at FROM app_state WHERE id = 'duospace_global_state'").first();
+        const finalVersion = updatedState ? (updatedState.version || 1) : 1;
+        const finalEtag = `W/"${finalVersion}-${updatedState?.checksum || newChecksum}"`;
+
+        return jsonResponse({
+          success: true,
+          message: "Sync successful",
+          version: finalVersion,
+          updatedAt: updatedState?.updated_at || new Date().toISOString()
+        }, 200, {
+          "ETag": finalEtag,
+          "X-Data-Version": String(finalVersion),
+          "X-Updated-At": updatedState?.updated_at || ""
+        });
       }
 
       return jsonResponse({ error: "Endpoint not found" }, 404);
