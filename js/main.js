@@ -98,6 +98,12 @@ class DuoSpaceApp {
         ModalManager.closeAddModal();
         ModalManager.closeCatHistoryModal();
         SidebarManager.close();
+        if (this.investment && typeof this.investment.closeSellModal === 'function') {
+          this.investment.closeSellModal();
+        }
+        if (this.motorbike && typeof this.motorbike.closePartsStatusModal === 'function') {
+          this.motorbike.closePartsStatusModal();
+        }
       }
     });
     window.addEventListener('error', event => {

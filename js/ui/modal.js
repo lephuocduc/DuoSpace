@@ -82,11 +82,20 @@ const ModalManager = {
     if (!modal) return;
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform').classList.remove('translate-y-full');
+
+    if (typeof Utils !== 'undefined' && Utils.lockScroll) {
+      Utils.lockScroll();
+    }
   },
 
   closeAddModal() {
     const modal = document.getElementById('addModal');
     if (!modal) return;
+    if (!modal.classList.contains('opacity-0')) {
+      if (typeof Utils !== 'undefined' && Utils.unlockScroll) {
+        Utils.unlockScroll();
+      }
+    }
     modal.classList.add('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform').classList.add('translate-y-full');
     this.editingIndex = -1;
@@ -118,12 +127,20 @@ const ModalManager = {
     if (modal) {
       modal.classList.remove('opacity-0', 'pointer-events-none');
       modal.querySelector('.transform').classList.remove('translate-y-full');
+      if (typeof Utils !== 'undefined' && Utils.lockScroll) {
+        Utils.lockScroll();
+      }
     }
   },
 
   closeCatHistoryModal() {
     const modal = document.getElementById('catHistoryModal');
     if (modal) {
+      if (!modal.classList.contains('opacity-0')) {
+        if (typeof Utils !== 'undefined' && Utils.unlockScroll) {
+          Utils.unlockScroll();
+        }
+      }
       modal.classList.add('opacity-0', 'pointer-events-none');
       modal.querySelector('.transform').classList.add('translate-y-full');
     }

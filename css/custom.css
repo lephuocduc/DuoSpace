@@ -5,6 +5,12 @@ body {
   user-select: none;
 }
 
+/* Khóa cuộn nền khi mở modal hoặc sidebar */
+.scroll-locked {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
 .sidebar-transition {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

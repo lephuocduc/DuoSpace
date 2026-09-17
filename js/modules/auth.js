@@ -260,12 +260,20 @@ class AuthModule {
     if (screen) {
       screen.style.display = 'flex';
       screen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      if (typeof Utils !== 'undefined' && Utils.lockScroll) {
+        Utils.lockScroll();
+      }
     }
   }
 
   hideLoginScreen() {
     const screen = document.getElementById('loginOverlay');
     if (screen) {
+      if (screen.style.display !== 'none' && !screen.classList.contains('hidden')) {
+        if (typeof Utils !== 'undefined' && Utils.unlockScroll) {
+          Utils.unlockScroll();
+        }
+      }
       screen.style.display = 'none';
       screen.classList.add('hidden', 'opacity-0', 'pointer-events-none');
     }

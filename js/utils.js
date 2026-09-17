@@ -8,6 +8,29 @@ const Utils = {
   sanitizeText(value, maxLength = 500) {
     return String(value || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
   },
+  lockCount: 0,
+  lockScroll() {
+    this.lockCount++;
+    if (this.lockCount === 1) {
+      document.body.classList.add('scroll-locked');
+      const mainContainer = document.getElementById('mainScrollContainer');
+      if (mainContainer) mainContainer.classList.add('scroll-locked');
+    }
+  },
+  unlockScroll() {
+    this.lockCount = Math.max(0, this.lockCount - 1);
+    if (this.lockCount === 0) {
+      document.body.classList.remove('scroll-locked');
+      const mainContainer = document.getElementById('mainScrollContainer');
+      if (mainContainer) mainContainer.classList.remove('scroll-locked');
+    }
+  },
+  forceUnlockScroll() {
+    this.lockCount = 0;
+    document.body.classList.remove('scroll-locked');
+    const mainContainer = document.getElementById('mainScrollContainer');
+    if (mainContainer) mainContainer.classList.remove('scroll-locked');
+  },
   notify(message, type = 'error') {
     const toast = document.getElementById('appToast');
     if (!toast) return alert(message);

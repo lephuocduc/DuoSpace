@@ -864,11 +864,19 @@ class InvestmentModule {
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform')?.classList.remove('translate-y-full');
+    if (typeof Utils !== 'undefined' && Utils.lockScroll) {
+      Utils.lockScroll();
+    }
   }
 
   closeSellModal() {
     const modal = document.getElementById('sellAssetModal');
     if (!modal) return;
+    if (!modal.classList.contains('opacity-0')) {
+      if (typeof Utils !== 'undefined' && Utils.unlockScroll) {
+        Utils.unlockScroll();
+      }
+    }
     modal.classList.add('opacity-0', 'pointer-events-none');
     modal.querySelector('.transform')?.classList.add('translate-y-full');
   }
