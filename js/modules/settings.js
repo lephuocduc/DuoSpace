@@ -30,19 +30,30 @@ class SettingsModule {
   importBackup(file) {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = event => {
+    reader.onload = async event => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!data || !Array.isArray(data.todos) || !Array.isArray(data.expenses) || !Array.isArray(data.incomes)) {
+        if (!data || typeof data !== 'object') {
           throw new Error('Tệp không đúng định dạng sao lưu DuoSpace.');
         }
-        if (!confirm('Khôi phục sẽ thay thế toàn bộ dữ liệu hiện có. Bạn có chắc chắn?')) return;
+        if (!confirm(`Khôi phục từ tệp "${file.name}" sẽ thay thế toàn bộ dữ liệu hiện có trên máy và Cloud. Bạn có chắc chắn?`)) return;
         this.app.data = this.app.storage.mergeWithDefaults(data);
         this.app.log?.system('Khôi phục bản sao lưu', `Đã khôi phục dữ liệu từ tệp ${file.name}`);
         this.app.save();
         this.app.render();
-        alert('Đã khôi phục bản sao lưu thành công.');
+
+        // Đẩy thẳng lên Cloudflare D1 để đồng bộ tức thì
+        if (this.app.sync && this.app.sync.isEnabled) {
+          await this.app.sync.pushToCloud();
+        }
+
+        if (typeof Utils !== 'undefined' && Utils.notify) {
+          Utils.notify('Đã khôi phục và đồng bộ bản sao lưu thành công!', 'success');
+        } else {
+          alert('Đã khôi phục bản sao lưu thành công.');
+        }
       } catch (error) {
+        console.error('Import backup error:', error);
         alert(`Không thể khôi phục bản sao lưu: ${error.message}`);
       }
     };

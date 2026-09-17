@@ -109,3 +109,17 @@ CREATE TABLE IF NOT EXISTS system_logs (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_logs_date ON system_logs(date);
+
+-- 10. Nhật ký sức khỏe & chỉ số cá nhân Đức & Sương (Health Logs)
+CREATE TABLE IF NOT EXISTS health_logs (
+    id TEXT PRIMARY KEY,
+    user TEXT NOT NULL,                -- 'Đ' hoặc 'S'
+    date DATE NOT NULL,
+    weight REAL,                       -- Cân nặng (kg)
+    height REAL,                       -- Chiều cao (cm)
+    water_ml INTEGER DEFAULT 0,        -- Lượng nước uống (ml)
+    steps INTEGER DEFAULT 0,           -- Số bước chân
+    notes TEXT,                        -- Ghi chú sức khỏe / triệu chứng
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_health_user_date ON health_logs(user, date);

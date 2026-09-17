@@ -181,7 +181,8 @@ export default {
           budgets,
           cats,
           bikes,
-          logs
+          logs,
+          healthLogs
         ] = await Promise.all([
           db.prepare("SELECT * FROM app_state WHERE id = 'duospace_global_state'").first(),
           db.prepare("SELECT * FROM todos ORDER BY created_at DESC").all(),
@@ -191,7 +192,8 @@ export default {
           db.prepare("SELECT * FROM monthly_budgets").all(),
           db.prepare("SELECT date, mun, bong FROM cat_weights ORDER BY date ASC").all(),
           db.prepare("SELECT * FROM bike_maintenances ORDER BY date DESC").all(),
-          db.prepare("SELECT id, title, notes, type, date FROM system_logs ORDER BY date DESC LIMIT 200").all()
+          db.prepare("SELECT id, title, notes, type, date FROM system_logs ORDER BY date DESC LIMIT 200").all(),
+          db.prepare("SELECT * FROM health_logs ORDER BY date DESC").all()
         ]);
 
         const expenses = [];
@@ -252,6 +254,17 @@ export default {
             monthlyBudgets: budgets.results || [],
             catWeights: cats.results || [],
             bikeMaintenances: bikes.results || [],
+            healthLogs: (healthLogs.results || []).map(h => ({
+              id: h.id,
+              user: h.user,
+              date: h.date,
+              weight: h.weight,
+              height: h.height,
+              waterMl: h.water_ml,
+              steps: h.steps,
+              notes: h.notes || "",
+              createdAt: h.created_at
+            })),
             logs: (logs.results || []).map(l => ({
               id: l.id,
               title: l.title,
@@ -419,6 +432,31 @@ export default {
                 INSERT INTO bike_maintenances (id, bike, title, odo, cost, date, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `).bind(id, bm.bike || "NMAX", bm.title || "", bm.odo || 0, bm.cost || 0, bm.date || "", bm.notes || "")
+            );
+          }
+        }
+
+        // Sync Health Logs
+        if (Array.isArray(payload.healthLogs)) {
+          statements.push(db.prepare("DELETE FROM health_logs"));
+          for (const h of payload.healthLogs) {
+            const id = h.id || `health-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = h.createdAt || h.date || new Date().toISOString();
+            statements.push(
+              db.prepare(`
+                INSERT INTO health_logs (id, user, date, weight, height, water_ml, steps, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `).bind(
+                id,
+                h.user || "Đ",
+                h.date || new Date().toISOString().slice(0, 10),
+                h.weight !== undefined && h.weight !== null ? Number(h.weight) : null,
+                h.height !== undefined && h.height !== null ? Number(h.height) : null,
+                Number(h.waterMl) || 0,
+                Number(h.steps) || 0,
+                h.notes || "",
+                createdAt
+              )
             );
           }
         }

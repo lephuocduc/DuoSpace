@@ -38,6 +38,7 @@ class Storage {
       bikeMaintenances: Array.isArray(saved.bikeMaintenances) ? saved.bikeMaintenances : defaults.bikeMaintenances,
       catWeights: Array.isArray(saved.catWeights) ? saved.catWeights : defaults.catWeights,
       monthlyBudgets: Array.isArray(saved.monthlyBudgets) ? saved.monthlyBudgets : defaults.monthlyBudgets,
+      healthLogs: Array.isArray(saved.healthLogs) ? saved.healthLogs : (defaults.healthLogs || []),
       logs: Array.isArray(saved.logs) ? saved.logs : defaults.logs
     };
   }
@@ -54,6 +55,7 @@ class Storage {
       netWorthHistory: [],
       monthlyBudgets: [],
       catWeights: [],
+      healthLogs: [],
       logs: [],
       settings: {
         munBreed: "Mèo Cưng",

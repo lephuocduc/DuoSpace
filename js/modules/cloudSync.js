@@ -119,18 +119,49 @@ class CloudSync {
     return false;
   }
 
+  // Đồng bộ thủ công khi người dùng bấm trực tiếp vào nút Cloud ở header
+  async manualSync() {
+    if (this.isSyncing) return;
+    if (!this.isEnabled) {
+      if (typeof Utils !== 'undefined' && Utils.notify) {
+        Utils.notify('Cloudflare D1 chưa được kích hoạt', 'warning');
+      }
+      return;
+    }
+
+    try {
+      this.setSyncStatus('loading', 'Đang đồng bộ...');
+      const success = await this.pullFromCloud();
+      if (success) {
+        if (typeof Utils !== 'undefined' && Utils.notify) {
+          Utils.notify('Đã cập nhật dữ liệu mới nhất từ Cloud!', 'success');
+        }
+      } else {
+        if (typeof Utils !== 'undefined' && Utils.notify) {
+          Utils.notify('Không thể đồng bộ Cloud hoặc chưa có kết nối mạng', 'error');
+        }
+      }
+    } catch (err) {
+      console.error('[CloudSync] Manual sync error:', err);
+      this.setSyncStatus('error', 'Lỗi đồng bộ');
+    }
+  }
+
   setSyncStatus(status, text) {
     const el = document.getElementById('cloudSyncStatus');
     if (!el) return;
-    el.classList.remove('hidden');
 
     if (status === 'loading') {
-      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 mr-1"></i> ${text}`;
+      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 mr-1"></i> <span class="text-blue-600 dark:text-blue-400 font-semibold">${text}</span>`;
     } else if (status === 'success') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 mr-1"></i> ${text}`;
-      setTimeout(() => { if (el) el.classList.add('hidden'); }, 3000);
+      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 mr-1"></i> <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${text}</span>`;
+      setTimeout(() => {
+        if (el && !this.isSyncing) {
+          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 mr-1"></i> <span>Đã đồng bộ</span>`;
+        }
+      }, 3500);
     } else if (status === 'error') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 mr-1"></i> ${text}`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 mr-1"></i> <span class="text-amber-600 dark:text-amber-400">${text}</span>`;
     }
   }
 }
