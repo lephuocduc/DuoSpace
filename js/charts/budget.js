@@ -60,6 +60,27 @@ class BudgetChart {
       });
     }
 
+    // Xác định giá trị lớn nhất trong toàn bộ 3 tháng để scale trục Y tự động
+    const rawMax = Math.max(...incomes, ...expenses, 0);
+
+    // Tính mốc trần đẹp mắt (nice round ceiling) cao hơn giá trị lớn nhất khoảng 15-20% để cột không bị chạm nóc
+    const getNiceCeiling = (val) => {
+      if (val <= 0) return 1000000; // Khi chưa có số liệu, giữ mốc 1M tối thiểu để trục không co về số 0 mũ khoa học
+      const target = val * 1.15;
+      const magnitude = Math.pow(10, Math.floor(Math.log10(target)));
+      const ratio = target / magnitude;
+      let multiplier = 10;
+      if (ratio <= 1.2) multiplier = 1.2;
+      else if (ratio <= 1.5) multiplier = 1.5;
+      else if (ratio <= 2) multiplier = 2;
+      else if (ratio <= 2.5) multiplier = 2.5;
+      else if (ratio <= 5) multiplier = 5;
+      else if (ratio <= 8) multiplier = 8;
+      return Math.round(multiplier * magnitude);
+    };
+
+    const calculatedMax = getNiceCeiling(rawMax);
+
     this.destroy();
 
     this.chart = new Chart(ctx.getContext('2d'), {
@@ -103,7 +124,7 @@ class BudgetChart {
         scales: {
           y: {
             beginAtZero: true,
-            suggestedMax: 10000000,
+            max: calculatedMax,
             grid: { color: isDark ? '#334155' : '#f1f5f9' },
             ticks: {
               color: isDark ? '#94a3b8' : '#64748b',
