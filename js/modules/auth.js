@@ -9,6 +9,12 @@ class AuthModule {
     this.matchedProfile = null;
     this.auth = null;
     this.isInitialized = false;
+    this.authStateResolved = false;
+
+    // Promise giúp các module khác (như CloudSync) chờ Firebase xác định trạng thái đăng nhập
+    this.authReady = new Promise((resolve) => {
+      this._resolveAuthReady = resolve;
+    });
 
     this.init();
   }
@@ -22,6 +28,8 @@ class AuthModule {
       if (!this.checkMockSession()) {
         this.showLoginScreen();
       }
+      this.authStateResolved = true;
+      if (this._resolveAuthReady) this._resolveAuthReady(null);
       return;
     }
 
@@ -36,13 +44,19 @@ class AuthModule {
         // Lắng nghe thay đổi trạng thái đăng nhập
         this.auth.onAuthStateChanged((user) => {
           this.handleAuthStateChange(user);
+          if (!this.authStateResolved) {
+            this.authStateResolved = true;
+            if (this._resolveAuthReady) this._resolveAuthReady(user);
+          }
         });
       } else {
         console.error('[DuoSpace Auth] Thư viện Firebase SDK chưa được nạp.');
+        if (this._resolveAuthReady) this._resolveAuthReady(null);
       }
     } catch (err) {
       console.error('[DuoSpace Auth] Lỗi khởi tạo Firebase:', err);
       this.showAuthError('Lỗi khởi tạo xác thực: ' + (err.message || err));
+      if (this._resolveAuthReady) this._resolveAuthReady(null);
     }
   }
 
@@ -135,6 +149,11 @@ class AuthModule {
    */
   async getIdToken(forceRefresh = false) {
     try {
+      // Chờ Firebase khôi phục xong phiên đăng nhập nếu trang vừa được refresh
+      if (this.authReady && !this.authStateResolved) {
+        await this.authReady;
+      }
+
       if (this.auth && this.auth.currentUser) {
         return await this.auth.currentUser.getIdToken(forceRefresh);
       }

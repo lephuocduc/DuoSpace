@@ -20,16 +20,21 @@ class CloudSync {
   // Tải dữ liệu mới nhất từ Cloudflare D1 về
   async pullFromCloud() {
     if (!this.isEnabled) return false;
+
+    // Lấy Google ID Token từ AuthModule (chờ nếu đang khôi phục phiên)
+    const idToken = await window.authManager?.getIdToken();
+    if (!idToken) {
+      // Người dùng chưa đăng nhập Google hoặc phiên chưa sẵn sàng -> bỏ qua pull ngầm
+      return false;
+    }
+
     try {
       this.setSyncStatus('loading', 'Đang tải dữ liệu từ Cloud...');
-      const headers = { 'Content-Type': 'application/json' };
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      };
       if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
-
-      // Lấy Google ID Token từ AuthModule
-      const idToken = await window.authManager?.getIdToken();
-      if (idToken) {
-        headers['Authorization'] = `Bearer ${idToken}`;
-      }
 
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'GET',
@@ -67,6 +72,14 @@ class CloudSync {
 
   async pushToCloud() {
     if (!this.isEnabled || this.isSyncing) return false;
+
+    // Lấy Google ID Token từ AuthModule
+    const idToken = await window.authManager?.getIdToken();
+    if (!idToken) {
+      // Người dùng chưa đăng nhập Google -> chỉ lưu local
+      return false;
+    }
+
     try {
       this.isSyncing = true;
       this.setSyncStatus('loading', 'Đang lưu lên Cloud...');
@@ -77,15 +90,10 @@ class CloudSync {
 
       const headers = {
         'Content-Type': 'application/json',
-        'X-User-Code': safeUserCode
+        'X-User-Code': safeUserCode,
+        'Authorization': `Bearer ${idToken}`
       };
       if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
-
-      // Lấy Google ID Token từ AuthModule
-      const idToken = await window.authManager?.getIdToken();
-      if (idToken) {
-        headers['Authorization'] = `Bearer ${idToken}`;
-      }
 
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'POST',
