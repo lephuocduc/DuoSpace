@@ -69,18 +69,15 @@ class MotorbikeModule {
     if (!title || isNaN(odo) || isNaN(cost) || !date) return alert('Vui lòng nhập đầy đủ thông tin bảo dưỡng!');
 
     if (!this.app.data.bikeMaintenances) this.app.data.bikeMaintenances = [];
-    if (!this.app.data.expenses) this.app.data.expenses = [];
-    const expenseId = Utils.createId('expense');
     const maintenanceId = Utils.createId('maintenance');
     const isoDate = new Date(`${date}T12:00:00`).toISOString();
-    this.app.data.bikeMaintenances.push({ id: maintenanceId, expenseId, bike, title, odo, cost, date: isoDate });
-    this.app.data.expenses.push({ id: expenseId, linkedMaintenanceId: maintenanceId, amount: cost, desc: `Bảo dưỡng ${bike}: ${title}`, category: '🛵 Xe', user: 'Đ', notes: `Mốc ODO: ${odo.toLocaleString('vi-VN')} km`, bike, odo, vehicleItem: title, date: isoDate });
+    this.app.data.bikeMaintenances.push({ id: maintenanceId, bike, title, odo, cost, date: isoDate });
 
     if (!this.app.data.settings) this.app.data.settings = {};
     if (bike === 'NMAX') this.app.data.settings.nmaxOdo = Math.max(this.app.data.settings.nmaxOdo || 0, odo);
     if (bike === 'Grande') this.app.data.settings.grandeOdo = Math.max(this.app.data.settings.grandeOdo || 0, odo);
 
-    this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km`);
+    this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km · ${cost.toLocaleString('vi-VN')} VNĐ`);
 
     this.app.save();
     this.app.render();
@@ -94,10 +91,13 @@ class MotorbikeModule {
   deleteBikeMaintenance(idx) {
     if (this.app.data.bikeMaintenances && this.app.data.bikeMaintenances[idx]) {
       const item = this.app.data.bikeMaintenances[idx];
-      if (!confirm(`Xóa lịch sử bảo dưỡng “${item.title}” của ${item.bike}? Khoản chi liên kết cũng sẽ bị xóa.`)) return;
+      if (!confirm(`Xóa lịch sử bảo dưỡng “${item.title}” của ${item.bike}?`)) return;
       this.app.data.bikeMaintenances.splice(idx, 1);
-      if (item.expenseId) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => expense.id !== item.expenseId);
-      this.app.log?.system('Xóa lịch sử bảo dưỡng', `${item.bike} · ${item.title} · ${Number(item.cost).toLocaleString('vi-VN')} VNĐ · ODO ${Number(item.odo).toLocaleString('vi-VN')} km${item.expenseId ? ' · Đồng thời xóa khoản chi liên kết' : ''}`);
+      // Nếu có bản ghi cũ từng liên kết khoản chi, cũng dọn sạch
+      if (item.expenseId) {
+        this.app.data.expenses = (this.app.data.expenses || []).filter(expense => expense.id !== item.expenseId && expense.linkedMaintenanceId !== item.id);
+      }
+      this.app.log?.system('Xóa lịch sử bảo dưỡng', `${item.bike} · ${item.title} · ${Number(item.cost).toLocaleString('vi-VN')} VNĐ · ODO ${Number(item.odo).toLocaleString('vi-VN')} km`);
       this.app.save();
       this.app.render();
     }

@@ -87,7 +87,15 @@ class Storage {
     return [
       ...(this.data.expenses || []).map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
       ...(this.data.incomes || []).map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
-    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+    ].sort((a, b) => {
+      const dateA = new Date(a.date).getTime() || 0;
+      const dateB = new Date(b.date).getTime() || 0;
+      if (dateA !== dateB) return dateB - dateA;
+      const createdA = new Date(a.createdAt || a.date).getTime() || 0;
+      const createdB = new Date(b.createdAt || b.date).getTime() || 0;
+      if (createdA !== createdB) return createdB - createdA;
+      return (b.rawIdx || 0) - (a.rawIdx || 0);
+    });
   }
 
   getTransactionsByDateRange(startDate, endDate, limit = null) {

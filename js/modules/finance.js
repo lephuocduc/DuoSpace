@@ -152,7 +152,16 @@ class FinanceModule {
     let allCombined = [
       ...(this.app.data.expenses || []).map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
       ...(this.app.data.incomes || []).map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
-    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+    ].sort((a, b) => {
+      const dateA = new Date(a.date).getTime() || 0;
+      const dateB = new Date(b.date).getTime() || 0;
+      if (dateA !== dateB) return dateB - dateA;
+      // Cùng ngày: ưu tiên mục có createdAt mới hơn, hoặc rawIdx lớn hơn (mới thêm vào mảng)
+      const createdA = new Date(a.createdAt || a.date).getTime() || 0;
+      const createdB = new Date(b.createdAt || b.date).getTime() || 0;
+      if (createdA !== createdB) return createdB - createdA;
+      return (b.rawIdx || 0) - (a.rawIdx || 0);
+    });
 
     // Calculate overall Totals for Top Summary (regardless of search, or based on date filter if active)
     let summaryBase = allCombined;
@@ -330,6 +339,7 @@ class FinanceModule {
     const editingExpense = ModalManager.editingType === 'expense' && ModalManager.editingIndex >= 0;
     const previousExpense = editingExpense ? { ...this.app.data.expenses[ModalManager.editingIndex] } : null;
     const expenseId = editingExpense ? (this.app.data.expenses[ModalManager.editingIndex].id || Utils.createId('expense')) : Utils.createId('expense');
+    const existingCreatedAt = editingExpense ? this.app.data.expenses[ModalManager.editingIndex].createdAt : null;
     const expenseRecord = {
       id: expenseId,
       amount,
@@ -337,7 +347,8 @@ class FinanceModule {
       category,
       user,
       notes,
-      date: new Date(`${expenseDate}T12:00:00`).toISOString()
+      date: new Date(`${expenseDate}T12:00:00`).toISOString(),
+      createdAt: existingCreatedAt || new Date().toISOString()
     };
 
     if (editingExpense) {
@@ -387,23 +398,25 @@ class FinanceModule {
 
     const editingIncome = ModalManager.editingType === 'income' && ModalManager.editingIndex >= 0;
     const previousIncome = editingIncome ? { ...this.app.data.incomes[ModalManager.editingIndex] } : null;
+    const existingCreatedAt = editingIncome ? this.app.data.incomes[ModalManager.editingIndex].createdAt : null;
+    const incomeId = editingIncome ? (this.app.data.incomes[ModalManager.editingIndex].id || Utils.createId('income')) : Utils.createId('income');
+    const incomeRecord = {
+      id: incomeId,
+      amount,
+      desc,
+      user,
+      notes,
+      date: new Date(`${incomeDate}T12:00:00`).toISOString(),
+      createdAt: existingCreatedAt || new Date().toISOString()
+    };
+
     if (editingIncome) {
       this.app.data.incomes[ModalManager.editingIndex] = {
         ...this.app.data.incomes[ModalManager.editingIndex],
-        amount,
-        desc,
-        user,
-        notes,
-        date: new Date(`${incomeDate}T12:00:00`).toISOString()
+        ...incomeRecord
       };
     } else {
-      this.app.data.incomes.push({
-        amount,
-        desc,
-        user,
-        notes,
-        date: new Date(`${incomeDate}T12:00:00`).toISOString()
-      });
+      this.app.data.incomes.push(incomeRecord);
     }
 
     const updatedIncome = this.app.data.incomes[editingIncome ? ModalManager.editingIndex : this.app.data.incomes.length - 1];
