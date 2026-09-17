@@ -1442,8 +1442,17 @@
           đăng nhập nhanh thử nghiệm bên dưới.</p>
       </div>
 
+      <!-- Initial Checking Session Status (Hiển thị ngay khi mở web để user biết đang làm gì) -->
+      <div id="authCheckingStatus" class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/40 flex items-center space-x-3 text-left">
+        <i class="fa-solid fa-circle-notch fa-spin text-blue-600 dark:text-blue-400 text-lg"></i>
+        <div>
+          <p id="authCheckingTitle" class="text-xs font-semibold text-blue-900 dark:text-blue-200">Đang kiểm tra phiên đăng nhập...</p>
+          <p id="authCheckingDesc" class="text-[11px] text-blue-700/80 dark:text-blue-300/70">Vui lòng chờ trong giây lát</p>
+        </div>
+      </div>
+
       <!-- Sign In With Google Button -->
-      <div class="space-y-3">
+      <div id="authActionContainer" class="space-y-3 hidden">
         <button id="googleSignInBtn" type="button" onclick="window.duoSignInWithGoogle()"
           class="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-white hover:bg-gray-50 active:scale-98 text-gray-700 font-semibold rounded-2xl border border-gray-300 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
           <svg id="googleSignInIcon" class="w-5 h-5" viewBox="0 0 24 24">

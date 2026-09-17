@@ -136,6 +136,12 @@ class AuthModule {
       return false;
     }
 
+    // Cập nhật trạng thái đang xác nhận người dùng hợp lệ
+    const checkingTitle = document.getElementById('authCheckingTitle');
+    const checkingDesc = document.getElementById('authCheckingDesc');
+    if (checkingTitle) checkingTitle.textContent = `Đang kết nối không gian của ${matched.name}...`;
+    if (checkingDesc) checkingDesc.textContent = 'Xác thực thành công. Đang tải dữ liệu...';
+
     this.matchedProfile = matched;
     this.currentUser = user;
     this.onAuthenticated();
@@ -257,12 +263,21 @@ class AuthModule {
 
   showLoginScreen() {
     const screen = document.getElementById('loginOverlay');
+    const checkingEl = document.getElementById('authCheckingStatus');
+    const actionEl = document.getElementById('authActionContainer');
+
     if (screen) {
       screen.style.display = 'flex';
       screen.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
       if (typeof Utils !== 'undefined' && Utils.lockScroll) {
         Utils.lockScroll();
       }
+    }
+
+    // Nếu đã kiểm tra xong phiên và không có ai đăng nhập -> ẩn spinner kiểm tra, hiện nút Google
+    if (this.authStateResolved && !this.currentUser) {
+      if (checkingEl) checkingEl.classList.add('hidden');
+      if (actionEl) actionEl.classList.remove('hidden');
     }
   }
 
