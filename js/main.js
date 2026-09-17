@@ -37,6 +37,7 @@ class DuoSpaceApp {
     this.health = new HealthModule(this);
     this.settings = new SettingsModule(this);
     this.log = new LogModule(this);
+    this.sync = typeof CloudSync !== 'undefined' ? new CloudSync(this.storage) : null;
 
     this.init();
   }
@@ -84,6 +85,11 @@ class DuoSpaceApp {
       priceUpdater.updateAllPrices();   // First run immediately
       priceUpdater.startAutoUpdate();   // Then every 5 min check
     }
+
+    // ── SYNC WITH CLOUDFLARE D1 ──
+    if (this.sync && this.sync.isEnabled) {
+      this.sync.pullFromCloud();
+    }
   }
 
   setupEventListeners() {
@@ -104,9 +110,12 @@ class DuoSpaceApp {
     });
   }
 
-  /** Lưu trạng thái ứng dụng hiện tại vào LocalStorage. */
+  /** Lưu trạng thái ứng dụng hiện tại vào LocalStorage và đồng bộ ngầm lên Cloudflare D1. */
   save() {
     this.storage.save(this.data);
+    if (this.sync && this.sync.isEnabled) {
+      this.sync.debouncePushToCloud();
+    }
   }
 
   /** Render các mô-đun sau khi dữ liệu thay đổi. */

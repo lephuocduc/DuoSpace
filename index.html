@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>DuoSpace - App Cho 2 Người</title>
+  <title>DuoSpace</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -52,6 +52,7 @@
         </div>
 
         <div class="flex items-center space-x-2">
+          <div id="cloudSyncStatus" class="hidden text-[11px] px-2.5 py-1 bg-white/80 dark:bg-slate-800/80 rounded-full border border-gray-200 dark:border-slate-700 shadow-sm flex items-center font-medium"></div>
           <button onclick="openAddModal()"
             class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform hover:bg-blue-700">
             <i class="fa-solid fa-plus text-base"></i>
@@ -203,7 +204,8 @@
         </div>
 
         <!-- 🔍 DATE RANGE FILTER PANEL -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2.5">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2.5">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
               <i class="fa-solid fa-calendar-days text-blue-500 mr-1.5"></i>Lọc Theo Khoảng Ngày
@@ -213,28 +215,40 @@
 
           <!-- Quick Presets -->
           <div class="flex space-x-1.5 overflow-x-auto pb-1 custom-scrollbar text-[11px]">
-            <button onclick="setDateFilterRange('thisMonth')" class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng này</button>
-            <button onclick="setDateFilterRange('lastMonth')" class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng trước</button>
-            <button onclick="setDateFilterRange('last30Days')" class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">30 ngày qua</button>
-            <button onclick="setDateFilterRange('thisYear')" class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Năm nay</button>
+            <button onclick="setDateFilterRange('thisMonth')"
+              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng
+              này</button>
+            <button onclick="setDateFilterRange('lastMonth')"
+              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng
+              trước</button>
+            <button onclick="setDateFilterRange('last30Days')"
+              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">30
+              ngày qua</button>
+            <button onclick="setDateFilterRange('thisYear')"
+              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Năm
+              nay</button>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] text-gray-400 font-medium mb-0.5">Từ ngày:</label>
-              <input type="date" id="filterDateFrom" class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+              <input type="date" id="filterDateFrom"
+                class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
             </div>
             <div>
               <label class="block text-[10px] text-gray-400 font-medium mb-0.5">Đến ngày:</label>
-              <input type="date" id="filterDateTo" class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
+              <input type="date" id="filterDateTo"
+                class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
             </div>
           </div>
 
           <div class="flex space-x-2 pt-0.5">
-            <button onclick="applyDateFilter()" id="applyFilterBtn" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
+            <button onclick="applyDateFilter()" id="applyFilterBtn"
+              class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
               Áp dụng lọc
             </button>
-            <button onclick="resetDateFilter()" id="resetFilterBtn" class="px-3 py-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors">
+            <button onclick="resetDateFilter()" id="resetFilterBtn"
+              class="px-3 py-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors">
               Đặt lại
             </button>
           </div>
@@ -267,7 +281,8 @@
 
           <!-- 📥 LOAD MORE BUTTON CONTAINER -->
           <div id="loadMoreContainer" class="hidden text-center pt-2 border-t border-gray-100 dark:border-slate-700/50">
-            <button id="loadMoreBtn" onclick="loadMoreTransactions()" class="w-full py-2 bg-gray-50 hover:bg-gray-100 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold text-xs rounded-xl border border-gray-200 dark:border-slate-700 transition-all">
+            <button id="loadMoreBtn" onclick="loadMoreTransactions()"
+              class="w-full py-2 bg-gray-50 hover:bg-gray-100 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold text-xs rounded-xl border border-gray-200 dark:border-slate-700 transition-all">
               📥 Tải thêm (Xem tuần trước)
             </button>
           </div>
@@ -276,37 +291,42 @@
 
       <!-- TAB 4: ĐẦU TƯ (PORTFOLIO MANAGEMENT) -->
       <div id="tab-investment" class="hidden space-y-4 tab-content">
-        
+
         <!-- SUMMARY CARD: VỐN, HIỆN TẠI, LÃI LỖ -->
-        <div class="bg-gradient-to-br from-indigo-800 via-purple-700 to-indigo-900 text-white p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden">
+        <div
+          class="bg-gradient-to-br from-indigo-800 via-purple-700 to-indigo-900 text-white p-5 rounded-2xl shadow-xl space-y-4 relative overflow-hidden">
           <!-- Decor background -->
           <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
             <i class="fa-solid fa-chart-pie text-9xl -mt-4 -mr-4"></i>
           </div>
-          
+
           <div class="flex justify-between items-center relative z-10">
             <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Portfolio Thực Tế</span>
-            <div class="flex items-center space-x-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20">
+            <div
+              class="flex items-center space-x-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20">
               <span class="font-medium">💵 VNĐ/USD:</span>
-              <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)" class="w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
+              <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)"
+                class="w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
               <span class="font-medium">đ</span>
-              <button id="usdRateRefreshBtn" onclick="fetchRealtimeUsdRate()" aria-label="Cập nhật tỷ giá USD" class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
+              <button id="usdRateRefreshBtn" onclick="fetchRealtimeUsdRate()" aria-label="Cập nhật tỷ giá USD"
+                class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
                 <i class="fa-solid fa-rotate text-xs"></i>
               </button>
               <span id="usdRateStatus" class="sr-only" role="status" aria-live="polite"></span>
             </div>
           </div>
-          
+
           <div class="relative z-10 space-y-1">
             <p class="text-[11px] text-indigo-200 font-medium">Tổng tài sản (Danh mục + Tiền dư Thu Chi)</p>
             <div id="investTotalValue" class="text-3xl font-extrabold tracking-tight">0 đ</div>
-            <div id="investNetWorthBreakdown" class="flex items-center space-x-2 text-[10px] text-indigo-200/90 font-medium pt-0.5">
+            <div id="investNetWorthBreakdown"
+              class="flex items-center space-x-2 text-[10px] text-indigo-200/90 font-medium pt-0.5">
               <span>Đầu tư: <b id="investAssetsOnly" class="text-white">0 đ</b></span>
               <span>•</span>
               <span>Tiền dư thu chi: <b id="investCashSurplus" class="text-emerald-300">0 đ</b></span>
             </div>
           </div>
-          
+
           <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 relative z-10">
             <div>
               <p class="text-[10px] text-indigo-200 font-medium mb-0.5">Tổng vốn đã đầu tư</p>
@@ -320,7 +340,8 @@
           <!-- Auto / Manual badge & Nút Refresh tất cả giá -->
           <div class="flex items-center justify-between pt-2 relative z-10 border-t border-white/10">
             <div id="investPriceBadges" class="flex flex-wrap gap-1.5 items-center"></div>
-            <button onclick="refreshAllInvestPrices()" id="btnRefreshAllPrices" class="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[10px] font-bold flex items-center space-x-1 backdrop-blur-md active:scale-95 transition-all">
+            <button onclick="refreshAllInvestPrices()" id="btnRefreshAllPrices"
+              class="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[10px] font-bold flex items-center space-x-1 backdrop-blur-md active:scale-95 transition-all">
               <i class="fa-solid fa-rotate text-[10px]" id="refreshAllIcon"></i>
               <span>Cập nhật giá</span>
             </button>
@@ -328,7 +349,8 @@
         </div>
 
         <!-- BIỂU ĐỒ TỔNG TÀI SẢN THEO NGÀY (LINE CHART) -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
           <div class="flex justify-between items-center">
             <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">
               <i class="fa-solid fa-chart-line text-indigo-500 mr-1.5"></i>Biến động tổng tài sản (VNĐ)
@@ -341,7 +363,8 @@
         </div>
 
         <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
           <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ danh mục</h3>
           <div class="w-full h-44 relative flex justify-center">
             <canvas id="assetAllocationChart"></canvas>
@@ -349,15 +372,19 @@
         </div>
 
         <!-- FORM THÊM / SỬA TÀI SẢN -->
-        <div id="investmentForm" class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-md space-y-3">
+        <div id="investmentForm"
+          class="hidden bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 shadow-md space-y-3">
           <div class="flex justify-between items-center mb-1">
-            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Giao Dịch Đầu Tư</h3>
-            <button onclick="toggleInvestmentForm()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="investFormTitle" class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase">Thêm Giao
+              Dịch Đầu Tư</h3>
+            <button onclick="toggleInvestmentForm()" class="text-gray-400 hover:text-gray-600"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
-          
+
           <div class="space-y-2">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tên tài sản <span class="text-red-500">*</span></label>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Tên tài sản <span
+                  class="text-red-500">*</span></label>
               <select id="investName" onchange="onAssetNameChange()"
                 class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none">
                 <option value="BTC" selected>🪙 Bitcoin (BTC)</option>
@@ -371,65 +398,84 @@
             </div>
 
             <div id="investCustomNameRow" class="hidden">
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Nhập tên tài sản riêng</label>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Nhập tên tài sản
+                riêng</label>
               <input type="text" id="investCustomName" placeholder="Ví dụ: NEAR, AVAX, Trái phiếu..."
                 class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
           </div>
-          
+
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng mua <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="investQuantity" placeholder="0" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng mua <span
+                  class="text-red-500">*</span></label>
+              <input type="number" step="any" id="investQuantity" placeholder="0"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div>
               <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ngày mua</label>
-              <input type="date" id="investPurchaseDate" class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <input type="date" id="investPurchaseDate"
+                class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
           </div>
 
-          <div class="space-y-2 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
+          <div
+            class="space-y-2 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị <span class="text-red-500">*</span></label>
-                <input type="number" step="any" id="investBuyPrice" placeholder="Giá mua..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị
+                  <span class="text-red-500">*</span></label>
+                <input type="number" step="any" id="investBuyPrice" placeholder="Giá mua..."
+                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
               </div>
               <div>
                 <div class="flex justify-between items-center mb-1">
-                  <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold">Giá thị trường <span class="text-red-500">*</span></label>
-                  <button type="button" onclick="fetchPriceForCurrentForm()" title="Lấy giá thị trường hiện tại từ Internet" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold">
+                  <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold">Giá thị trường <span
+                      class="text-red-500">*</span></label>
+                  <button type="button" onclick="fetchPriceForCurrentForm()"
+                    title="Lấy giá thị trường hiện tại từ Internet"
+                    class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold">
                     <i class="fa-solid fa-rotate text-[9px]"></i>
                     <span>Lấy giá live</span>
                   </button>
                 </div>
-                <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                <input type="number" step="any" id="investCurrentPrice" placeholder="Giá TT..."
+                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
               </div>
             </div>
             <div class="flex items-center justify-between pt-1">
               <div class="flex items-center">
-                <input type="checkbox" id="investIsUsd" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                <label for="investIsUsd" class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
+                <input type="checkbox" id="investIsUsd"
+                  class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                <label for="investIsUsd"
+                  class="ml-2 text-[10px] text-gray-600 dark:text-slate-400 font-semibold cursor-pointer">
                   Giá tính theo USD ($)
                 </label>
               </div>
-              <span id="investAutoPriceHint" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ Tự động cập nhật giá</span>
+              <span id="investAutoPriceHint" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ Tự
+                động cập nhật giá</span>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ (%)</label>
-              <input type="number" step="1" id="investTarget" placeholder="VD: 30" class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Mục tiêu phân bổ
+                (%)</label>
+              <input type="number" step="1" id="investTarget" placeholder="VD: 30"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Ví, Sổ TK...)</label>
-              <input type="text" id="investNotes" placeholder="Binance, Trust Wallet..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Ví, Sổ
+                TK...)</label>
+              <input type="text" id="investNotes" placeholder="Binance, Trust Wallet..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
           </div>
-          
 
 
-          <button id="saveInvestBtn" onclick="saveInvestment()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
+
+          <button id="saveInvestBtn" onclick="saveInvestment()"
+            class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">
             Lưu tài sản
           </button>
         </div>
@@ -439,11 +485,13 @@
           <div class="flex justify-between items-center px-1">
             <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Danh mục tài sản chi tiết</h3>
             <div class="flex items-center space-x-1.5">
-              <button onclick="openInvestmentForm(-1)" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all flex items-center space-x-1">
+              <button onclick="openInvestmentForm(-1)"
+                class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-indigo-200 active:scale-95 transition-all flex items-center space-x-1">
                 <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>Thêm tài sản</span>
               </button>
-              <button onclick="openSellAssetModal()" class="text-xs bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-rose-200 active:scale-95 transition-all flex items-center space-x-1">
+              <button onclick="openSellAssetModal()"
+                class="text-xs bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 px-2.5 py-1.5 rounded-lg font-bold shadow-sm hover:bg-rose-200 active:scale-95 transition-all flex items-center space-x-1">
                 <i class="fa-solid fa-arrow-trend-down text-[10px]"></i>
                 <span>Bán bớt</span>
               </button>
@@ -459,7 +507,8 @@
       <!-- TAB 5: XE MÁY -->
       <div id="tab-motorbike" class="hidden space-y-4 tab-content">
         <div class="grid grid-cols-2 gap-3">
-          <div onclick="openPartsStatusModal('NMAX')" class="bg-sky-600 hover:bg-sky-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
+          <div onclick="openPartsStatusModal('NMAX')"
+            class="bg-sky-600 hover:bg-sky-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
             <div class="flex justify-between items-center text-xs text-sky-200 font-semibold">
               <span>NMAX ⚙️</span>
               <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
@@ -470,7 +519,8 @@
               <span class="underline font-medium">Parts Status →</span>
             </div>
           </div>
-          <div onclick="openPartsStatusModal('Grande')" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
+          <div onclick="openPartsStatusModal('Grande')"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-2xl shadow-md space-y-1 cursor-pointer transition-transform active:scale-95 group">
             <div class="flex justify-between items-center text-xs text-indigo-200 font-semibold">
               <span>GRANDE ⚙️</span>
               <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
@@ -483,10 +533,12 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Thông tin xe</h3>
-            <button onclick="saveBikeInfo()" class="text-xs bg-sky-600 text-white px-2.5 py-1 rounded-lg font-semibold">Lưu</button>
+            <button onclick="saveBikeInfo()"
+              class="text-xs bg-sky-600 text-white px-2.5 py-1 rounded-lg font-semibold">Lưu</button>
           </div>
           <div class="grid grid-cols-2 gap-2 text-[10px]">
             <div>
@@ -496,7 +548,8 @@
             </div>
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">NMAX ODO (km)</label>
-              <input type="number" id="bikeNmaxOdo" placeholder="14850" class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              <input type="number" id="bikeNmaxOdo" placeholder="14850"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
             <div>
               <p class="text-gray-500 dark:text-slate-400 font-semibold">Grande</p>
@@ -505,7 +558,8 @@
             </div>
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">Grande ODO (km)</label>
-              <input type="number" id="bikeGrandeOdo" placeholder="8200" class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
+              <input type="number" id="bikeGrandeOdo" placeholder="8200"
+                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
         </div>
@@ -681,7 +735,8 @@
       <!-- TAB 8: CÀI ĐẶT -->
       <div id="tab-setting" class="hidden space-y-5 tab-content">
         <!-- Tài khoản & Bảo mật -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200">Tài khoản & Xác thực</h2>
             <i class="fa-solid fa-user-shield text-blue-500"></i>
@@ -689,53 +744,119 @@
           <div id="authSettingInfo">
             <p class="text-xs text-gray-400">Đang tải thông tin tài khoản...</p>
           </div>
-          <button id="logoutSettingBtn" class="w-full py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold border border-rose-100 dark:border-rose-900/50 transition-colors">
+          <button id="logoutSettingBtn"
+            class="w-full py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold border border-rose-100 dark:border-rose-900/50 transition-colors">
             <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Đăng xuất tài khoản
           </button>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4">
-          <div><h2 class="text-sm font-bold text-gray-800 dark:text-slate-200">Dữ liệu & sao lưu</h2><p class="text-xs text-gray-400 mt-1">Xuất bản sao lưu trước khi đổi thiết bị hoặc chỉnh sửa dữ liệu lớn.</p></div>
-          <button onclick="downloadBackup()" class="w-full py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold"><i class="fa-solid fa-download mr-2"></i>Tải bản sao lưu JSON</button>
-          <label class="block w-full py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-xl text-sm font-semibold text-center cursor-pointer"><i class="fa-solid fa-upload mr-2"></i>Khôi phục từ bản sao lưu<input id="backupImportInput" type="file" accept="application/json,.json" class="hidden" onchange="importBackup(this.files[0])"></label>
-          <button onclick="exportFinanceCsv()" class="w-full py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold"><i class="fa-solid fa-file-csv mr-2"></i>Xuất thu chi CSV</button>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4">
+          <div>
+            <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200">Dữ liệu & sao lưu</h2>
+            <p class="text-xs text-gray-400 mt-1">Xuất bản sao lưu trước khi đổi thiết bị hoặc chỉnh sửa dữ liệu lớn.
+            </p>
+          </div>
+          <button onclick="downloadBackup()"
+            class="w-full py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold"><i
+              class="fa-solid fa-download mr-2"></i>Tải bản sao lưu JSON</button>
+          <label
+            class="block w-full py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-xl text-sm font-semibold text-center cursor-pointer"><i
+              class="fa-solid fa-upload mr-2"></i>Khôi phục từ bản sao lưu<input id="backupImportInput" type="file"
+              accept="application/json,.json" class="hidden" onchange="importBackup(this.files[0])"></label>
+          <button onclick="exportFinanceCsv()"
+            class="w-full py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold"><i
+              class="fa-solid fa-file-csv mr-2"></i>Xuất thu chi CSV</button>
+          <div class="pt-2 border-t border-gray-100 dark:border-slate-700/60 space-y-2">
+            <button onclick="window.app.sync?.pullFromCloud()"
+              class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center">
+              <i class="fa-solid fa-cloud-arrow-down mr-2"></i>Đồng bộ lại từ Cloudflare D1
+            </button>
+            <button onclick="clearTemporaryData()"
+              class="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-semibold border border-rose-200 dark:border-rose-900/50 transition-colors flex items-center justify-center">
+              <i class="fa-solid fa-trash-can mr-2"></i>Xóa sạch dữ liệu tạm
+            </button>
+          </div>
           <p class="text-[11px] text-amber-600 dark:text-amber-400">Khôi phục sẽ thay thế toàn bộ dữ liệu hiện có.</p>
         </div>
       </div>
 
       <!-- TAB: NHẬT KÝ HỆ THỐNG -->
       <div id="tab-log" class="hidden space-y-4 tab-content">
-        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200">Nhật ký hệ thống</h2>
             <i class="fa-solid fa-clock-rotate-left text-blue-500"></i>
           </div>
-          <p class="text-xs text-gray-500 dark:text-slate-400">Tự động lưu các thao tác quan trọng như thêm, cập nhật hoặc xóa dữ liệu. Mục này chỉ để theo dõi, không dùng làm ghi chú cá nhân.</p>
+          <p class="text-xs text-gray-500 dark:text-slate-400">Tự động lưu các thao tác quan trọng như thêm, cập nhật
+            hoặc xóa dữ liệu. Mục này chỉ để theo dõi, không dùng làm ghi chú cá nhân.</p>
         </section>
-        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-          <div class="flex items-center justify-between gap-3 mb-3"><h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Hoạt động gần đây</h3><span id="logCount" class="text-[10px] text-gray-400"></span></div>
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Hoạt động gần đây</h3><span
+              id="logCount" class="text-[10px] text-gray-400"></span>
+          </div>
           <div class="flex gap-1.5 overflow-x-auto pb-2 custom-scrollbar text-[11px]">
-            <button onclick="filterSystemLog('all')" id="logFilter-all" class="shrink-0 px-2.5 py-1 rounded-lg bg-blue-600 text-white font-semibold">Tất cả</button>
-            <button onclick="filterSystemLog('add')" id="logFilter-add" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Thêm</button>
-            <button onclick="filterSystemLog('update')" id="logFilter-update" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Cập nhật</button>
-            <button onclick="filterSystemLog('delete')" id="logFilter-delete" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Xóa</button>
-            <button onclick="filterSystemLog('other')" id="logFilter-other" class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Khác</button>
+            <button onclick="filterSystemLog('all')" id="logFilter-all"
+              class="shrink-0 px-2.5 py-1 rounded-lg bg-blue-600 text-white font-semibold">Tất cả</button>
+            <button onclick="filterSystemLog('add')" id="logFilter-add"
+              class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Thêm</button>
+            <button onclick="filterSystemLog('update')" id="logFilter-update"
+              class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Cập
+              nhật</button>
+            <button onclick="filterSystemLog('delete')" id="logFilter-delete"
+              class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Xóa</button>
+            <button onclick="filterSystemLog('other')" id="logFilter-other"
+              class="shrink-0 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold">Khác</button>
           </div>
           <div id="logList" class="space-y-2"></div>
-          <button id="loadMoreLogsBtn" onclick="loadMoreSystemLogs()" class="hidden w-full mt-3 py-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold">Tải thêm</button>
+          <button id="loadMoreLogsBtn" onclick="loadMoreSystemLogs()"
+            class="hidden w-full mt-3 py-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold">Tải
+            thêm</button>
         </section>
       </div>
 
       <!-- TAB: HƯỚNG DẪN -->
       <div id="tab-guide" class="hidden space-y-4 tab-content">
-        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4 text-sm text-gray-600 dark:text-slate-300">
+        <section
+          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4 text-sm text-gray-600 dark:text-slate-300">
           <h2 class="text-base font-bold text-gray-800 dark:text-slate-100">Hướng dẫn sử dụng</h2>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Công việc</p><p class="text-xs mt-1">Thêm việc bằng nút +, chọn người thực hiện và mức ưu tiên. Danh sách luôn ưu tiên việc Cao trước, sau đó Trung bình và Thấp.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Thu chi</p><p class="text-xs mt-1">Nhấn nút + tại trang Thu chi, chọn Chi tiêu hoặc Thu nhập, điền số tiền, danh mục, người thanh toán và mô tả rồi lưu. Có thể chọn một giao dịch trong danh sách để sửa hoặc xóa. Số dư và biểu đồ được cập nhật ngay sau khi lưu.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Chi tiêu xe & bảo dưỡng</p><p class="text-xs mt-1">Chọn danh mục Xe để hiện thông tin xe. Chọn xe, số ODO và hạng mục bảo dưỡng từ danh sách; chọn Khác nếu cần tự nhập. Khoản chi và lịch sử bảo dưỡng luôn được liên kết: thêm, sửa hoặc xóa ở một bên sẽ tự đồng bộ bên còn lại.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Đầu tư & tài sản</p><p class="text-xs mt-1">Khi chọn danh mục Đầu tư, nhập số lượng và giá mua/đơn vị; số tiền chi sẽ tự tính bằng số lượng × giá mua. Chọn tài sản có hỗ trợ để hệ thống tự lấy giá thị trường; vẫn có thể sửa giá thủ công. Giao dịch mua và khoản chi được liên kết hai chiều, nên xóa ở một bên cũng sẽ xóa bản ghi còn lại.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Xe máy</p><p class="text-xs mt-1">Cập nhật ODO hiện tại của từng xe tại phần Thông tin xe. Dùng nút + Bảo dưỡng để ghi lịch sử độc lập, xem lần bảo dưỡng gần nhất và theo dõi tình trạng phụ tùng.</p></div>
-          <div><p class="font-semibold text-gray-800 dark:text-slate-200">Nhật ký hệ thống</p><p class="text-xs mt-1">Trang này tự ghi các thay đổi dữ liệu quan trọng để tiện kiểm tra. Đây không phải nơi ghi nhật ký hoặc ghi chú cá nhân.</p></div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Công việc</p>
+            <p class="text-xs mt-1">Thêm việc bằng nút +, chọn người thực hiện và mức ưu tiên. Danh sách luôn ưu tiên
+              việc Cao trước, sau đó Trung bình và Thấp.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Thu chi</p>
+            <p class="text-xs mt-1">Nhấn nút + tại trang Thu chi, chọn Chi tiêu hoặc Thu nhập, điền số tiền, danh mục,
+              người thanh toán và mô tả rồi lưu. Có thể chọn một giao dịch trong danh sách để sửa hoặc xóa. Số dư và
+              biểu đồ được cập nhật ngay sau khi lưu.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Chi tiêu xe & bảo dưỡng</p>
+            <p class="text-xs mt-1">Chọn danh mục Xe để hiện thông tin xe. Chọn xe, số ODO và hạng mục bảo dưỡng từ danh
+              sách; chọn Khác nếu cần tự nhập. Khoản chi và lịch sử bảo dưỡng luôn được liên kết: thêm, sửa hoặc xóa ở
+              một bên sẽ tự đồng bộ bên còn lại.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Đầu tư & tài sản</p>
+            <p class="text-xs mt-1">Khi chọn danh mục Đầu tư, nhập số lượng và giá mua/đơn vị; số tiền chi sẽ tự tính
+              bằng số lượng × giá mua. Chọn tài sản có hỗ trợ để hệ thống tự lấy giá thị trường; vẫn có thể sửa giá thủ
+              công. Giao dịch mua và khoản chi được liên kết hai chiều, nên xóa ở một bên cũng sẽ xóa bản ghi còn lại.
+            </p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Xe máy</p>
+            <p class="text-xs mt-1">Cập nhật ODO hiện tại của từng xe tại phần Thông tin xe. Dùng nút + Bảo dưỡng để ghi
+              lịch sử độc lập, xem lần bảo dưỡng gần nhất và theo dõi tình trạng phụ tùng.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-800 dark:text-slate-200">Nhật ký hệ thống</p>
+            <p class="text-xs mt-1">Trang này tự ghi các thay đổi dữ liệu quan trọng để tiện kiểm tra. Đây không phải
+              nơi ghi nhật ký hoặc ghi chú cá nhân.</p>
+          </div>
         </section>
       </div>
 
@@ -806,7 +927,8 @@
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <i class="fa-solid fa-motorcycle text-xs"></i></div>
+              <i class="fa-solid fa-motorcycle text-xs"></i>
+            </div>
             <span>Xe Máy</span>
           </a>
 
@@ -814,7 +936,8 @@
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-              <i class="fa-solid fa-cat text-xs"></i></div>
+              <i class="fa-solid fa-cat text-xs"></i>
+            </div>
             <span>Mun, Bông</span>
           </a>
 
@@ -822,17 +945,24 @@
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <i class="fa-solid fa-heart-pulse text-xs"></i></div>
+              <i class="fa-solid fa-heart-pulse text-xs"></i>
+            </div>
             <span>Sức Khỏe</span>
           </a>
 
-          <a href="#" onclick="switchTab('log', 'Nhật ký hệ thống'); toggleSidebar();" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-            <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center"><i class="fa-solid fa-book text-xs"></i></div>
+          <a href="#" onclick="switchTab('log', 'Nhật ký hệ thống'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <i class="fa-solid fa-book text-xs"></i></div>
             <span>Nhật ký hệ thống</span>
           </a>
 
-          <a href="#" onclick="switchTab('guide', 'Hướng dẫn sử dụng'); toggleSidebar();" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-            <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center"><i class="fa-solid fa-circle-question text-xs"></i></div>
+          <a href="#" onclick="switchTab('guide', 'Hướng dẫn sử dụng'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <i class="fa-solid fa-circle-question text-xs"></i></div>
             <span>Hướng dẫn sử dụng</span>
           </a>
 
@@ -840,7 +970,8 @@
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors mt-4 border-t border-gray-100 dark:border-slate-800 pt-3">
             <div
               class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center">
-              <i class="fa-solid fa-gear text-xs"></i></div>
+              <i class="fa-solid fa-gear text-xs"></i>
+            </div>
             <span>Cài Đặt (Setting)</span>
           </a>
         </nav>
@@ -848,9 +979,11 @@
 
       <div class="space-y-3 border-t border-gray-100 dark:border-slate-800 pt-4">
         <!-- Thông tin tài khoản đăng nhập hiện tại -->
-        <div id="authSidebarUser" class="hidden flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-800">
+        <div id="authSidebarUser"
+          class="hidden flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-800">
           <div class="flex items-center space-x-2.5 min-w-0">
-            <div id="authSidebarAvatar" class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+            <div id="authSidebarAvatar"
+              class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
               U
             </div>
             <div class="min-w-0">
@@ -915,7 +1048,8 @@
         class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3.5 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
         <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
           <div>
-            <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center text-rose-600 dark:text-rose-400">
+            <h3
+              class="text-base font-bold text-gray-900 dark:text-white flex items-center text-rose-600 dark:text-rose-400">
               <i class="fa-solid fa-arrow-trend-down mr-2"></i>Bán Bớt Tài Sản Đầu Tư
             </h3>
             <p class="text-[11px] text-gray-400 mt-0.5">Hệ thống sẽ trừ số lượng và tự tính lại giá vốn trung bình</p>
@@ -928,13 +1062,15 @@
 
         <div class="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-1">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Chọn tài sản muốn bán <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Chọn tài sản muốn bán
+              <span class="text-red-500">*</span></label>
             <select id="sellAssetSelect" onchange="onSellAssetSelectChange()"
               class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs font-semibold focus:ring-1 focus:ring-rose-500 outline-none">
             </select>
           </div>
 
-          <div id="sellAssetCurrentInfo" class="bg-gray-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700 text-xs space-y-1">
+          <div id="sellAssetCurrentInfo"
+            class="bg-gray-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700 text-xs space-y-1">
             <div class="flex justify-between">
               <span class="text-gray-500">Số lượng đang có:</span>
               <span id="sellCurrentQty" class="font-bold text-gray-800 dark:text-slate-200">0</span>
@@ -951,27 +1087,35 @@
 
           <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng bán <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="sellQuantity" placeholder="Nhập SL bán..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng bán <span
+                  class="text-red-500">*</span></label>
+              <input type="number" step="any" id="sellQuantity" placeholder="Nhập SL bán..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
             </div>
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá bán thực tế / 1 đơn vị <span class="text-red-500">*</span></label>
-              <input type="number" step="any" id="sellPrice" placeholder="Giá bán..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá bán thực tế / 1
+                đơn vị <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="sellPrice" placeholder="Giá bán..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2.5">
             <div>
               <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ngày bán</label>
-              <input type="date" id="sellDate" class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+              <input type="date" id="sellDate"
+                class="w-full px-2 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
             </div>
             <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Lý do, Lãi chốt...)</label>
-              <input type="text" id="sellNotes" placeholder="Chốt lời, cơ cấu..." class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ghi chú (Lý do, Lãi
+                chốt...)</label>
+              <input type="text" id="sellNotes" placeholder="Chốt lời, cơ cấu..."
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
             </div>
           </div>
 
-          <button type="button" onclick="confirmSellAsset()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">
+          <button type="button" onclick="confirmSellAsset()"
+            class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">
             Xác nhận bán tài sản
           </button>
         </div>
@@ -985,7 +1129,8 @@
         class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-2">
           <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
-          <button onclick="closeAddModal()" aria-label="Đóng biểu mẫu" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <button onclick="closeAddModal()" aria-label="Đóng biểu mẫu"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
@@ -1058,13 +1203,15 @@
         <div id="addExpenseForm" class="hidden space-y-3">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
-            <input type="number" id="expenseAmount" min="0" step="1" placeholder="0" aria-describedby="expenseAmountHelp"
+            <input type="number" id="expenseAmount" min="0" step="1" placeholder="0"
+              aria-describedby="expenseAmountHelp"
               class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
             <p id="expenseAmountHelp" class="text-[10px] text-gray-400 mt-1">Có thể nhập 0 VNĐ.</p>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày chi</label>
-            <input type="date" id="expenseDate" class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            <input type="date" id="expenseDate"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -1118,7 +1265,8 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày nhận</label>
-            <input type="date" id="incomeDate" class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="date" id="incomeDate"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Nguồn thu nhập</label>
@@ -1128,7 +1276,7 @@
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người gửi</label>
             <select id="incomeUser"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
               <option value="Đ">Đức</option>
               <option value="S">Sương</option>
             </select>
@@ -1151,11 +1299,13 @@
   <!-- LOGIN OVERLAY (Bảo vệ toàn bộ ứng dụng bằng Google Authentication) -->
   <div id="loginOverlay"
     class="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
-    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 text-center space-y-6">
-      
+    <div
+      class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 text-center space-y-6">
+
       <!-- App Branding -->
       <div class="space-y-2">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-rose-500 text-white shadow-lg shadow-blue-500/30 mb-2">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-rose-500 text-white shadow-lg shadow-blue-500/30 mb-2">
           <i class="fa-solid fa-heart-pulse text-2xl"></i>
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">DuoSpace</h2>
@@ -1164,23 +1314,33 @@
 
       <!-- Avatars Showcase -->
       <div class="flex items-center justify-center space-x-3 py-2">
-        <div class="flex items-center space-x-2 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-full border border-rose-100 dark:border-rose-900/50">
-          <span class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">Đ</span>
+        <div
+          class="flex items-center space-x-2 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-full border border-rose-100 dark:border-rose-900/50">
+          <span
+            class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">Đ</span>
           <span class="text-xs font-semibold text-rose-700 dark:text-rose-300">Đức</span>
         </div>
         <i class="fa-solid fa-heart text-xs text-rose-400 animate-pulse"></i>
-        <div class="flex items-center space-x-2 bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/50">
-          <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">S</span>
+        <div
+          class="flex items-center space-x-2 bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/50">
+          <span
+            class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">S</span>
           <span class="text-xs font-semibold text-blue-700 dark:text-blue-300">Sương</span>
         </div>
       </div>
 
       <!-- Error & Notice Alerts -->
-      <div id="authErrorMessage" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-300 text-left space-y-1"></div>
+      <div id="authErrorMessage"
+        class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-300 text-left space-y-1">
+      </div>
 
-      <div id="authConfigNotice" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-left text-xs text-amber-700 dark:text-amber-300 space-y-1">
-        <p class="font-semibold flex items-center"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Chế độ chạy thử (Demo)</p>
-        <p class="text-[11px] opacity-90">Chưa điền Firebase API Key trong <code class="bg-amber-100 dark:bg-amber-900 px-1 py-0.5 rounded font-mono">js/authConfig.js</code>. Bạn có thể bấm đăng nhập nhanh thử nghiệm bên dưới.</p>
+      <div id="authConfigNotice"
+        class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-left text-xs text-amber-700 dark:text-amber-300 space-y-1">
+        <p class="font-semibold flex items-center"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Chế độ chạy
+          thử (Demo)</p>
+        <p class="text-[11px] opacity-90">Chưa điền Firebase API Key trong <code
+            class="bg-amber-100 dark:bg-amber-900 px-1 py-0.5 rounded font-mono">js/authConfig.js</code>. Bạn có thể bấm
+          đăng nhập nhanh thử nghiệm bên dưới.</p>
       </div>
 
       <!-- Sign In With Google Button -->
@@ -1188,35 +1348,30 @@
         <button id="googleSignInBtn" type="button" onclick="window.duoSignInWithGoogle()"
           class="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-white hover:bg-gray-50 active:scale-98 text-gray-700 font-semibold rounded-2xl border border-gray-300 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
           <svg id="googleSignInIcon" class="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            <path fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
           </svg>
           <i id="googleSignInSpinner" class="fa-solid fa-circle-notch fa-spin text-base text-blue-600 hidden"></i>
           <span id="googleSignInText" class="text-sm">Đăng nhập với Google</span>
         </button>
-
-        <!-- Nút đăng nhập thử nhanh dành cho Đức & Sương khi test giao diện -->
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <button id="demoLoginDucBtn" type="button" onclick="window.duoMockLogin('Đ')"
-            class="py-2 px-2.5 text-xs font-semibold rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40 hover:bg-rose-100 transition-colors cursor-pointer">
-            <i class="fa-solid fa-user-check mr-1"></i> Demo Đức (Đ)
-          </button>
-          <button id="demoLoginSuongBtn" type="button" onclick="window.duoMockLogin('S')"
-            class="py-2 px-2.5 text-xs font-semibold rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40 hover:bg-blue-100 transition-colors cursor-pointer">
-            <i class="fa-solid fa-user-check mr-1"></i> Demo Sương (S)
-          </button>
-        </div>
       </div>
 
       <p class="text-[11px] text-gray-400">
-        <i class="fa-solid fa-lock text-[10px] mr-1"></i> Dữ liệu được bảo mật. Chỉ tài khoản Gmail được cấp phép mới có thể xem ứng dụng.
+        <i class="fa-solid fa-lock text-[10px] mr-1"></i> Dữ liệu được bảo mật. Chỉ tài khoản Gmail được cấp phép mới có
+        thể xem ứng dụng.
       </p>
     </div>
   </div>
 
-  <div id="appToast" role="status" aria-live="polite" class="fixed left-1/2 -translate-x-1/2 bottom-20 z-[60] hidden max-w-[90%] rounded-xl px-4 py-3 text-sm font-medium shadow-lg"></div>
+  <div id="appToast" role="status" aria-live="polite"
+    class="fixed left-1/2 -translate-x-1/2 bottom-20 z-[60] hidden max-w-[90%] rounded-xl px-4 py-3 text-sm font-medium shadow-lg">
+  </div>
 
   <!-- APPLICATION SCRIPTS (Ordered for dependency resolution) -->
   <!-- Firebase App & Auth SDK (Compat) -->
@@ -1244,6 +1399,7 @@
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
   <script src="js/modules/settings.js"></script>
+  <script src="js/modules/cloudSync.js"></script>
   <script src="js/modules/log.js"></script>
   <script src="js/main.js"></script>
 </body>

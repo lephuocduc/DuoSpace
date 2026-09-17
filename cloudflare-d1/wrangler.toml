@@ -1,0 +1,9 @@
+name = "duospace-api"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# Khai báo binding Cloudflare D1 Database
+[[d1_databases]]
+binding = "duospace_db"
+database_name = "duospace-db"
+database_id = "c2debc77-a4e5-4563-a502-c17f7a4ae15e"

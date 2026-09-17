@@ -46,112 +46,22 @@ class Storage {
     return {
       isDarkMode: false,
       usdRate: 25400,
-      todos: [
-        {
-          title: "Lịch nhỏ mắt & tẩy giun Mun, Bông",
-          category: "Mun & Bông",
-          user: "S",
-          priority: "high",
-          notes: "Dùng thuốc nhỏ Revolution",
-          done: false,
-          date: new Date().toISOString()
-        },
-        {
-          title: "Thay nhớt NMAX mốc 15.000km",
-          category: "Xe Máy",
-          user: "Đ",
-          priority: "medium",
-          notes: "Thay nhớt máy Motul 10W40",
-          done: false,
-          date: new Date().toISOString()
-        }
-      ],
-      incomes: [
-        { amount: 15000000, desc: "Lương tháng 8", user: "Đ", notes: "Thu nhập cố định", date: new Date().toISOString() },
-        { amount: 12000000, desc: "Lương tháng 8", user: "S", notes: "Thu nhập cố định", date: new Date().toISOString() }
-      ],
-      expenses: [
-        { amount: 3200000, desc: "Ăn uống nhà hàng & chợ", category: "🍜 Ăn uống", user: "S", notes: "", date: new Date().toISOString() },
-        { amount: 4000000, desc: "Tiền điện nước internet", category: "🏠 Nhà cửa", user: "Đ", notes: "", date: new Date().toISOString() },
-        { amount: 800000, desc: "Xăng xe & bảo dưỡng", category: "🛵 Xe", user: "Đ", notes: "", date: new Date().toISOString() },
-        { amount: 600000, desc: "Cát vệ sinh & hạt mèo", category: "🐱 Mèo", user: "S", notes: "", date: new Date().toISOString() },
-        { amount: 3900000, desc: "Sắm đồ dùng gia đình", category: "📦 Khác", user: "Đ", notes: "", date: new Date().toISOString() }
-      ],
-      bikeMaintenances: [
-        { bike: "NMAX", title: "Thay nhớt", odo: 14850, cost: 350000, date: "2026-08-31" },
-        { bike: "NMAX", title: "Thay nhớt", odo: 12100, cost: 300000, date: "2026-05-15" }
-      ],
-      investments: [
-        { 
-          name: "BTC", 
-          type: "🪙 BTC", 
-          quantity: 0.05, 
-          buyPrice: 60000, 
-          currentPrice: 65000, 
-          isUsd: true, 
-          targetWeight: 40, 
-          notes: "Binance Spot",
-          purchases: [
-            { date: "2026-07-10", quantity: 0.03, buyPrice: 58000, notes: "DCA tháng 7" },
-            { date: "2026-08-05", quantity: 0.02, buyPrice: 63000, notes: "DCA tháng 8" }
-          ],
-          priceSource: { type: 'crypto', symbol: 'BTC', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
-        },
-        { 
-          name: "BNB", 
-          type: "🪙 BNB", 
-          quantity: 4.5, 
-          buyPrice: 520, 
-          currentPrice: 580, 
-          isUsd: true, 
-          targetWeight: 20, 
-          notes: "Binance Vault",
-          purchases: [
-            { date: "2026-07-20", quantity: 4.5, buyPrice: 520, notes: "Mua tích sản" }
-          ],
-          priceSource: { type: 'crypto', symbol: 'BNB', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
-        },
-        { 
-          name: "Tiết kiệm USD", 
-          type: "💵 USD", 
-          quantity: 1000, 
-          buyPrice: 1, 
-          currentPrice: 1, 
-          isUsd: true, 
-          targetWeight: 40, 
-          notes: "Tài khoản USD",
-          purchases: [
-            { date: "2026-06-01", quantity: 1000, buyPrice: 1, notes: "Quỹ dự phòng" }
-          ],
-          priceSource: { type: 'usd', symbol: 'USD', refreshInterval: 3600, goldUnit: 'oz', lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
-        }
-      ],
-      netWorthHistory: [
-        { date: "2026-08-28", value: 162500000 },
-        { date: "2026-08-29", value: 164200000 },
-        { date: "2026-08-30", value: 163800000 },
-        { date: "2026-08-31", value: 167500000 },
-        { date: "2026-09-01", value: 171200000 },
-        { date: "2026-09-02", value: 174500000 }
-      ],
-      monthlyBudgets: [
-        { month: "T6/2026", budget: 15000000, spent: 10200000 },
-        { month: "T7/2026", budget: 14000000, spent: 11800000 },
-        { month: "T8/2026", budget: 12500000, spent: 4200000 }
-      ],
-      catWeights: [
-        { date: "2026-06-01", mun: 4.0, bong: 3.5 },
-        { date: "2026-07-01", mun: 4.1, bong: 3.6 },
-        { date: "2026-08-01", mun: 4.2, bong: 3.8 }
-      ],
+      todos: [],
+      incomes: [],
+      expenses: [],
+      bikeMaintenances: [],
+      investments: [],
+      netWorthHistory: [],
+      monthlyBudgets: [],
+      catWeights: [],
       logs: [],
       settings: {
         munBreed: "Mèo Cưng",
         bongBreed: "Mèo Cưng",
         nmaxPlate: "50AD-539.09",
-        nmaxOdo: 14850,
+        nmaxOdo: 0,
         grandePlate: "50N2-461.30",
-        grandeOdo: 8200
+        grandeOdo: 0
       }
     };
   }

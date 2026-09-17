@@ -71,6 +71,16 @@ class SettingsModule {
     link.click();
     URL.revokeObjectURL(url);
   }
+
+  clearTemporaryData() {
+    if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu tạm và bắt đầu dữ liệu trống mới?')) return;
+    this.app.data = this.app.storage.defaultData();
+    this.app.save();
+    this.app.render();
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify('Đã xóa sạch dữ liệu tạm thành công.', 'success');
+    }
+  }
 }
 
 // Global aliases
@@ -79,3 +89,4 @@ function saveSettings() { window.app.settings.saveSettings(); }
 function downloadBackup() { window.app.settings.downloadBackup(); }
 function importBackup(file) { window.app.settings.importBackup(file); }
 function exportFinanceCsv() { window.app.settings.exportFinanceCsv(); }
+function clearTemporaryData() { window.app.settings.clearTemporaryData(); }

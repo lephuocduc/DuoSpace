@@ -5,6 +5,7 @@ const CONFIG = {
   APP_VERSION: '3.1',
   STORAGE_KEY: 'duoSpaceData',
   USD_RATE_API: 'https://open.er-api.com/v6/latest/USD',
+  D1_API_URL: 'https://duospace-api.duc-todo-api.workers.dev',
 
   VEHICLES: {
     NMAX: { plate: '50AD-539.09', chassis: 'RLCSGB310TY001107' },
