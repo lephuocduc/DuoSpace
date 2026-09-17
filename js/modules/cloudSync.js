@@ -22,9 +22,12 @@ class CloudSync {
     if (!this.isEnabled) return false;
     try {
       this.setSyncStatus('loading', 'Đang tải dữ liệu từ Cloud...');
+      const headers = { 'Content-Type': 'application/json' };
+      if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
+
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers
       });
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const result = await res.json();
@@ -66,12 +69,15 @@ class CloudSync {
       const rawUserCode = window.authManager?.matchedProfile?.code || 'Đ';
       const safeUserCode = rawUserCode === 'Đ' ? 'D' : (rawUserCode === 'S' ? 'S' : 'Both');
 
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-User-Code': safeUserCode
+      };
+      if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
+
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Code': safeUserCode
-        },
+        headers,
         body: JSON.stringify({
           ...currentData,
           userCode: rawUserCode

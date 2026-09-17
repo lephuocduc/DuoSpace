@@ -6,7 +6,7 @@
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-Code"
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-Code, X-App-Secret"
 };
 
 function jsonResponse(data, status = 200) {
@@ -23,6 +23,13 @@ export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: CORS_HEADERS });
+    }
+
+    // Kiểm tra Secret Key bảo vệ API
+    const expectedSecret = env.APP_SECRET || "0da0431f2db64e72a951af2a54198237";
+    const clientSecret = request.headers.get("X-App-Secret");
+    if (!clientSecret || clientSecret !== expectedSecret) {
+      return jsonResponse({ error: "Unauthorized: Invalid or missing X-App-Secret" }, 401);
     }
 
     const url = new URL(request.url);
