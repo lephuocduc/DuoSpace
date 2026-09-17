@@ -1,76 +1,114 @@
 # DuoSpace 👫
 
-**DuoSpace** là ứng dụng web cá nhân & quản lý gia đình dành cho 2 người (Phước Đức & Thu Sương), giúp theo dõi công việc chung, thu chi, danh mục đầu tư, lịch sử bảo dưỡng xe và sức khỏe thú cưng.
+**DuoSpace** là ứng dụng web cá nhân & quản lý gia đình dành riêng cho 2 người (**Phước Đức & Thu Sương**), giúp tổ chức công việc chung, theo dõi tài chính thu chi, danh mục đầu tư, sức khỏe cá nhân, bảo dưỡng xe máy và mèo cưng với khả năng lưu trữ cục bộ (Local-First) kết hợp đồng bộ hóa đám mây **Cloudflare D1**.
 
 ---
 
 ## 🌟 Tính năng chính
 
-- 🏠 **Tổng quan (Home)**: Thống kê Quỹ chung hàng tháng, so sánh Thu - Chi, tiến độ hoàn thành To-Do và nhắc nhở việc quan trọng.
-- 📝 **To-Do List**: Quản lý danh sách việc cần làm, phân công theo người (Đức / Sương / Cả hai), mức độ ưu tiên và lọc theo mốc thời gian.
-- 💰 **Quản lý Thu Chi (Finance)**: Ghi chép chi tiêu theo danh mục, người chi trả và thống kê số dư quỹ chung.
-- 📈 **Quản lý Đầu tư (Investment)**: Theo dõi danh mục tài sản (Crypto, Cổ phiếu, Vàng, USD, Tiết kiệm), tự động cập nhật tỷ giá USD/VNĐ theo thời gian thực và biểu đồ phân bổ tài sản.
-- 🛵 **Xe Máy (Motorbike)**: Theo dõi chỉ số Odo và lịch sử bảo dưỡng định kỳ cho 2 xe (NMAX & Grande).
-- 🐱 **Mun & Bông (Cats)**: Nhật ký theo dõi và biểu đồ biến động cân nặng của 2 bé mèo.
-- 🏸 **Sức Khỏe (Health)**: Nhắc nhở tập luyện chạy bộ, cầu lông và theo dõi sức khỏe.
-- ⚙️ **Cài đặt & Giao diện**: Tự động hỗ trợ Dark Mode / Light Mode và lưu trữ dữ liệu an toàn trên LocalStorage.
+### 1. 🔐 Bảo mật & Xác thực (Google Firebase Auth)
+- **Đăng nhập Google an toàn:** Xác thực người dùng qua Google OAuth bằng Firebase Authentication.
+- **Bảo vệ bằng danh sách Whitelist:** Chỉ cấp phép truy cập cho đúng 2 email của Đức (`leducst1@gmail.com`) và Sương (`suongtranst1@gmail.com`).
+- **Màn hình khởi động thông minh:** Tự động kiểm tra phiên đăng nhập nền và phản hồi trạng thái kết nối rõ ràng.
+
+### 2. ☁️ Đồng bộ Cloudflare D1 (Local-First + Cloud Sync)
+- **Lưu trữ tức thì:** Dữ liệu ưu tiên ghi vào `LocalStorage` của trình duyệt giúp ứng dụng phản hồi mượt mà và hoạt động cả khi mất mạng tạm thời.
+- **Tự động đồng bộ lên D1:** Mọi thay đổi dữ liệu sẽ được tự động đồng bộ lên cơ sở dữ liệu serverless Cloudflare D1.
+- **Xác thực API bằng ID Token:** Cloudflare Worker xác thực trực tiếp JWT RS256 của Google JWKS, ngăn chặn mọi truy cập trái phép.
+- **Nút Đồng bộ thủ công (Sync Button):** Biểu tượng đám mây ở header cho phép bấm trực tiếp để ép tải dữ liệu mới nhất bất cứ lúc nào.
+
+### 3. 📝 Quản lý Công việc (To-Do List)
+- **Phân loại đa dạng:** Việc nhà, Mun & Bông, Xe Máy, Sức Khỏe, Đầu tư và **Khác**.
+- **Phân công linh hoạt:** Giao việc cho Đức, Sương hoặc Cả hai.
+- **Mốc thời gian:** Hỗ trợ **Ngày bắt đầu** và **Hạn hoàn thành (Deadline)**.
+- **Cảnh báo quá hạn:** Tự động bật nhãn đỏ cảnh báo `(Quá hạn)` nếu công việc chưa hoàn thành sau thời hạn.
+
+### 4. 💰 Quản lý Tài chính & Thu Chi (Finance)
+- **Ghi chép giao dịch:** Ghi nhận chi tiêu và thu nhập theo danh mục và người chi trả. Sắp xếp thông minh: giao dịch mới nhất luôn ở trên cùng.
+- **Bộ lọc khoảng ngày mạnh mẽ:** Lọc nhanh theo "Tháng này", "Tháng trước", "30 ngày qua", "Năm nay" hoặc tự chọn khoảng ngày tùy ý.
+- **Biểu đồ so sánh Thu - Chi:** Trực quan hóa dòng tiền 3 tháng gần nhất với trục Y co giãn tự động theo số liệu thực tế.
+
+### 5. 📈 Quản lý Đầu tư & Tài sản (Investment)
+- **Đa dạng danh mục:** Theo dõi Crypto (BTC, BNB...), Vàng nhẫn 9999, Tiền mặt USD, VND, Tiền gửi tiết kiệm.
+- **Tự động cập nhật tỷ giá:** Tích hợp API lấy giá Coin theo thời gian thực và crawler giá vàng DOJI.
+- **Bán tài sản & chốt lời:** Hỗ trợ bán từng phần, tính lãi/lỗ tự động và ghi nhận thu nhập vào quỹ chung.
+
+### 6. ❤️ Sức Khỏe Cá Nhân (Health)
+- Ghi nhận định kỳ **Cân nặng (kg)** và **Chiều cao (cm)** của Đức & Sương.
+- Tự động tính chỉ số **BMI** và phân loại thể trạng (Gầy, Bình thường, Thừa cân nhẹ, Cần giảm cân) kèm ghi chú thể lực.
+- Lịch sử theo dõi rõ ràng, hỗ trợ xóa và cập nhật chỉ số nhanh chóng.
+
+### 7. 🛵 Xe Máy & 🐱 Mèo Cưng
+- **Xe máy (NMAX & Grande):** Quản lý ODO hiện tại và tuổi thọ các phụ tùng cần bảo dưỡng định kỳ (Nhớt máy, nhớt láp, lọc gió, bugi, dây curoa...).
+- **Mun & Bông:** Theo dõi cân nặng hàng tháng của 2 bé mèo với biểu đồ tăng trưởng trực quan.
+
+### 8. 💾 Sao lưu & Khôi phục (Backup & Restore)
+- Xuất toàn bộ cơ sở dữ liệu ra file backup **JSON**.
+- Khôi phục từ file JSON với tính năng tự động đẩy dữ liệu khôi phục lên Cloudflare D1.
+- Xuất lịch sử thu chi ra file **Excel (CSV)**.
 
 ---
 
-## 📁 Cấu trúc dự án
+## 📁 Cấu trúc thư mục
 
 ```
 duospace/
 ├── index.html              # Giao diện chính (Shell HTML)
 ├── css/
-│   └── custom.css          # Tùy chỉnh CSS & animations
+│   └── custom.css          # Tùy chỉnh CSS, animations & scroll lock
 ├── js/
-│   ├── config.js           # Cấu hình hằng số & categories
-│   ├── utils.js            # Các hàm tiện ích
+│   ├── config.js           # Hằng số cấu hình hệ thống & categories
+│   ├── authConfig.js       # Cấu hình Firebase Auth & Whitelist email
+│   ├── utils.js            # Tiện ích định dạng, sanitize, thông báo, scroll lock
 │   ├── storage.js          # Quản lý LocalStorage & schema
-│   ├── main.js             # Entry point khởi động ứng dụng
-│   ├── ui/                 # Module điều khiển giao diện (Theme, Tabs, Sidebar, Modal)
-│   ├── charts/             # Module biểu đồ Chart.js (Budget, Weight, Investment)
-│   └── modules/            # Logic nghiệp vụ theo từng tính năng
-└── data/
-    └── schema.json         # Cấu trúc tài liệu dữ liệu JSON
+│   ├── main.js             # Khởi tạo DuoSpaceApp & bộ điều hướng
+│   ├── ui/                 # Module điều khiển giao diện (Sidebar, Modal, Tabs)
+│   ├── charts/             # Biểu đồ Chart.js (Budget, Cat weights, Investment)
+│   └── modules/            # Module nghiệp vụ (Auth, CloudSync, Todo, Finance, Investment, Motorbike, Cats, Health, Settings, Log)
+├── cloudflare-d1/          # Backend Serverless Cloudflare D1
+│   ├── wrangler.toml       # Cấu hình Cloudflare Worker & D1 Database binding
+│   ├── schema.sql          # Định nghĩa cấu trúc các bảng CSDL SQLite trên D1
+│   └── worker.js           # Worker API xác thực Google JWT RS256 và CRUD sync
+└── server/
+    └── doji-server.js      # Server crawler bảng giá vàng DOJI bằng Puppeteer
 ```
 
 ---
 
-## 🚀 Hướng dẫn sử dụng
+## 🚀 Hướng dẫn khởi chạy
 
-Mở trực tiếp file `index.html` trên bất kỳ trình duyệt hiện đại nào (Chrome, Safari, Edge, Firefox) hoặc chạy qua Live Server/GitHub Pages.
+### Chạy trực tiếp
+Mở file `index.html` bằng **Live Server** (trong VS Code) hoặc chạy lệnh:
+```bash
+npx serve .
+```
+Truy cập `http://localhost:3000` trên trình duyệt.
 
-Để lấy giá DOJI trực tiếp từ bảng giá đã render, mở thêm một terminal tại thư mục dự án và chạy:
+> **Lưu ý:** Để Firebase Google Auth hoạt động đúng, không mở trực tiếp bằng đường dẫn `file:///` mà hãy chạy qua máy chủ web cục bộ (`http://localhost`).
 
+### Crawl giá vàng DOJI (Tùy chọn)
+Để cập nhật giá vàng nhẫn 9999 trực tiếp từ website DOJI:
 ```bash
 npm install
 npm run doji-server
 ```
+Server sẽ chạy ở cổng `3001` và phục vụ API tại `http://127.0.0.1:3001/api/gold/doji`.
 
-Sau khi server báo sẵn sàng ở cổng `3001`, ứng dụng sẽ tự gọi `http://127.0.0.1:3001/api/gold/doji`. Server này chạy Puppeteer, đợi bảng giá Angular của DOJI tải xong và lấy giá mua của “Nhẫn tròn 9999 Hưng Thịnh Vượng”.
+### Deploy Cloudflare Worker
+Nếu cần cập nhật hoặc triển khai lại Worker API lên Cloudflare:
+```bash
+cd cloudflare-d1
+npx wrangler deploy
+```
 
-## 💾 Sao lưu và khôi phục
-
-Vào **Cài đặt → Dữ liệu & sao lưu** để tải toàn bộ dữ liệu thành tệp JSON hoặc khôi phục từ một bản sao lưu trước đó. Khôi phục sẽ thay thế dữ liệu hiện có. Tại đây cũng có nút xuất toàn bộ thu chi thành tệp CSV, có thể mở bằng Excel hoặc Google Sheets.
+---
 
 ## 🔐 Cấu hình Google Authentication (Firebase Auth)
 
-DuoSpace được tích hợp Google Authentication qua Firebase để bảo vệ dữ liệu, kèm cơ chế Whitelist chỉ cho phép đúng 2 tài khoản của Đức và Sương:
-
-1. Truy cập [Firebase Console](https://console.firebase.google.com/) và tạo một Project mới.
-2. Vào **Build → Authentication → Sign-in method**, bấm **Add new provider** và chọn **Google**, sau đó bật **Enable**.
-3. Vào **Project Settings (biểu tượng bánh răng) → General → Your apps**, thêm Web app (`</>`) để lấy mã cấu hình `firebaseConfig`.
-4. Mở file [js/authConfig.js](file:///g:/My%20Drive/L%C3%AA%20Ph%C6%B0%E1%BB%9Bc%20%C4%90%E1%BB%A9c/Personal%20App/js/authConfig.js):
-   - Dán `firebaseConfig` của bạn vào `firebaseConfig`.
-   - Cập nhật đúng địa chỉ Gmail của Đức và Sương trong mảng `allowedUsers`.
-5. Nếu chạy trên tên miền riêng hoặc `localhost`, đảm bảo domain đã được thêm vào **Authentication → Settings → Authorized domains**.
-
-## 🛠 Khắc phục sự cố
-
-- Không thấy dữ liệu cũ: kiểm tra trình duyệt có đang chặn LocalStorage hoặc đang dùng cửa sổ ẩn danh không.
-- Báo lỗi "Tài khoản không có quyền truy cập": Kiểm tra địa chỉ Gmail đăng nhập đã được thêm chính xác vào `allowedUsers` trong `js/authConfig.js` chưa.
-
-- Không cập nhật được tỷ giá/giá tài sản: ứng dụng vẫn dùng giá đã lưu; thử lại khi có Internet.
-- Trước khi xóa hoặc khôi phục dữ liệu lớn: hãy tải một bản sao lưu JSON trong **Cài đặt**.
+1. Truy cập [Firebase Console](https://console.firebase.google.com/) và tạo Project.
+2. Vào **Build → Authentication → Sign-in method**, kích hoạt **Google provider**.
+3. Tại **Project Settings → General → Your apps**, copy thông số `firebaseConfig`.
+4. Mở file `js/authConfig.js`:
+   - Dán thông số vào `firebaseConfig`.
+   - Cấu hình email tại `allowedUsers` (mặc định: `leducst1@gmail.com` và `suongtranst1@gmail.com`).
+5. Thêm domain chạy web (ví dụ `localhost`, `duc-todo.pages.dev`...) vào mục **Authorized domains** trong Firebase Authentication Settings.

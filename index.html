@@ -907,41 +907,101 @@
       <!-- TAB: HƯỚNG DẪN -->
       <div id="tab-guide" class="hidden space-y-4 tab-content">
         <section
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4 text-sm text-gray-600 dark:text-slate-300">
-          <h2 class="text-base font-bold text-gray-800 dark:text-slate-100">Hướng dẫn sử dụng</h2>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Công việc</p>
-            <p class="text-xs mt-1">Thêm việc bằng nút +, chọn người thực hiện và mức ưu tiên. Danh sách luôn ưu tiên
-              việc Cao trước, sau đó Trung bình và Thấp.</p>
+          class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-5 text-sm text-gray-600 dark:text-slate-300">
+          <div class="border-b border-gray-100 dark:border-slate-700/60 pb-3">
+            <h2 class="text-base font-bold text-gray-900 dark:text-slate-100 flex items-center">
+              <i class="fa-solid fa-book-open-reader text-blue-500 mr-2"></i>Hướng Dẫn Sử Dụng DuoSpace
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">Cẩm nang chi tiết các tính năng quản lý dành riêng cho gia đình nhỏ của Đức & Sương.</p>
           </div>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Thu chi</p>
-            <p class="text-xs mt-1">Nhấn nút + tại trang Thu chi, chọn Chi tiêu hoặc Thu nhập, điền số tiền, danh mục,
-              người thanh toán và mô tả rồi lưu. Có thể chọn một giao dịch trong danh sách để sửa hoặc xóa. Số dư và
-              biểu đồ được cập nhật ngay sau khi lưu.</p>
-          </div>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Chi tiêu xe & bảo dưỡng</p>
-            <p class="text-xs mt-1">Chọn danh mục Xe để hiện thông tin xe. Chọn xe, số ODO và hạng mục bảo dưỡng từ danh
-              sách; chọn Khác nếu cần tự nhập. Khoản chi và lịch sử bảo dưỡng luôn được liên kết: thêm, sửa hoặc xóa ở
-              một bên sẽ tự đồng bộ bên còn lại.</p>
-          </div>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Đầu tư & tài sản</p>
-            <p class="text-xs mt-1">Khi chọn danh mục Đầu tư, nhập số lượng và giá mua/đơn vị; số tiền chi sẽ tự tính
-              bằng số lượng × giá mua. Chọn tài sản có hỗ trợ để hệ thống tự lấy giá thị trường; vẫn có thể sửa giá thủ
-              công. Giao dịch mua và khoản chi được liên kết hai chiều, nên xóa ở một bên cũng sẽ xóa bản ghi còn lại.
+
+          <!-- 1. Xác thực & Đồng bộ Cloud -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">1</span>
+              Bảo mật & Đồng bộ Cloudflare D1
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • <strong>Bảo mật:</strong> Ứng dụng dùng Google Firebase Authentication với danh sách Whitelist bảo vệ chỉ cho phép 2 tài khoản của Đức và Sương.<br>
+              • <strong>Đồng bộ tự động:</strong> Mọi thay đổi dữ liệu được lưu tức thì vào máy và tự động đồng bộ lên cơ sở dữ liệu Cloudflare D1.<br>
+              • <strong>Nút Cloud thủ công:</strong> Biểu tượng đám mây ở góc trên header cho biết trạng thái. Bấm trực tiếp vào icon để <em>ép tải lại dữ liệu mới nhất</em> từ Cloud bất cứ lúc nào đối phương vừa cập nhật.
             </p>
           </div>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Xe máy</p>
-            <p class="text-xs mt-1">Cập nhật ODO hiện tại của từng xe tại phần Thông tin xe. Dùng nút + Bảo dưỡng để ghi
-              lịch sử độc lập, xem lần bảo dưỡng gần nhất và theo dõi tình trạng phụ tùng.</p>
+
+          <!-- 2. To-Do List -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">2</span>
+              Quản lý Công Việc (To-Do List)
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • <strong>Thêm công việc:</strong> Nhấn nút <i class="fa-solid fa-plus text-[10px]"></i> góc trên màn hình, điền tên việc, phân công (Đức / Sương / Cả hai), mức độ ưu tiên và phân loại (Việc nhà, Mun & Bông, Xe máy, Sức khỏe, Đầu tư, Khác).<br>
+              • <strong>Ngày bắt đầu & Hạn hoàn thành:</strong> Cho phép chọn mốc ngày bắt đầu và hạn chót. Khi quá hạn mà chưa hoàn thành, hệ thống sẽ tự động bật cảnh báo <em>màu đỏ (Quá hạn)</em>.<br>
+              • <strong>Hoàn thành & Lưu trữ:</strong> Đánh dấu tick để chuyển việc vào tab <em>Đã hoàn thành</em> hoặc mở lại khi cần.
+            </p>
           </div>
-          <div>
-            <p class="font-semibold text-gray-800 dark:text-slate-200">Nhật ký hệ thống</p>
-            <p class="text-xs mt-1">Trang này tự ghi các thay đổi dữ liệu quan trọng để tiện kiểm tra. Đây không phải
-              nơi ghi nhật ký hoặc ghi chú cá nhân.</p>
+
+          <!-- 3. Thu Chi Tài Chính -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">3</span>
+              Quản lý Tài Chính & Thu Chi
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • <strong>Ghi chép:</strong> Thêm khoản Chi tiêu hoặc Thu nhập, chọn danh mục và người chi trả (Đức / Sương). Lịch sử luôn tự động xếp giao dịch mới nhất lên đầu.<br>
+              • <strong>Bộ lọc khoảng ngày:</strong> Chọn nhanh "Tháng này", "Tháng trước", "30 ngày qua", "Năm nay" hoặc tùy chỉnh Từ ngày - Đến ngày để xem tổng thu, tổng chi chính xác.<br>
+              • <strong>Biểu đồ so sánh:</strong> Cột Y tự động co giãn theo số tiền thực tế 3 tháng gần nhất để dễ quan sát biến động dòng tiền.
+            </p>
+          </div>
+
+          <!-- 4. Quản lý Đầu Tư & Tài Sản -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">4</span>
+              Đầu Tư & Tổng Tài Sản
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • <strong>Theo dõi đa tài sản:</strong> Hỗ trợ Crypto (BTC, BNB...), Vàng nhẫn 9999, Tiền mặt USD, VND và Tiền gửi tiết kiệm.<br>
+              • <strong>Cập nhật giá thị trường:</strong> Nhấn "Cập nhật giá" để tự động lấy giá Coin và tỷ giá USD/VND theo thời gian thực (hỗ trợ crawl giá vàng DOJI qua server riêng).<br>
+              • <strong>Bán / Khớp lệnh:</strong> Hỗ trợ bán từng phần tài sản, tự động tính lãi/lỗ và tạo giao dịch thu nhập vào quỹ.
+            </p>
+          </div>
+
+          <!-- 5. Xe Máy & Mèo Cưng -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">5</span>
+              Xe Máy (NMAX & Grande) & Mèo Cưng
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • <strong>Xe máy:</strong> Theo dõi số km ODO hiện tại và tuổi thọ phụ tùng (Nhớt máy, nhớt láp, lọc gió, bugi, dây curoa...). Chi phí bảo dưỡng tự động liên kết với Thu Chi.<br>
+              • <strong>Mun & Bông:</strong> Theo dõi cân nặng hàng tháng của 2 bé mèo kèm biểu đồ tăng trưởng trực quan.
+            </p>
+          </div>
+
+          <!-- 6. Sức Khỏe Cá Nhân -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">6</span>
+              Theo dõi Sức Khỏe (Health)
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • Ghi nhận <strong>Cân nặng (kg)</strong> và <strong>Chiều cao (cm)</strong> định kỳ cho Đức & Sương.<br>
+              • Hệ thống tự động tính <strong>chỉ số BMI</strong> kèm đánh giá thể trạng (Gầy, Bình thường, Thừa cân nhẹ, Cần giảm cân) và lưu nhật ký cảm xúc, thể lực.
+            </p>
+          </div>
+
+          <!-- 7. Sao Lưu & Dự Phòng -->
+          <div class="space-y-1.5">
+            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
+              <span class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">7</span>
+              Sao Lưu & Khôi Phục Dữ Liệu
+            </p>
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
+              • Trong tab <strong>Cài đặt</strong>, bạn có thể bấm <em>"Tải bản sao lưu JSON"</em> về máy bất cứ lúc nào đề phòng trường hợp khẩn cấp.<br>
+              • Khi chuyển sang thiết bị mới, bấm <em>"Khôi phục từ bản sao lưu"</em> để nạp lại dữ liệu, hệ thống sẽ tự động đồng bộ ngay lên Cloudflare D1.<br>
+              • Hỗ trợ xuất file Excel CSV cho dữ liệu thu chi để làm báo cáo thống kê.
+            </p>
           </div>
         </section>
       </div>
