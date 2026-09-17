@@ -20,12 +20,15 @@ CREATE TABLE IF NOT EXISTS todos (
     priority TEXT DEFAULT 'medium',    -- 'low', 'medium', 'high'
     notes TEXT,
     done INTEGER DEFAULT 0,            -- 0 (chưa xong) / 1 (đã xong)
+    start_date DATE,                   -- Ngày bắt đầu
+    due_date DATE,                     -- Hạn hoàn thành
     date DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_todos_user ON todos(user);
 CREATE INDEX IF NOT EXISTS idx_todos_done ON todos(done);
+CREATE INDEX IF NOT EXISTS idx_todos_due_date ON todos(due_date);
 
 -- 3. Giao dịch Thu Nhập & Chi Tiêu (Incomes & Expenses)
 CREATE TABLE IF NOT EXISTS transactions (

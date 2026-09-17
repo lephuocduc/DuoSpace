@@ -158,8 +158,16 @@ class DuoSpaceApp {
 
     container.innerHTML = list.map(todo => {
       const realIndex = this.data.todos.indexOf(todo);
-      const createdDate = todo.date ? Utils.formatDate(todo.date) : '';
       const userText = todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai';
+      let dateDisplay = '';
+      if (todo.dueDate) {
+        const isOverdue = !todo.done && new Date(todo.dueDate).setHours(23,59,59,999) < Date.now();
+        dateDisplay = `<span class="text-[9px] ${isOverdue ? 'text-rose-500 font-semibold' : 'text-gray-400'} block">⏰ ${Utils.formatDate(todo.dueDate)}</span>`;
+      } else if (todo.startDate) {
+        dateDisplay = `<span class="text-[9px] text-gray-400 block">📅 ${Utils.formatDate(todo.startDate)}</span>`;
+      } else if (todo.date) {
+        dateDisplay = `<span class="text-[9px] text-gray-400 block">${Utils.formatDate(todo.date)}</span>`;
+      }
 
       return `
         <div class="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 p-1 rounded-lg">
@@ -169,7 +177,7 @@ class DuoSpaceApp {
           </div>
           <div onclick="window.app.todo.editTodo(${realIndex})" class="text-right cursor-pointer">
             <span class="text-[10px] text-gray-400 dark:text-slate-500 block">${userText}</span>
-            ${createdDate ? `<span class="text-[9px] text-gray-400 block">${createdDate}</span>` : ''}
+            ${dateDisplay}
           </div>
         </div>
       `;

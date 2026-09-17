@@ -109,8 +109,6 @@ class HealthModule {
         const st = this.getBmiStatus(bmi);
         metrics.push(`BMI: <strong>${bmi}</strong> (<span class="${st.color}">${st.label}</span>)`);
       }
-      if (item.waterMl) metrics.push(`💧 ${item.waterMl} ml`);
-      if (item.steps) metrics.push(`👟 ${item.steps.toLocaleString('vi-VN')} bước`);
 
       const dateStr = item.date ? Utils.formatDate(item.date) : '';
 
@@ -139,8 +137,6 @@ class HealthModule {
     const date = document.getElementById('healthDateInput')?.value;
     const weightVal = parseFloat(document.getElementById('healthWeightInput')?.value);
     const heightVal = parseFloat(document.getElementById('healthHeightInput')?.value);
-    const waterVal = parseInt(document.getElementById('healthWaterInput')?.value);
-    const stepsVal = parseInt(document.getElementById('healthStepsInput')?.value);
     const notes = Utils.sanitizeText(document.getElementById('healthNotesInput')?.value || '');
 
     if (!date) {
@@ -148,8 +144,8 @@ class HealthModule {
       return;
     }
 
-    if (isNaN(weightVal) && isNaN(heightVal) && isNaN(waterVal) && isNaN(stepsVal)) {
-      alert('Vui lòng nhập ít nhất một chỉ số (Cân nặng, Chiều cao, Nước hoặc Bước chân)!');
+    if (isNaN(weightVal) && isNaN(heightVal)) {
+      alert('Vui lòng nhập ít nhất Cân nặng hoặc Chiều cao!');
       return;
     }
 
@@ -163,8 +159,6 @@ class HealthModule {
       date,
       weight: !isNaN(weightVal) ? weightVal : null,
       height: !isNaN(heightVal) ? heightVal : null,
-      waterMl: !isNaN(waterVal) ? waterVal : 0,
-      steps: !isNaN(stepsVal) ? stepsVal : 0,
       notes,
       createdAt: new Date().toISOString()
     };
@@ -181,13 +175,9 @@ class HealthModule {
     // Reset inputs
     const weightInput = document.getElementById('healthWeightInput');
     const heightInput = document.getElementById('healthHeightInput');
-    const waterInput = document.getElementById('healthWaterInput');
-    const stepsInput = document.getElementById('healthStepsInput');
     const notesInput = document.getElementById('healthNotesInput');
     if (weightInput) weightInput.value = '';
     if (heightInput) heightInput.value = '';
-    if (waterInput) waterInput.value = '';
-    if (stepsInput) stepsInput.value = '';
     if (notesInput) notesInput.value = '';
 
     if (typeof Utils !== 'undefined' && Utils.notify) {

@@ -95,7 +95,20 @@ class TodoModule {
         low: ['Thấp', 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400']
       }[todo.priority] || ['Trung bình', 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'];
       const priorityBadge = `<span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${priorityMeta[1]}">Ưu tiên ${priorityMeta[0]}</span>`;
-      const dateStr = todo.date ? Utils.formatDate(todo.date) : '';
+      const dateBadges = [];
+      if (todo.startDate) {
+        dateBadges.push(`<span class="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded"><i class="fa-regular fa-calendar-plus mr-1"></i>Từ: ${Utils.formatDate(todo.startDate)}</span>`);
+      }
+      if (todo.dueDate) {
+        const isOverdue = !todo.done && new Date(todo.dueDate).setHours(23,59,59,999) < Date.now();
+        const dueColor = isOverdue
+          ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 font-semibold'
+          : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50';
+        dateBadges.push(`<span class="text-[10px] ${dueColor} px-1.5 py-0.5 rounded"><i class="fa-regular fa-clock mr-1"></i>Hạn: ${Utils.formatDate(todo.dueDate)}${isOverdue ? ' (Quá hạn)' : ''}</span>`);
+      }
+      if (!todo.startDate && !todo.dueDate && todo.date) {
+        dateBadges.push(`<span class="text-[10px] text-gray-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${Utils.formatDate(todo.date)}</span>`);
+      }
 
       return `
         <div class="task-item bg-gray-50 dark:bg-slate-800/80 rounded-xl p-3 border border-gray-100 dark:border-slate-700/60 space-y-1 hover:bg-gray-100 dark:hover:bg-slate-700/50">
@@ -108,7 +121,7 @@ class TodoModule {
                   ${userBadge}
                   ${categoryBadge}
                   ${priorityBadge}
-                  ${dateStr ? `<span class="text-[10px] text-gray-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</span>` : ''}
+                  ${dateBadges.join(' ')}
                 </div>
               </div>
             </div>
@@ -155,6 +168,12 @@ class TodoModule {
     document.getElementById('todoUser').value = todo.user || 'Both';
     document.getElementById('todoPriority').value = todo.priority || 'medium';
     document.getElementById('todoNotes').value = todo.notes || '';
+
+    const startInput = document.getElementById('todoStartDate');
+    const dueInput = document.getElementById('todoDueDate');
+    if (startInput) startInput.value = todo.startDate || '';
+    if (dueInput) dueInput.value = todo.dueDate || '';
+
     document.getElementById('saveTodoBtn').innerText = "Cập nhật công việc";
 
     ModalManager.openAddModal();
@@ -165,6 +184,8 @@ class TodoModule {
     const category = document.getElementById('todoCategory').value;
     const user = document.getElementById('todoUser').value;
     const priority = document.getElementById('todoPriority').value;
+    const startDate = document.getElementById('todoStartDate')?.value || null;
+    const dueDate = document.getElementById('todoDueDate')?.value || null;
     const notes = Utils.sanitizeText(document.getElementById('todoNotes').value);
 
     if (!title) return alert('Vui lòng nhập tên công việc!');
@@ -178,14 +199,19 @@ class TodoModule {
         category,
         user,
         priority,
+        startDate,
+        dueDate,
         notes
       };
     } else {
       this.app.data.todos.push({
+        id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
         title,
         category,
         user,
         priority,
+        startDate,
+        dueDate,
         notes,
         done: false,
         date: new Date().toISOString()
@@ -198,6 +224,8 @@ class TodoModule {
       previousTodo.category !== todo.category && `Phân loại: ${previousTodo.category} → ${todo.category}`,
       previousTodo.user !== todo.user && `Phân công: ${previousTodo.user} → ${todo.user}`,
       previousTodo.priority !== todo.priority && `Ưu tiên: ${previousTodo.priority} → ${todo.priority}`,
+      previousTodo.startDate !== todo.startDate && `Bắt đầu: ${previousTodo.startDate || 'chưa có'} → ${todo.startDate || 'chưa có'}`,
+      previousTodo.dueDate !== todo.dueDate && `Hạn: ${previousTodo.dueDate || 'chưa có'} → ${todo.dueDate || 'chưa có'}`,
       previousTodo.notes !== todo.notes && `Ghi chú: ${previousTodo.notes || 'trống'} → ${todo.notes || 'trống'}`
     ].filter(Boolean).join(' · ') : title;
     this.app.log?.system(editingTodo ? 'Cập nhật công việc' : 'Thêm công việc', changes || 'Không thay đổi dữ liệu');

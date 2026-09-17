@@ -142,8 +142,17 @@ class HomeModule {
       const priorityBadge = todo.priority === 'high'
         ? '<span class="text-[10px] font-bold px-2 py-0.5 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-md">🔴 Cao</span>'
         : '<span class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-md">🟡 Trung bình</span>';
-      const createdDate = todo.date ? Utils.formatDate(todo.date) : '';
       const userText = todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai';
+      
+      let dateInfo = '';
+      if (todo.dueDate) {
+        const isOverdue = !todo.done && new Date(todo.dueDate).setHours(23,59,59,999) < Date.now();
+        dateInfo = ` • <span class="${isOverdue ? 'text-rose-500 font-semibold' : ''}">⏰ Hạn: ${Utils.formatDate(todo.dueDate)}</span>`;
+      } else if (todo.startDate) {
+        dateInfo = ` • 📅 Từ: ${Utils.formatDate(todo.startDate)}`;
+      } else if (todo.date) {
+        dateInfo = ` • 📅 ${Utils.formatDate(todo.date)}`;
+      }
 
       return `
         <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-900/60 rounded-xl border border-gray-100 dark:border-slate-800 hover:bg-gray-100/80 transition-colors">
@@ -151,7 +160,7 @@ class HomeModule {
             <input type="checkbox" onchange="window.app.todo.toggleTodo(${realIdx})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
             <div onclick="window.app.todo.editTodo(${realIdx})" class="flex-1 cursor-pointer">
               <p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${Utils.escapeHtml(todo.title)}</p>
-              <p class="text-[11px] text-gray-400 dark:text-slate-500">${todo.category} • ${userText}${createdDate ? ' • 📅 ' + createdDate : ''}</p>
+              <p class="text-[11px] text-gray-400 dark:text-slate-500">${todo.category} • ${userText}${dateInfo}</p>
             </div>
           </div>
           ${priorityBadge}

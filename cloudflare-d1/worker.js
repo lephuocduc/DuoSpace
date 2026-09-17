@@ -244,6 +244,8 @@ export default {
               priority: t.priority,
               notes: t.notes || "",
               done: Boolean(t.done),
+              startDate: t.start_date || null,
+              dueDate: t.due_date || null,
               date: t.date,
               createdAt: t.created_at || t.date
             })),
@@ -309,8 +311,8 @@ export default {
             const createdAt = item.createdAt || item.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO todos (id, title, category, user, priority, notes, done, date, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO todos (id, title, category, user, priority, notes, done, start_date, due_date, date, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 id,
                 item.title || "",
@@ -319,6 +321,8 @@ export default {
                 item.priority || "medium",
                 item.notes || "",
                 item.done ? 1 : 0,
+                item.startDate || null,
+                item.dueDate || null,
                 item.date || new Date().toISOString(),
                 createdAt
               )

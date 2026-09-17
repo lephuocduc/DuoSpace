@@ -776,18 +776,7 @@
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Nước uống (ml)</label>
-              <input type="number" step="50" id="healthWaterInput" placeholder="VD: 2000"
-                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-            </div>
-            <div>
-              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Bước chân (steps)</label>
-              <input type="number" step="100" id="healthStepsInput" placeholder="VD: 6000"
-                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
-            </div>
-          </div>
+
           <div>
             <label class="block text-[10px] text-gray-500 font-semibold mb-1">Ghi chú (Cảm xúc / Thể trạng)</label>
             <input type="text" id="healthNotesInput" placeholder="VD: Chạy bộ 5km, uống đủ nước, ngủ ngon..."
@@ -1276,6 +1265,18 @@
               <option value="medium" selected>🟡 Trung bình</option>
               <option value="low">⚪ Thấp</option>
             </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">📅 Ngày bắt đầu</label>
+              <input type="date" id="todoStartDate"
+                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">⏰ Hạn hoàn thành</label>
+              <input type="date" id="todoDueDate"
+                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm

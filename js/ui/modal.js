@@ -26,6 +26,10 @@ const ModalManager = {
 
       document.getElementById('todoInput').value = '';
       document.getElementById('todoNotes').value = '';
+      const todoStartEl = document.getElementById('todoStartDate');
+      const todoDueEl = document.getElementById('todoDueDate');
+      if (todoStartEl) todoStartEl.value = '';
+      if (todoDueEl) todoDueEl.value = '';
       document.getElementById('expenseAmount').value = '';
       document.getElementById('expenseDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('expenseDesc').value = '';
