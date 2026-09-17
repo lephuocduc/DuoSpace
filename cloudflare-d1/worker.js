@@ -185,7 +185,7 @@ export default {
         ] = await Promise.all([
           db.prepare("SELECT * FROM app_state WHERE id = 'duospace_global_state'").first(),
           db.prepare("SELECT * FROM todos ORDER BY created_at DESC").all(),
-          db.prepare("SELECT * FROM transactions ORDER BY date DESC").all(),
+          db.prepare("SELECT * FROM transactions ORDER BY date DESC, created_at DESC").all(),
           db.prepare("SELECT * FROM investments").all(),
           db.prepare("SELECT date, value FROM net_worth_history ORDER BY date ASC").all(),
           db.prepare("SELECT * FROM monthly_budgets").all(),
@@ -204,6 +204,7 @@ export default {
             user: t.user,
             notes: t.notes || "",
             date: t.date,
+            createdAt: t.created_at || t.date,
             category: t.category || ""
           };
           if (t.type === "income") incomes.push(item);
@@ -314,20 +315,22 @@ export default {
           statements.push(db.prepare("DELETE FROM transactions"));
           for (const inc of (payload.incomes || [])) {
             const id = inc.id || `inc-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = inc.createdAt || inc.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO transactions (id, type, amount, description, category, user, notes, date)
-                VALUES (?, 'income', ?, ?, ?, ?, ?, ?)
-              `).bind(id, inc.amount || 0, inc.desc || "", inc.category || "Lương", inc.user || "Đ", inc.notes || "", inc.date || new Date().toISOString())
+                INSERT INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
+                VALUES (?, 'income', ?, ?, ?, ?, ?, ?, ?)
+              `).bind(id, inc.amount || 0, inc.desc || "", inc.category || "Lương", inc.user || "Đ", inc.notes || "", inc.date || new Date().toISOString(), createdAt)
             );
           }
           for (const exp of (payload.expenses || [])) {
             const id = exp.id || `exp-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = exp.createdAt || exp.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO transactions (id, type, amount, description, category, user, notes, date)
-                VALUES (?, 'expense', ?, ?, ?, ?, ?, ?)
-              `).bind(id, exp.amount || 0, exp.desc || "", exp.category || "📦 Khác", exp.user || "Đ", exp.notes || "", exp.date || new Date().toISOString())
+                INSERT INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
+                VALUES (?, 'expense', ?, ?, ?, ?, ?, ?, ?)
+              `).bind(id, exp.amount || 0, exp.desc || "", exp.category || "📦 Khác", exp.user || "Đ", exp.notes || "", exp.date || new Date().toISOString(), createdAt)
             );
           }
         }

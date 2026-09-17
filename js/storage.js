@@ -84,16 +84,45 @@ class Storage {
 
   // ── Helper functions for Date Filtering & Pagination ──
   getAllTransactions() {
+    const toDateKey = (dateVal) => {
+      if (!dateVal) return '';
+      if (typeof dateVal === 'string' && dateVal.length >= 10) return dateVal.slice(0, 10);
+      try {
+        const d = new Date(dateVal);
+        if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+      } catch (e) {}
+      return '';
+    };
+
+    const getRecordTimestamp = (item) => {
+      if (item.createdAt) {
+        const t = new Date(item.createdAt).getTime();
+        if (!isNaN(t) && t > 0) return t;
+      }
+      if (item.id && typeof item.id === 'string') {
+        const m = item.id.match(/^(?:expense|income|trans)-(\d+)/);
+        if (m) {
+          const t = parseInt(m[1]);
+          if (!isNaN(t) && t > 0) return t;
+        }
+      }
+      return 0;
+    };
+
     return [
       ...(this.data.expenses || []).map((e, idx) => ({ ...e, type: 'expense', rawIdx: idx })),
       ...(this.data.incomes || []).map((i, idx) => ({ ...i, type: 'income', rawIdx: idx }))
     ].sort((a, b) => {
-      const dateA = new Date(a.date).getTime() || 0;
-      const dateB = new Date(b.date).getTime() || 0;
-      if (dateA !== dateB) return dateB - dateA;
-      const createdA = new Date(a.createdAt || a.date).getTime() || 0;
-      const createdB = new Date(b.createdAt || b.date).getTime() || 0;
-      if (createdA !== createdB) return createdB - createdA;
+      const dayA = toDateKey(a.date);
+      const dayB = toDateKey(b.date);
+      if (dayA !== dayB) {
+        return dayB.localeCompare(dayA);
+      }
+      const timeA = getRecordTimestamp(a);
+      const timeB = getRecordTimestamp(b);
+      if (timeA !== timeB) {
+        return timeB - timeA;
+      }
       return (b.rawIdx || 0) - (a.rawIdx || 0);
     });
   }
