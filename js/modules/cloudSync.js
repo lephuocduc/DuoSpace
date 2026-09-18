@@ -204,8 +204,17 @@ class CloudSync {
           Utils.notify('Đã cập nhật dữ liệu mới nhất từ Cloud!', 'success');
         }
       } else {
-        if (typeof Utils !== 'undefined' && Utils.notify) {
-          Utils.notify('Không thể đồng bộ Cloud hoặc chưa có kết nối mạng', 'error');
+        const idToken = await window.authManager?.getIdToken();
+        if (!idToken) {
+          this.setSyncStatus('idle', 'Cloud');
+          if (typeof Utils !== 'undefined' && Utils.notify) {
+            Utils.notify('Bạn chưa đăng nhập. Vui lòng đăng nhập để đồng bộ Cloud.', 'warning');
+          }
+        } else {
+          this.setSyncStatus('error', 'Lỗi kết nối');
+          if (typeof Utils !== 'undefined' && Utils.notify) {
+            Utils.notify('Không thể đồng bộ Cloud hoặc chưa có kết nối mạng', 'error');
+          }
         }
       }
     } catch (err) {
@@ -219,16 +228,23 @@ class CloudSync {
     if (!el) return;
 
     if (status === 'loading') {
-      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 mr-1"></i> <span class="hidden sm:inline text-blue-600 dark:text-blue-400 font-semibold">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 shrink-0 ${text ? 'mr-1' : ''}"></i><span class="text-blue-600 dark:text-blue-400 font-semibold text-[10px] sm:text-xs">${text || ''}</span>`;
     } else if (status === 'success') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 mr-1"></i> <span class="hidden sm:inline text-emerald-600 dark:text-emerald-400 font-semibold">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 shrink-0 mr-1"></i><span class="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] sm:text-xs">${text}</span>`;
       setTimeout(() => {
         if (el && !this.isSyncing) {
-          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 mr-1"></i> <span class="hidden sm:inline">Đã đồng bộ</span>`;
+          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Đã đồng bộ</span>`;
         }
       }, 3500);
     } else if (status === 'error') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 mr-1"></i> <span class="hidden sm:inline text-amber-600 dark:text-amber-400">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 shrink-0 mr-1"></i><span class="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs font-semibold">${text}</span>`;
+      setTimeout(() => {
+        if (el && !this.isSyncing) {
+          el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Cloud</span>`;
+        }
+      }, 4000);
+    } else {
+      el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">${text || 'Cloud'}</span>`;
     }
   }
 }
