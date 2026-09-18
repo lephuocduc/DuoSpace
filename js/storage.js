@@ -28,7 +28,18 @@ class Storage {
     return {
       ...defaults,
       ...saved,
-      settings: { ...defaults.settings, ...(saved.settings || {}) },
+      settings: {
+        ...defaults.settings,
+        ...(saved.settings || {}),
+        categories: {
+          todo: Array.isArray(saved.settings?.categories?.todo) && saved.settings.categories.todo.length > 0
+            ? saved.settings.categories.todo
+            : defaults.settings.categories.todo,
+          expense: Array.isArray(saved.settings?.categories?.expense) && saved.settings.categories.expense.length > 0
+            ? saved.settings.categories.expense
+            : defaults.settings.categories.expense
+        }
+      },
       usdRate: saved.usdRate || defaults.usdRate,
       todos: Array.isArray(saved.todos) ? saved.todos : defaults.todos,
       expenses: Array.isArray(saved.expenses) ? saved.expenses : defaults.expenses,
@@ -63,7 +74,13 @@ class Storage {
         nmaxPlate: "50AD-539.09",
         nmaxOdo: 0,
         grandePlate: "50N2-461.30",
-        grandeOdo: 0
+        grandeOdo: 0,
+        categories: {
+          todo: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.TODO) ? [...CONFIG.CATEGORIES.TODO] : ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe', 'Đầu tư', 'Khác'],
+          expense: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.EXPENSE) ? [...CONFIG.CATEGORIES.EXPENSE] : [
+            '🍜 Ăn uống', '🏠 Nhà cửa', '🛒 Siêu thị', '🛵 Xe', '🐱 Mèo', '💊 Sức khỏe', '🎮 Giải trí', '💼 Đầu tư', '📦 Khác'
+          ]
+        }
       }
     };
   }

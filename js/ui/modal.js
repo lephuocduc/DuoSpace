@@ -5,7 +5,39 @@ const ModalManager = {
   editingType: null,
   editingIndex: -1,
 
+  populateCategorySelects(selectedTodoCat, selectedExpCat) {
+    const todoEl = document.getElementById('todoCategory');
+    const expEl = document.getElementById('expenseCategory');
+
+    const todoCats = (window.app && typeof window.app.getTodoCategories === 'function')
+      ? window.app.getTodoCategories()
+      : ((typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.TODO) || ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe', 'Đầu tư', 'Khác']);
+
+    const expCats = (window.app && typeof window.app.getExpenseCategories === 'function')
+      ? window.app.getExpenseCategories()
+      : ((typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.EXPENSE) || [
+        '🍜 Ăn uống', '🏠 Nhà cửa', '🛒 Siêu thị', '🛵 Xe', '🐱 Mèo', '💊 Sức khỏe', '🎮 Giải trí', '💼 Đầu tư', '📦 Khác'
+      ]);
+
+    if (todoEl) {
+      const currentVal = selectedTodoCat || todoEl.value || todoCats[0];
+      todoEl.innerHTML = todoCats.map(cat => `<option value="${Utils.escapeHtml(cat)}">${Utils.escapeHtml(cat)}</option>`).join('');
+      if (todoCats.includes(currentVal)) {
+        todoEl.value = currentVal;
+      }
+    }
+
+    if (expEl) {
+      const currentVal = selectedExpCat || expEl.value || (expCats.includes('📦 Khác') ? '📦 Khác' : expCats[0]);
+      expEl.innerHTML = expCats.map(cat => `<option value="${Utils.escapeHtml(cat)}">${Utils.escapeHtml(cat)}</option>`).join('');
+      if (expCats.includes(currentVal)) {
+        expEl.value = currentVal;
+      }
+    }
+  },
+
   openAddModal() {
+    this.populateCategorySelects();
     // Detect currently visible active tab
     let currentTab = (window.TabsManager && window.TabsManager.currentTab) || '';
     if (!currentTab) {

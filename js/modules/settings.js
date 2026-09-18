@@ -10,6 +10,7 @@ class SettingsModule {
 
   render() {
     this.loadSettingsToForm();
+    this.renderCategoriesUI();
   }
 
   loadSettingsToForm() {
@@ -18,6 +19,216 @@ class SettingsModule {
 
   saveSettings() {
     // Kept as a harmless global alias for old inline handlers.
+  }
+
+  // ──────────────────────────────────────────────
+  // CATEGORIES MANAGEMENT (THÊM / SỬA / XÓA)
+  // ──────────────────────────────────────────────
+
+  getCategories(type) {
+    if (!this.app.data.settings) this.app.data.settings = {};
+    if (!this.app.data.settings.categories) {
+      this.app.data.settings.categories = {
+        todo: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.TODO) ? [...CONFIG.CATEGORIES.TODO] : ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe', 'Đầu tư', 'Khác'],
+        expense: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.EXPENSE) ? [...CONFIG.CATEGORIES.EXPENSE] : [
+          '🍜 Ăn uống', '🏠 Nhà cửa', '🛒 Siêu thị', '🛵 Xe', '🐱 Mèo', '💊 Sức khỏe', '🎮 Giải trí', '💼 Đầu tư', '📦 Khác'
+        ]
+      };
+    }
+    return this.app.data.settings.categories[type] || [];
+  }
+
+  renderCategoriesUI() {
+    const expenseContainer = document.getElementById('expenseCategoryListContainer');
+    const todoContainer = document.getElementById('todoCategoryListContainer');
+    if (!expenseContainer && !todoContainer) return;
+
+    const expenseCats = this.getCategories('expense');
+    const todoCats = this.getCategories('todo');
+
+    if (expenseContainer) {
+      expenseContainer.innerHTML = expenseCats.map((cat, idx) => `
+        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/60 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
+          <div class="flex items-center space-x-2 min-w-0 pr-2">
+            <span class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(cat)}</span>
+          </div>
+          <div class="flex items-center space-x-1 shrink-0">
+            <button type="button" onclick="window.app.settings.editCategory('expense', ${idx})" title="Sửa tên danh mục"
+              class="w-7 h-7 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button type="button" onclick="window.app.settings.deleteCategory('expense', ${idx})" title="Xóa danh mục"
+              class="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    if (todoContainer) {
+      todoContainer.innerHTML = todoCats.map((cat, idx) => `
+        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/60 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
+          <div class="flex items-center space-x-2 min-w-0 pr-2">
+            <span class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(cat)}</span>
+          </div>
+          <div class="flex items-center space-x-1 shrink-0">
+            <button type="button" onclick="window.app.settings.editCategory('todo', ${idx})" title="Sửa tên danh mục"
+              class="w-7 h-7 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button type="button" onclick="window.app.settings.deleteCategory('todo', ${idx})" title="Xóa danh mục"
+              class="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Refresh Modal Select Options when categories change
+    if (typeof ModalManager !== 'undefined' && typeof ModalManager.populateCategorySelects === 'function') {
+      ModalManager.populateCategorySelects();
+    }
+  }
+
+  addCategory(type) {
+    const inputId = type === 'expense' ? 'newExpenseCategoryInput' : 'newTodoCategoryInput';
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) {
+      alert('Vui lòng nhập tên danh mục!');
+      input.focus();
+      return;
+    }
+
+    const categories = this.getCategories(type);
+    if (categories.some(c => c.toLowerCase() === name.toLowerCase())) {
+      alert(`Danh mục "${name}" đã tồn tại!`);
+      return;
+    }
+
+    categories.push(name);
+    this.app.data.settings.categories[type] = categories;
+    this.app.log?.system(`Thêm danh mục ${type === 'expense' ? 'chi tiêu' : 'công việc'}`, name);
+    this.app.save();
+    input.value = '';
+    this.renderCategoriesUI();
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify(`Đã thêm danh mục "${name}"`, 'success');
+    }
+  }
+
+  editCategory(type, index) {
+    const categories = this.getCategories(type);
+    const oldName = categories[index];
+    if (!oldName) return;
+
+    const newName = prompt(`Sửa tên danh mục ${type === 'expense' ? 'chi tiêu' : 'công việc'}:`, oldName);
+    if (newName === null) return;
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      alert('Tên danh mục không được để trống!');
+      return;
+    }
+    if (trimmed === oldName) return;
+
+    if (categories.some((c, i) => i !== index && c.toLowerCase() === trimmed.toLowerCase())) {
+      alert(`Danh mục "${trimmed}" đã tồn tại!`);
+      return;
+    }
+
+    // Hỏi xem có cập nhật các giao dịch / công việc cũ không
+    let updateExisting = false;
+    let countAffected = 0;
+    if (type === 'expense') {
+      countAffected = (this.app.data.expenses || []).filter(e => e.category === oldName).length;
+    } else {
+      countAffected = (this.app.data.todos || []).filter(t => t.category === oldName).length;
+    }
+
+    if (countAffected > 0) {
+      updateExisting = confirm(`Đang có ${countAffected} ${type === 'expense' ? 'khoản chi tiêu' : 'công việc'} sử dụng danh mục "${oldName}".\nBạn có muốn tự động cập nhật sang "${trimmed}" không?`);
+    }
+
+    categories[index] = trimmed;
+    this.app.data.settings.categories[type] = categories;
+
+    if (updateExisting) {
+      if (type === 'expense') {
+        (this.app.data.expenses || []).forEach(e => {
+          if (e.category === oldName) e.category = trimmed;
+        });
+      } else {
+        (this.app.data.todos || []).forEach(t => {
+          if (t.category === oldName) t.category = trimmed;
+        });
+      }
+    }
+
+    this.app.log?.system(`Cập nhật danh mục ${type === 'expense' ? 'chi tiêu' : 'công việc'}`, `${oldName} → ${trimmed} (đã đồng bộ ${updateExisting ? countAffected : 0} mục cũ)`);
+    this.app.save();
+    this.renderCategoriesUI();
+    this.app.renderParts([type === 'expense' ? 'finance' : 'todo', 'home']);
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify(`Đã đổi tên danh mục thành "${trimmed}"`, 'success');
+    }
+  }
+
+  deleteCategory(type, index) {
+    const categories = this.getCategories(type);
+    const catName = categories[index];
+    if (!catName) return;
+
+    if (categories.length <= 1) {
+      alert('Không thể xóa hết danh mục. Bạn cần giữ lại ít nhất 1 danh mục!');
+      return;
+    }
+
+    let countAffected = 0;
+    if (type === 'expense') {
+      countAffected = (this.app.data.expenses || []).filter(e => e.category === catName).length;
+    } else {
+      countAffected = (this.app.data.todos || []).filter(t => t.category === catName).length;
+    }
+
+    let msg = `Bạn có chắc muốn xóa danh mục "${catName}"?`;
+    if (countAffected > 0) {
+      msg += `\nLƯU Ý: Đang có ${countAffected} ${type === 'expense' ? 'khoản chi tiêu' : 'công việc'} dùng danh mục này. Dữ liệu cũ vẫn được giữ nguyên.`;
+    }
+
+    if (!confirm(msg)) return;
+
+    categories.splice(index, 1);
+    this.app.data.settings.categories[type] = categories;
+    this.app.log?.system(`Xóa danh mục ${type === 'expense' ? 'chi tiêu' : 'công việc'}`, catName);
+    this.app.save();
+    this.renderCategoriesUI();
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify(`Đã xóa danh mục "${catName}"`, 'info');
+    }
+  }
+
+  resetCategories(type) {
+    const typeLabel = type === 'expense' ? 'Chi Tiêu' : 'Công Việc';
+    if (!confirm(`Khôi phục danh sách Danh mục ${typeLabel} về mặc định hệ thống?`)) return;
+
+    if (!this.app.data.settings) this.app.data.settings = {};
+    if (!this.app.data.settings.categories) this.app.data.settings.categories = {};
+
+    if (type === 'expense') {
+      this.app.data.settings.categories.expense = [...CONFIG.CATEGORIES.EXPENSE];
+    } else {
+      this.app.data.settings.categories.todo = [...CONFIG.CATEGORIES.TODO];
+    }
+
+    this.app.log?.system(`Khôi phục danh mục ${type === 'expense' ? 'chi tiêu' : 'công việc'}`, 'Đã khôi phục về mặc định');
+    this.app.save();
+    this.renderCategoriesUI();
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify(`Đã khôi phục danh mục ${typeLabel} mặc định!`, 'success');
+    }
   }
 
   downloadBackup() {
@@ -90,3 +301,6 @@ function saveSettings() { window.app.settings.saveSettings(); }
 function downloadBackup() { window.app.settings.downloadBackup(); }
 function importBackup(file) { window.app.settings.importBackup(file); }
 function exportFinanceCsv() { window.app.settings.exportFinanceCsv(); }
+function addCategory(type) { window.app.settings.addCategory(type); }
+function resetCategories(type) { window.app.settings.resetCategories(type); }
+

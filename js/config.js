@@ -15,7 +15,7 @@ const CONFIG = {
 
   // Categories definition
   CATEGORIES: {
-    TODO: ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe'],
+    TODO: ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe', 'Đầu tư', 'Khác'],
     EXPENSE: [
       '🍜 Ăn uống',
       '🏠 Nhà cửa',

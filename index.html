@@ -35,11 +35,11 @@
   class="bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased min-h-screen flex justify-center transition-colors duration-200">
 
   <div
-    class="w-full max-w-md bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-colors duration-200">
+    class="w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-300">
 
     <!-- HEADER -->
     <header
-      class="px-5 pt-12 pb-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800 transition-colors">
+      class="px-5 sm:px-8 pt-8 md:pt-6 pb-4 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800 transition-colors">
       <div class="flex justify-between items-center">
         <div class="flex items-center space-x-3">
           <button onclick="toggleSidebar()"
@@ -77,7 +77,7 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main id="mainScrollContainer" class="px-5 pt-4 flex-1 overflow-y-auto pb-24 custom-scrollbar">
+    <main id="mainScrollContainer" class="px-5 sm:px-8 pt-4 flex-1 overflow-y-auto pb-24 custom-scrollbar">
 
       <!-- TAB 1: HOME -->
       <div id="tab-home" class="space-y-5 tab-content">
@@ -118,29 +118,32 @@
           </div>
         </section>
 
-        <!-- PHÂN PHỐI CHI TIÊU THEO CATEGORY -->
-        <section
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Chi tháng này theo
-              Category</h3>
-            <span id="homeCategoryTotalText" class="text-xs font-bold text-rose-500">0đ</span>
-          </div>
-          <div id="homeCategoryBreakdown" class="space-y-2.5">
-          </div>
-        </section>
+        <!-- Grid 2 cột trên Tablet / Desktop cho Phân bổ Category & Biểu đồ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- PHÂN PHỐI CHI TIÊU THEO CATEGORY -->
+          <section
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Chi tháng này theo
+                Category</h3>
+              <span id="homeCategoryTotalText" class="text-xs font-bold text-rose-500">0đ</span>
+            </div>
+            <div id="homeCategoryBreakdown" class="space-y-2.5">
+            </div>
+          </section>
 
-        <section
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">So sánh Thu - Chi
-              theo Tháng</h3>
-            <span class="text-[10px] text-gray-400">3 tháng gần nhất</span>
-          </div>
-          <div class="w-full h-44 relative">
-            <canvas id="budgetComparisonChart"></canvas>
-          </div>
-        </section>
+          <section
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+            <div class="flex justify-between items-center">
+              <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">So sánh Thu - Chi
+                theo Tháng</h3>
+              <span class="text-[10px] text-gray-400">3 tháng gần nhất</span>
+            </div>
+            <div class="w-full h-44 relative">
+              <canvas id="budgetComparisonChart"></canvas>
+            </div>
+          </section>
+        </div>
 
         <section class="space-y-3">
           <div class="flex justify-between items-center">
@@ -363,26 +366,29 @@
           </div>
         </div>
 
-        <!-- BIỂU ĐỒ TỔNG TÀI SẢN THEO NGÀY (LINE CHART) -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">
-              <i class="fa-solid fa-chart-line text-indigo-500 mr-1.5"></i>Biến động tổng tài sản (VNĐ)
-            </h3>
-            <span class="text-[10px] text-gray-400">Cập nhật lúc 00:00 mỗi ngày</span>
+        <!-- BIỂU ĐỒ TỔNG TÀI SẢN & PHÂN BỔ TÀI SẢN (GRID 2 CỘT TRÊN TABLET/DESKTOP) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- BIỂU ĐỒ TỔNG TÀI SẢN THEO NGÀY (LINE CHART) -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+            <div class="flex justify-between items-center">
+              <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">
+                <i class="fa-solid fa-chart-line text-indigo-500 mr-1.5"></i>Biến động tổng tài sản (VNĐ)
+              </h3>
+              <span class="text-[10px] text-gray-400">Cập nhật lúc 00:00</span>
+            </div>
+            <div class="w-full h-44 relative">
+              <canvas id="netWorthLineChart"></canvas>
+            </div>
           </div>
-          <div class="w-full h-44 relative">
-            <canvas id="netWorthLineChart"></canvas>
-          </div>
-        </div>
 
-        <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-          <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ danh mục</h3>
-          <div class="w-full h-44 relative flex justify-center">
-            <canvas id="assetAllocationChart"></canvas>
+          <!-- BIỂU ĐỒ PHÂN BỔ TÀI SẢN -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+            <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Phân bổ danh mục</h3>
+            <div class="w-full h-44 relative flex justify-center">
+              <canvas id="assetAllocationChart"></canvas>
+            </div>
           </div>
         </div>
 
@@ -513,7 +519,7 @@
             </div>
           </div>
 
-          <div id="investmentList" class="space-y-3">
+          <div id="investmentList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Render danh sách ở đây -->
           </div>
         </div>
@@ -638,24 +644,26 @@
           </button>
         </div>
 
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử bảo dưỡng (Maintenance)</h3>
-            <button onclick="toggleBikeMaintenanceForm()"
-              class="text-xs bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg font-semibold">
-              + Bảo dưỡng
-            </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử bảo dưỡng (Maintenance)</h3>
+              <button onclick="toggleBikeMaintenanceForm()"
+                class="text-xs bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg font-semibold">
+                + Bảo dưỡng
+              </button>
+            </div>
+
+            <div id="bikeMaintenanceList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+            </div>
           </div>
 
-          <div id="bikeMaintenanceList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Công việc Xe Máy</h3>
+            <div id="motorbikeTodoList" class="space-y-2"></div>
           </div>
-        </div>
-
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Công việc Xe Máy</h3>
-          <div id="motorbikeTodoList" class="space-y-2"></div>
         </div>
       </div>
 
@@ -708,26 +716,28 @@
           </button>
         </div>
 
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Biểu đồ Cân Nặng (kg)</h3>
-            <div class="flex space-x-3 text-xs font-semibold">
-              <span class="flex items-center"><i
-                  class="fa-solid fa-circle text-amber-500 mr-1 text-[8px]"></i>Mun</span>
-              <span class="flex items-center"><i
-                  class="fa-solid fa-circle text-rose-500 mr-1 text-[8px]"></i>Bông</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Biểu đồ Cân Nặng (kg)</h3>
+              <div class="flex space-x-3 text-xs font-semibold">
+                <span class="flex items-center"><i
+                    class="fa-solid fa-circle text-amber-500 mr-1 text-[8px]"></i>Mun</span>
+                <span class="flex items-center"><i
+                    class="fa-solid fa-circle text-rose-500 mr-1 text-[8px]"></i>Bông</span>
+              </div>
+            </div>
+            <div class="w-full h-48 relative">
+              <canvas id="weightChart"></canvas>
             </div>
           </div>
-          <div class="w-full h-48 relative">
-            <canvas id="weightChart"></canvas>
-          </div>
-        </div>
 
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch chăm sóc Mun & Bông</h3>
-          <div id="catsTodoList" class="space-y-2"></div>
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch chăm sóc Mun & Bông</h3>
+            <div id="catsTodoList" class="space-y-2"></div>
+          </div>
         </div>
       </div>
 
@@ -806,19 +816,22 @@
           </div>
         </div>
 
-        <!-- Lịch sử chỉ số đo lường -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Nhật ký đo lường sức khỏe</h3>
-            <span id="healthLogCount" class="text-[10px] text-gray-400"></span>
+        <!-- Lưới 2 cột: Lịch sử chỉ số đo lường & Lịch tập luyện -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Lịch sử chỉ số đo lường -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Nhật ký đo lường sức khỏe</h3>
+              <span id="healthLogCount" class="text-[10px] text-gray-400"></span>
+            </div>
+            <div id="healthHistoryList" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar"></div>
           </div>
-          <div id="healthHistoryList" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar"></div>
-        </div>
 
-        <!-- Lịch tập luyện & Sức khỏe (To-dos) -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch tập luyện & Thói quen tốt</h3>
-          <div id="healthTodoList" class="space-y-2"></div>
+          <!-- Lịch tập luyện & Sức khỏe (To-dos) -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch tập luyện & Thói quen tốt</h3>
+            <div id="healthTodoList" class="space-y-2"></div>
+          </div>
         </div>
       </div>
 
@@ -838,6 +851,73 @@
             class="w-full py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold border border-rose-100 dark:border-rose-900/50 transition-colors">
             <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Đăng xuất tài khoản
           </button>
+        </div>
+
+        <!-- Quản lý Danh mục (Categories) -->
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200 flex items-center">
+                <i class="fa-solid fa-tags text-blue-500 mr-2"></i>Quản lý Danh Mục
+              </h2>
+              <p class="text-xs text-gray-400 mt-0.5">Tùy chỉnh danh mục Chi tiêu và Công việc To-Do</p>
+            </div>
+          </div>
+
+          <!-- Danh mục Chi Tiêu -->
+          <div class="space-y-2.5 pt-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
+                <i class="fa-solid fa-receipt text-rose-500 mr-1.5"></i>Danh mục Chi tiêu
+              </span>
+              <button type="button" onclick="resetCategories('expense')"
+                class="text-[11px] text-gray-400 hover:text-rose-500 transition-colors">
+                <i class="fa-solid fa-rotate-left mr-1"></i>Mặc định
+              </button>
+            </div>
+            
+            <div class="flex gap-2">
+              <input type="text" id="newExpenseCategoryInput" placeholder="Ví dụ: ☕ Cà phê, 🎓 Học tập..."
+                onkeydown="if(event.key==='Enter') addCategory('expense')"
+                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500">
+              <button type="button" onclick="addCategory('expense')"
+                class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm">
+                <i class="fa-solid fa-plus mr-1"></i>Thêm
+              </button>
+            </div>
+
+            <div id="expenseCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Render động từ SettingsModule -->
+            </div>
+          </div>
+
+          <!-- Danh mục To-Do -->
+          <div class="space-y-2.5 pt-3 border-t border-gray-100 dark:border-slate-700/60">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
+                <i class="fa-solid fa-list-check text-blue-500 mr-1.5"></i>Danh mục Công việc (To-Do)
+              </span>
+              <button type="button" onclick="resetCategories('todo')"
+                class="text-[11px] text-gray-400 hover:text-blue-500 transition-colors">
+                <i class="fa-solid fa-rotate-left mr-1"></i>Mặc định
+              </button>
+            </div>
+
+            <div class="flex gap-2">
+              <input type="text" id="newTodoCategoryInput" placeholder="Ví dụ: 🏋️ Gym, 📚 Đọc sách..."
+                onkeydown="if(event.key==='Enter') addCategory('todo')"
+                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button type="button" onclick="addCategory('todo')"
+                class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm">
+                <i class="fa-solid fa-plus mr-1"></i>Thêm
+              </button>
+            </div>
+
+            <div id="todoCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Render động từ SettingsModule -->
+            </div>
+          </div>
         </div>
 
         <div
@@ -1010,31 +1090,31 @@
 
     <!-- BOTTOM TAB BAR -->
     <nav
-      class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-4 py-2 flex justify-between items-center z-20 transition-colors">
+      class="fixed bottom-0 w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 sm:px-12 py-2 flex justify-around md:justify-between items-center z-20 transition-all duration-300">
       <button onclick="switchTab('home', 'Tổng quan', this)"
-        class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1">
-        <i class="fa-solid fa-house text-lg"></i>
-        <span class="text-[10px] font-medium">Tổng quan</span>
+        class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1 hover:text-blue-500 transition-colors">
+        <i class="fa-solid fa-house text-lg md:text-xl"></i>
+        <span class="text-[10px] md:text-xs font-medium">Tổng quan</span>
       </button>
 
       <button onclick="switchTab('todo', 'Công việc chung', this)"
-        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 relative">
-        <i class="fa-solid fa-list-check text-lg"></i>
-        <span class="text-[10px] font-medium">To-Do</span>
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 relative hover:text-blue-500 transition-colors">
+        <i class="fa-solid fa-list-check text-lg md:text-xl"></i>
+        <span class="text-[10px] md:text-xs font-medium">To-Do</span>
         <span id="todoBadge"
           class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
       </button>
 
       <button onclick="switchTab('investment', 'Tài Sản', this)"
-        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1">
-        <i class="fa-solid fa-chart-line text-lg"></i>
-        <span class="text-[10px] font-medium">Tài sản</span>
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 hover:text-blue-500 transition-colors">
+        <i class="fa-solid fa-chart-line text-lg md:text-xl"></i>
+        <span class="text-[10px] md:text-xs font-medium">Tài sản</span>
       </button>
 
       <button onclick="switchTab('finance', 'Quản lý Thu Chi', this)"
-        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1">
-        <i class="fa-solid fa-coins text-lg"></i>
-        <span class="text-[10px] font-medium">Tài chính</span>
+        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 hover:text-blue-500 transition-colors">
+        <i class="fa-solid fa-coins text-lg md:text-xl"></i>
+        <span class="text-[10px] md:text-xs font-medium">Tài chính</span>
       </button>
     </nav>
 
@@ -1152,9 +1232,9 @@
 
     <!-- POPUP LỊCH SỬ CÂN NẶNG MUN & BÔNG -->
     <div id="catHistoryModal" onclick="closeCatWeightHistoryModal()"
-      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
       <div onclick="event.stopPropagation()"
-        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[75vh] flex flex-col">
+        class="responsive-dialog bg-white dark:bg-slate-900 w-full rounded-t-3xl md:rounded-3xl p-5 space-y-3 max-w-md md:max-w-lg transform translate-y-full md:translate-y-0 transition-transform duration-300 border-t md:border border-gray-100 dark:border-slate-800 max-h-[85vh] md:max-h-[80vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
           <h3 class="text-base font-bold text-gray-900 dark:text-white">Lịch sử cân nặng Mun & Bông</h3>
           <button onclick="closeCatWeightHistoryModal()"
@@ -1169,9 +1249,9 @@
 
     <!-- POPUP TRẠNG THÁI PHỤ TÙNG XE MÁY -->
     <div id="bikePartsModal" onclick="closePartsStatusModal()"
-      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
       <div onclick="event.stopPropagation()"
-        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[82vh] flex flex-col">
+        class="responsive-dialog bg-white dark:bg-slate-900 w-full rounded-t-3xl md:rounded-3xl p-5 space-y-3 max-w-md md:max-w-lg transform translate-y-full md:translate-y-0 transition-transform duration-300 border-t md:border border-gray-100 dark:border-slate-800 max-h-[85vh] md:max-h-[80vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
           <div>
             <h3 id="partsModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Trạng Thái Phụ Tùng</h3>
@@ -1189,9 +1269,9 @@
 
     <!-- POPUP BÁN TÀI SẢN ĐẦU TƯ -->
     <div id="sellAssetModal" onclick="closeSellAssetModal()"
-      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
       <div onclick="event.stopPropagation()"
-        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-5 space-y-3.5 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
+        class="responsive-dialog bg-white dark:bg-slate-900 w-full rounded-t-3xl md:rounded-3xl p-5 space-y-3.5 max-w-md md:max-w-lg transform translate-y-full md:translate-y-0 transition-transform duration-300 border-t md:border border-gray-100 dark:border-slate-800 max-h-[85vh] md:max-h-[80vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-slate-800">
           <div>
             <h3
@@ -1270,9 +1350,9 @@
 
     <!-- ADD & EDIT MODAL -->
     <div id="addModal" onclick="closeAddModal()"
-      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end justify-center">
+      class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
       <div onclick="event.stopPropagation()"
-        class="bg-white dark:bg-slate-900 w-full rounded-t-3xl p-6 space-y-4 max-w-md transform translate-y-full transition-transform duration-300 border-t border-gray-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+        class="responsive-dialog bg-white dark:bg-slate-900 w-full rounded-t-3xl md:rounded-3xl p-6 space-y-4 max-w-md md:max-w-lg transform translate-y-full md:translate-y-0 transition-transform duration-300 border-t md:border border-gray-100 dark:border-slate-800 max-h-[90vh] md:max-h-[85vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-2">
           <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
           <button onclick="closeAddModal()" aria-label="Đóng biểu mẫu"

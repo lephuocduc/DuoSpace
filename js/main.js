@@ -124,6 +124,14 @@ class DuoSpaceApp {
     }
   }
 
+  getExpenseCategories() {
+    return this.data.settings?.categories?.expense || CONFIG.CATEGORIES.EXPENSE;
+  }
+
+  getTodoCategories() {
+    return this.data.settings?.categories?.todo || CONFIG.CATEGORIES.TODO;
+  }
+
   /** Render các mô-đun sau khi dữ liệu thay đổi. */
   render() {
     this.home.render();
@@ -133,6 +141,7 @@ class DuoSpaceApp {
     this.motorbike.render();
     this.cats.render();
     this.health.render();
+    this.settings.render();
     this.log.render();
   }
 
@@ -141,7 +150,7 @@ class DuoSpaceApp {
     const renderers = {
       home: () => this.home.render(), todo: () => this.todo.render(), finance: () => this.finance.render(),
       investment: () => this.investment.render(), motorbike: () => this.motorbike.render(), cats: () => this.cats.render(),
-      health: () => this.health.render(), log: () => this.log.render()
+      health: () => this.health.render(), settings: () => this.settings.render(), log: () => this.log.render()
     };
     [...new Set(parts)].forEach(part => renderers[part]?.());
   }
