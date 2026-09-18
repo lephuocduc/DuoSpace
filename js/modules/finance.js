@@ -276,13 +276,13 @@ class FinanceModule {
 
     financeList.innerHTML = displayed.map(item => {
       const isExpense = item.type === 'expense';
-      const icon = isExpense ? (item.category ? item.category.split(' ')[0] : '💸') : '💰';
+      const icon = item.category ? item.category.split(' ')[0] : (isExpense ? '💸' : '💰');
       const color = isExpense ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
       const sign = isExpense ? '-' : '+';
       const byLabel = isExpense ? 'Chi bởi' : 'Thu bởi';
       const userText = item.user === 'Đ' ? 'Đức' : 'Sương';
-      const catTag = isExpense && item.category
-        ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ml-1">${item.category}</span>`
+      const catTag = item.category
+        ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ml-1">${Utils.escapeHtml(item.category)}</span>`
         : '';
       const dateStr = item.date ? Utils.formatDate(item.date) : '';
 
@@ -339,7 +339,8 @@ class FinanceModule {
     ModalManager.setAddType(type);
 
     if (type === 'expense') {
-      document.getElementById('expenseAmount').value = item.amount || '';
+      const expAmount = item.amount ? Number(item.amount).toLocaleString('vi-VN') : '';
+      document.getElementById('expenseAmount').value = expAmount;
       document.getElementById('expenseDate').value = (item.date || '').slice(0, 10);
       document.getElementById('expenseDesc').value = item.desc || '';
       document.getElementById('expenseCategory').value = item.category || '📦 Khác';
@@ -347,8 +348,11 @@ class FinanceModule {
       document.getElementById('expenseNotes').value = item.notes || '';
       document.getElementById('saveExpenseBtn').innerText = "Cập nhật khoản chi";
     } else {
-      document.getElementById('incomeAmount').value = item.amount || '';
+      const incAmount = item.amount ? Number(item.amount).toLocaleString('vi-VN') : '';
+      document.getElementById('incomeAmount').value = incAmount;
       document.getElementById('incomeDate').value = (item.date || '').slice(0, 10);
+      const incCatEl = document.getElementById('incomeCategory');
+      if (incCatEl) incCatEl.value = item.category || '💼 Lương';
       document.getElementById('incomeDesc').value = item.desc || '';
       document.getElementById('incomeUser').value = item.user || 'Đ';
       document.getElementById('incomeNotes').value = item.notes || '';
@@ -360,13 +364,15 @@ class FinanceModule {
 
   saveExpenseAction() {
     const category = document.getElementById('expenseCategory').value;
-    const amount = Math.round(parseFloat(document.getElementById('expenseAmount').value));
+    const rawAmount = String(document.getElementById('expenseAmount')?.value || '').replace(/\D/g, '');
+    const amount = parseInt(rawAmount, 10);
     const desc = Utils.sanitizeText(document.getElementById('expenseDesc').value);
     const user = document.getElementById('expenseUser').value;
     const notes = Utils.sanitizeText(document.getElementById('expenseNotes').value);
     const expenseDate = document.getElementById('expenseDate')?.value;
 
-    if (isNaN(amount) || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    if (isNaN(amount) || amount <= 0) return alert('Vui lòng nhập số tiền hợp lệ (> 0 VNĐ)!');
+    if (!desc) return alert('Vui lòng nhập mô tả khoản chi!');
     if (!expenseDate) return alert('Vui lòng chọn ngày chi.');
 
     const editingExpense = ModalManager.editingType === 'expense' && ModalManager.editingIndex >= 0;
@@ -420,13 +426,16 @@ class FinanceModule {
   }
 
   saveIncomeAction() {
-    const amount = parseInt(document.getElementById('incomeAmount').value);
-    const desc = Utils.sanitizeText(document.getElementById('incomeDesc').value);
+    const rawAmount = String(document.getElementById('incomeAmount')?.value || '').replace(/\D/g, '');
+    const amount = parseInt(rawAmount, 10);
+    const category = document.getElementById('incomeCategory')?.value || '💼 Lương';
+    const inputDesc = Utils.sanitizeText(document.getElementById('incomeDesc')?.value);
+    const desc = inputDesc || category;
     const user = document.getElementById('incomeUser').value;
     const notes = Utils.sanitizeText(document.getElementById('incomeNotes').value);
     const incomeDate = document.getElementById('incomeDate')?.value;
 
-    if (isNaN(amount) || !desc) return alert('Vui lòng nhập đủ số tiền và mô tả!');
+    if (isNaN(amount) || amount <= 0) return alert('Vui lòng nhập số tiền hợp lệ (> 0 VNĐ)!');
     if (!incomeDate) return alert('Vui lòng chọn ngày nhận.');
 
     const editingIncome = ModalManager.editingType === 'income' && ModalManager.editingIndex >= 0;
@@ -436,6 +445,7 @@ class FinanceModule {
     const incomeRecord = {
       id: incomeId,
       amount,
+      category,
       desc,
       user,
       notes,

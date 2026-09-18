@@ -27,6 +27,12 @@ const CONFIG = {
       '💼 Đầu tư',
       '📦 Khác'
     ],
+    INCOME: [
+      '💼 Lương',
+      '🎁 Thưởng',
+      '📈 Đầu tư / Lãi',
+      '📦 Khác'
+    ],
     INVESTMENT: [
       '🪙 Crypto',
       '📈 Cổ phiếu',

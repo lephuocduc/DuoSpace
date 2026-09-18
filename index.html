@@ -863,7 +863,7 @@
               <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200 flex items-center">
                 <i class="fa-solid fa-tags text-blue-500 mr-2"></i>Quản lý Danh Mục
               </h2>
-              <p class="text-xs text-gray-400 mt-0.5">Tùy chỉnh danh mục Chi tiêu và Công việc To-Do</p>
+              <p class="text-xs text-gray-400 mt-0.5">Tùy chỉnh danh mục Chi tiêu, Thu nhập và Công việc To-Do</p>
             </div>
           </div>
 
@@ -890,6 +890,33 @@
             </div>
 
             <div id="expenseCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Render động từ SettingsModule -->
+            </div>
+          </div>
+
+          <!-- Danh mục Thu Nhập -->
+          <div class="space-y-2.5 pt-3 border-t border-gray-100 dark:border-slate-700/60">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
+                <i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i>Danh mục Thu nhập
+              </span>
+              <button type="button" onclick="resetCategories('income')"
+                class="text-[11px] text-gray-400 hover:text-emerald-500 transition-colors">
+                <i class="fa-solid fa-rotate-left mr-1"></i>Mặc định
+              </button>
+            </div>
+            
+            <div class="flex gap-2">
+              <input type="text" id="newIncomeCategoryInput" placeholder="Ví dụ: 💻 Freelance, 🏢 Cho thuê..."
+                onkeydown="if(event.key==='Enter') addCategory('income')"
+                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <button type="button" onclick="addCategory('income')"
+                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm">
+                <i class="fa-solid fa-plus mr-1"></i>Thêm
+              </button>
+            </div>
+
+            <div id="incomeCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
               <!-- Render động từ SettingsModule -->
             </div>
           </div>
@@ -1444,22 +1471,20 @@
         <div id="addExpenseForm" class="hidden space-y-3">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
-            <input type="number" id="expenseAmount" min="0" step="1" placeholder="0"
-              aria-describedby="expenseAmountHelp"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-            <p id="expenseAmountHelp" class="text-[10px] text-gray-400 mt-1">Có thể nhập 0 VNĐ.</p>
+            <input type="text" inputmode="numeric" id="expenseAmount" placeholder="0" oninput="Utils.formatNumberInput(this)"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày chi</label>
             <input type="date" id="expenseDate"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Category (Danh
                 mục)</label>
               <select id="expenseCategory"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
                 <option value="🍜 Ăn uống">🍜 Ăn uống</option>
                 <option value="🏠 Nhà cửa">🏠 Nhà cửa</option>
                 <option value="🛒 Siêu thị">🛒 Siêu thị</option>
@@ -1474,7 +1499,7 @@
             <div>
               <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người chi trả</label>
               <select id="expenseUser"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
                 <option value="Đ">Đức</option>
                 <option value="S">Sương</option>
               </select>
@@ -1483,16 +1508,16 @@
           <div id="expenseDescriptionRow">
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả khoản chi</label>
             <input type="text" id="expenseDesc" placeholder="Mô tả..."
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
               (Notes)</label>
             <textarea id="expenseNotes" rows="2" placeholder="Ghi chú chi tiết..."
-              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
           </div>
           <button id="saveExpenseBtn" onclick="saveExpenseAction()"
-            class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
             khoản chi</button>
         </div>
 
@@ -1500,27 +1525,38 @@
         <div id="addIncomeForm" class="hidden space-y-3">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
-            <input type="number" id="incomeAmount" min="0" step="1" placeholder="0" aria-describedby="incomeAmountHelp"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <p id="incomeAmountHelp" class="text-[10px] text-gray-400 mt-1">Có thể nhập 0 VNĐ.</p>
+            <input type="text" inputmode="numeric" id="incomeAmount" placeholder="0" oninput="Utils.formatNumberInput(this)"
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày nhận</label>
             <input type="date" id="incomeDate"
               class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Nguồn thu nhập</label>
-            <input type="text" id="incomeDesc" placeholder="Nguồn thu..."
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Danh mục thu nhập</label>
+              <select id="incomeCategory"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="💼 Lương">💼 Lương</option>
+                <option value="🎁 Thưởng">🎁 Thưởng</option>
+                <option value="📈 Đầu tư / Lãi">📈 Đầu tư / Lãi</option>
+                <option value="📦 Khác">📦 Khác</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người nhận</label>
+              <select id="incomeUser"
+                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="Đ">Đức</option>
+                <option value="S">Sương</option>
+              </select>
+            </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người gửi</label>
-            <select id="incomeUser"
-              class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="Đ">Đức</option>
-              <option value="S">Sương</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả chi tiết / Nguồn thu (tùy chọn)</label>
+            <input type="text" id="incomeDesc" placeholder="Ví dụ: Lương tháng 9, Thưởng quý..."
+              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
@@ -1529,7 +1565,7 @@
               class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
           </div>
           <button id="saveIncomeBtn" onclick="saveIncomeAction()"
-            class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
+            class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
             khoản thu</button>
         </div>
       </div>

@@ -128,6 +128,10 @@ class DuoSpaceApp {
     return this.data.settings?.categories?.expense || CONFIG.CATEGORIES.EXPENSE;
   }
 
+  getIncomeCategories() {
+    return this.data.settings?.categories?.income || CONFIG.CATEGORIES.INCOME;
+  }
+
   getTodoCategories() {
     return this.data.settings?.categories?.todo || CONFIG.CATEGORIES.TODO;
   }

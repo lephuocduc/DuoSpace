@@ -37,7 +37,10 @@ class Storage {
             : defaults.settings.categories.todo,
           expense: Array.isArray(saved.settings?.categories?.expense) && saved.settings.categories.expense.length > 0
             ? saved.settings.categories.expense
-            : defaults.settings.categories.expense
+            : defaults.settings.categories.expense,
+          income: Array.isArray(saved.settings?.categories?.income) && saved.settings.categories.income.length > 0
+            ? saved.settings.categories.income
+            : defaults.settings.categories.income
         }
       },
       usdRate: saved.usdRate || defaults.usdRate,
@@ -79,6 +82,9 @@ class Storage {
           todo: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.TODO) ? [...CONFIG.CATEGORIES.TODO] : ['Việc nhà', 'Mun & Bông', 'Xe Máy', 'Sức Khỏe', 'Đầu tư', 'Khác'],
           expense: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.EXPENSE) ? [...CONFIG.CATEGORIES.EXPENSE] : [
             '🍜 Ăn uống', '🏠 Nhà cửa', '🛒 Siêu thị', '🛵 Xe', '🐱 Mèo', '💊 Sức khỏe', '🎮 Giải trí', '💼 Đầu tư', '📦 Khác'
+          ],
+          income: (typeof CONFIG !== 'undefined' && CONFIG.CATEGORIES?.INCOME) ? [...CONFIG.CATEGORIES.INCOME] : [
+            '💼 Lương', '🎁 Thưởng', '📈 Đầu tư / Lãi', '📦 Khác'
           ]
         }
       }

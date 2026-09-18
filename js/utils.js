@@ -75,6 +75,27 @@ const Utils = {
   },
 
   /**
+   * Format numeric input in real-time with thousand dot separators (.)
+   * @param {HTMLInputElement} input
+   */
+  formatNumberInput(input) {
+    if (!input) return;
+    const originalValue = input.value;
+    const rawValue = originalValue.replace(/\D/g, '');
+    if (!rawValue) {
+      input.value = '';
+      return;
+    }
+    const formatted = parseInt(rawValue, 10).toLocaleString('vi-VN');
+    
+    // Maintain cursor position relative to end of string
+    const cursorOffsetFromEnd = originalValue.length - (input.selectionEnd || 0);
+    input.value = formatted;
+    const newCursor = Math.max(0, formatted.length - cursorOffsetFromEnd);
+    input.setSelectionRange(newCursor, newCursor);
+  },
+
+  /**
    * Escape HTML to prevent XSS
    * @param {string} str
    * @returns {string}
