@@ -219,16 +219,16 @@ class CloudSync {
     if (!el) return;
 
     if (status === 'loading') {
-      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 mr-1"></i> <span class="text-blue-600 dark:text-blue-400 font-semibold">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 mr-1"></i> <span class="hidden sm:inline text-blue-600 dark:text-blue-400 font-semibold">${text}</span>`;
     } else if (status === 'success') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 mr-1"></i> <span class="text-emerald-600 dark:text-emerald-400 font-semibold">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 mr-1"></i> <span class="hidden sm:inline text-emerald-600 dark:text-emerald-400 font-semibold">${text}</span>`;
       setTimeout(() => {
         if (el && !this.isSyncing) {
-          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 mr-1"></i> <span>Đã đồng bộ</span>`;
+          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 mr-1"></i> <span class="hidden sm:inline">Đã đồng bộ</span>`;
         }
       }, 3500);
     } else if (status === 'error') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 mr-1"></i> <span class="text-amber-600 dark:text-amber-400">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 mr-1"></i> <span class="hidden sm:inline text-amber-600 dark:text-amber-400">${text}</span>`;
     }
   }
 }
