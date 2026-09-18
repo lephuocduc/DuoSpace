@@ -347,11 +347,11 @@ class AuthModule {
       const ducHeader = document.getElementById('headerAvatarDuc');
       const suongHeader = document.getElementById('headerAvatarSuong');
       if (profile.code === 'Đ') {
-        ducHeader?.classList.add('ring-4', 'ring-rose-400', 'scale-110', 'z-10');
-        suongHeader?.classList.remove('ring-4', 'ring-blue-400', 'scale-110', 'z-10');
+        ducHeader?.classList.add('ring-2', 'ring-rose-400', 'scale-105', 'shadow-sm');
+        suongHeader?.classList.remove('ring-2', 'ring-blue-400', 'scale-105', 'shadow-sm');
       } else if (profile.code === 'S') {
-        suongHeader?.classList.add('ring-4', 'ring-blue-400', 'scale-110', 'z-10');
-        ducHeader?.classList.remove('ring-4', 'ring-rose-400', 'scale-110', 'z-10');
+        suongHeader?.classList.add('ring-2', 'ring-blue-400', 'scale-105', 'shadow-sm');
+        ducHeader?.classList.remove('ring-2', 'ring-rose-400', 'scale-105', 'shadow-sm');
       }
     } else {
       if (userContainer) userContainer.classList.add('hidden');
@@ -360,8 +360,8 @@ class AuthModule {
       }
       const ducHeader = document.getElementById('headerAvatarDuc');
       const suongHeader = document.getElementById('headerAvatarSuong');
-      ducHeader?.classList.remove('ring-4', 'ring-rose-400', 'scale-110', 'z-10');
-      suongHeader?.classList.remove('ring-4', 'ring-blue-400', 'scale-110', 'z-10');
+      ducHeader?.classList.remove('ring-2', 'ring-rose-400', 'scale-105', 'shadow-sm');
+      suongHeader?.classList.remove('ring-2', 'ring-blue-400', 'scale-105', 'shadow-sm');
     }
   }
 
