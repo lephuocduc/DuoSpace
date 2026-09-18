@@ -3,7 +3,7 @@ class LogModule {
   constructor(app) {
     this.app = app;
     this.filter = 'all';
-    this.countLoaded = 20;
+    this.countLoaded = 10;
   }
 
   getLogKind(entry) {
@@ -15,13 +15,59 @@ class LogModule {
 
   filterLogs(filter) {
     this.filter = filter;
-    this.countLoaded = 20;
+    this.countLoaded = 10;
     this.render();
   }
 
   loadMore() {
-    this.countLoaded += 20;
+    this.countLoaded += 10;
     this.render();
+  }
+
+  exportLogsCsv() {
+    const allLogs = [...(this.app.data.logs || [])]
+      .filter(entry => entry.type === 'system')
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!allLogs.length) {
+      if (typeof Utils !== 'undefined' && Utils.notify) {
+        Utils.notify('Chưa có nhật ký nào để xuất!', 'info');
+      } else {
+        alert('Chưa có nhật ký nào để xuất!');
+      }
+      return;
+    }
+
+    const quote = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const rows = [
+      ['Thời gian', 'Phân loại', 'Thao tác / Tiêu đề', 'Chi tiết thay đổi'],
+      ...allLogs.map(entry => [
+        entry.date ? new Date(entry.date).toLocaleString('vi-VN') : '',
+        this.getLogKind(entry),
+        entry.title || '',
+        entry.notes || ''
+      ])
+    ];
+
+    const csv = '\uFEFF' + rows.map(row => row.map(quote).join(',')).join('\r\n');
+    const filename = `duospace-nhat-ky-he-thong-${new Date().toISOString().slice(0, 10)}.csv`;
+    
+    if (typeof Utils !== 'undefined' && Utils.downloadFile) {
+      Utils.downloadFile(csv, filename, 'text/csv;charset=utf-8');
+    } else {
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    if (typeof Utils !== 'undefined' && Utils.notify) {
+      Utils.notify(`Đã xuất ${allLogs.length} nhật ký hệ thống ra file CSV!`, 'success');
+    }
   }
 
   render() {
@@ -32,6 +78,8 @@ class LogModule {
       .sort((a, b) => new Date(b.date) - new Date(a.date));
     const logs = this.filter === 'all' ? allLogs : allLogs.filter(entry => this.getLogKind(entry) === this.filter);
     const displayed = logs.slice(0, this.countLoaded);
+    const remainingCount = logs.length - displayed.length;
+
     const countEl = document.getElementById('logCount');
     if (countEl) countEl.textContent = `${logs.length} hoạt động`;
     ['all', 'add', 'update', 'delete', 'other'].forEach(kind => {
@@ -53,7 +101,14 @@ class LogModule {
       </div>`;
     }).join('');
     const loadMoreButton = document.getElementById('loadMoreLogsBtn');
-    if (loadMoreButton) loadMoreButton.classList.toggle('hidden', displayed.length >= logs.length);
+    if (loadMoreButton) {
+      if (remainingCount > 0) {
+        loadMoreButton.classList.remove('hidden');
+        loadMoreButton.innerHTML = `<i class="fa-solid fa-arrow-down mr-1.5"></i>Xem thêm (Còn ${remainingCount} hoạt động · Hiển thị ${displayed.length}/${logs.length})`;
+      } else {
+        loadMoreButton.classList.add('hidden');
+      }
+    }
   }
 
   system(title, notes = '') {
@@ -66,3 +121,4 @@ class LogModule {
 
 function filterSystemLog(filter) { window.app.log.filterLogs(filter); }
 function loadMoreSystemLogs() { window.app.log.loadMore(); }
+function exportSystemLogsCsv() { window.app.log.exportLogsCsv(); }
