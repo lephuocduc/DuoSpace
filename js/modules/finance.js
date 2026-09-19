@@ -280,7 +280,7 @@ class FinanceModule {
       const color = isExpense ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
       const sign = isExpense ? '-' : '+';
       const byLabel = isExpense ? 'Chi bởi' : 'Thu bởi';
-      const userText = item.user === 'Đ' ? 'Đức' : 'Sương';
+      const userText = item.user === 'Đ' ? 'Đức' : (item.user === 'S' ? 'Sương' : 'Cả hai');
       const catTag = item.category
         ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ml-1">${Utils.escapeHtml(item.category)}</span>`
         : '';
@@ -416,7 +416,7 @@ class FinanceModule {
       const format = value => {
         if (key === 'amount') return `${Number(value || 0).toLocaleString('vi-VN')} VNĐ`;
         if (key === 'date') return value ? Utils.formatDate(value) : 'trống';
-        if (key === 'user') return value === 'Đ' ? 'Đức' : value === 'S' ? 'Sương' : (value || 'trống');
+        if (key === 'user') return value === 'Đ' ? 'Đức' : (value === 'S' ? 'Sương' : (value === 'Both' ? 'Cả hai' : (value || 'trống')));
         return value || 'trống';
       };
       return `${labels[key]}: ${format(before[key])} → ${format(after[key])}`;

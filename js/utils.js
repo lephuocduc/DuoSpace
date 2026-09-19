@@ -45,6 +45,7 @@ const Utils = {
    * @returns {string}
    */
   formatCurrency(amount) {
+    if (window.app?.data?.hideAmounts) return '***** đ';
     if (isNaN(amount) || amount === null || amount === undefined) return '0 đ';
     return Number(amount).toLocaleString('vi-VN') + ' đ';
   },
@@ -70,6 +71,7 @@ const Utils = {
    * @returns {string}
    */
   formatNumber(number, locale = 'vi-VN') {
+    if (window.app?.data?.hideAmounts) return '*****';
     if (isNaN(number) || number === null) return '0';
     return Number(number).toLocaleString(locale);
   },

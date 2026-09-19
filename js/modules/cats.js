@@ -8,7 +8,7 @@ class CatsModule {
 
   render() {
     this.renderTodoList();
-    if (this.app.charts) {
+    if (this.app.charts && !this.app.skipCharts) {
       setTimeout(() => this.app.charts.renderCatChart(), 100);
     }
   }

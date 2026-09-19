@@ -66,6 +66,10 @@
         </div>
 
         <div class="flex items-center space-x-2 shrink-0">
+          <button id="toggleAmountsBtn" onclick="window.app.toggleAmounts()" title="Ẩn/hiện số tiền"
+            class="text-[11px] px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all rounded-full border border-gray-200 dark:border-slate-700 shadow-sm flex items-center justify-center cursor-pointer min-h-[28px] min-w-[32px]">
+            <i id="toggleAmountsIcon" class="fa-solid fa-eye text-gray-500 dark:text-slate-400 text-xs sm:text-sm"></i>
+          </button>
           <button id="cloudSyncStatus" onclick="window.app.sync?.manualSync()" title="Bấm để đồng bộ dữ liệu ngay từ Cloudflare D1"
             class="text-[11px] px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 active:scale-95 transition-all rounded-full border border-gray-200 dark:border-slate-700 shadow-sm flex items-center font-medium cursor-pointer min-h-[28px] min-w-[32px] justify-center">
             <i class="fa-solid fa-cloud text-gray-400 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Cloud</span>
@@ -146,6 +150,23 @@
             </div>
           </section>
         </div>
+
+        <!-- UPCOMING REMINDERS WIDGET -->
+        <section id="homeRemindersWidget" class="hidden">
+          <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 shadow-sm border border-amber-100 dark:border-amber-800/30">
+            <h3 class="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider mb-3 flex items-center">
+              <i class="fa-solid fa-bell mr-1.5 animate-pulse"></i> Nhắc nhở sắp tới
+            </h3>
+            <div id="homeRemindersList" class="space-y-2">
+            </div>
+            <div id="homeShoppingReminder" class="mt-3 pt-3 border-t border-amber-200/50 dark:border-amber-800/50 hidden">
+              <div class="flex justify-between items-center cursor-pointer hover:opacity-80" onclick="switchTab('shopping', 'Đi Siêu Thị')">
+                <span class="text-sm font-semibold text-amber-900 dark:text-amber-200"><i class="fa-solid fa-basket-shopping mr-1.5 text-amber-600"></i> Bạn có <span id="homeShoppingCount">0</span> món đồ cần mua</span>
+                <i class="fa-solid fa-chevron-right text-xs text-amber-600"></i>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section class="space-y-3">
           <div class="flex justify-between items-center">
@@ -1121,6 +1142,56 @@
         </section>
       </div>
 
+      <!-- NEW TAB: SHOPPING LIST -->
+      <div id="tab-shopping" class="hidden space-y-4 tab-content">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <i class="fa-solid fa-basket-shopping text-orange-500 mr-2"></i> Đi Siêu Thị
+          </h2>
+          <button onclick="window.app.shopping.clearDone()" class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-xl transition-colors" title="Xóa món đã mua">
+            <i class="fa-solid fa-broom text-xs"></i>
+          </button>
+        </div>
+        
+        <div class="relative mb-2">
+          <input type="text" id="quickShoppingInput" placeholder="Thêm món đồ (VD: nước mắm)..." class="w-full pl-4 pr-12 py-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800 dark:text-slate-200 shadow-sm" onkeypress="if(event.key === 'Enter') window.app.shopping.saveItem()">
+          <button onclick="window.app.shopping.saveItem()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-plus text-sm"></i>
+          </button>
+        </div>
+
+        <div id="shoppingListContainer" class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-800">
+        </div>
+      </div>
+
+      <!-- NEW TAB: CALENDAR -->
+      <div id="tab-calendar" class="hidden space-y-4 tab-content">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <i class="fa-regular fa-calendar-days text-purple-500 mr-2"></i> Lịch & Hóa Đơn
+          </h2>
+          <button onclick="window.app.calendar.openModal()" class="w-8 h-8 flex items-center justify-center bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/50 text-purple-600 dark:text-purple-400 rounded-xl transition-colors">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div id="eventsContainer" class="min-h-[200px]">
+        </div>
+      </div>
+
+      <!-- NEW TAB: NOTES -->
+      <div id="tab-notes" class="hidden space-y-4 tab-content">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <i class="fa-regular fa-note-sticky text-amber-500 mr-2"></i> Sổ Tay Chung
+          </h2>
+          <button onclick="window.app.notes.openModal()" class="w-8 h-8 flex items-center justify-center bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 text-amber-600 dark:text-amber-400 rounded-xl transition-colors">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div id="notesContainer" class="min-h-[200px]">
+        </div>
+      </div>
+
     </main>
 
     <!-- BOTTOM TAB BAR -->
@@ -1183,8 +1254,9 @@
           </div>
         </div>
 
-        <nav class="space-y-1.5">
-          <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
+          <nav class="space-y-1.5 overflow-y-auto custom-scrollbar pb-20">
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">Gia Đình & Sức Khỏe</h4>
+            <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
@@ -1211,7 +1283,36 @@
             <span>Sức Khỏe</span>
           </a>
 
-          <a href="#" onclick="switchTab('log', 'Nhật ký hệ thống'); toggleSidebar();"
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Công Cụ & Kế Hoạch</h4>
+            <a href="#" onclick="switchTab('shopping', 'Đi Siêu Thị'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800 hover:text-orange-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+              <i class="fa-solid fa-basket-shopping text-xs"></i>
+            </div>
+            <span>Đi Siêu Thị</span>
+          </a>
+
+          <a href="#" onclick="switchTab('calendar', 'Lịch & Hóa Đơn'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 hover:text-purple-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <i class="fa-regular fa-calendar-days text-xs"></i>
+            </div>
+            <span>Lịch & Hóa Đơn</span>
+          </a>
+
+          <a href="#" onclick="switchTab('notes', 'Sổ Tay Chung'); toggleSidebar();"
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
+            <div
+              class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <i class="fa-regular fa-note-sticky text-xs"></i>
+            </div>
+            <span>Sổ Tay Chung</span>
+          </a>
+
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Hệ Thống</h4>
+            <a href="#" onclick="switchTab('log', 'Nhật ký hệ thống'); toggleSidebar();"
             class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -1508,6 +1609,7 @@
                 class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
                 <option value="Đ">Đức</option>
                 <option value="S">Sương</option>
+                <option value="Both">Cả hai</option>
               </select>
             </div>
           </div>
@@ -1556,6 +1658,7 @@
                 class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="Đ">Đức</option>
                 <option value="S">Sương</option>
+                <option value="Both">Cả hai</option>
               </select>
             </div>
           </div>
@@ -1661,6 +1764,112 @@
     </div>
   </div>
 
+  <!-- MODALS FOR NEW FEATURES -->
+  <!-- Goal Modal -->
+  <div id="goalModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 scale-95 opacity-0 transition-all duration-300 transform">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Mục tiêu tài chính</h3>
+        <button onclick="window.app.goals.closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <input type="hidden" id="goalId">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Tên mục tiêu</label>
+          <input type="text" id="goalTitle" placeholder="Ví dụ: Du lịch Nhật Bản" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền mục tiêu (VND)</label>
+          <input type="text" id="goalTarget" placeholder="10,000,000" inputmode="numeric" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="Utils.formatNumberInput(this)">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Đã tích lũy (VND)</label>
+          <input type="text" id="goalCurrent" placeholder="2,000,000" inputmode="numeric" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="Utils.formatNumberInput(this)">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Icon (FontAwesome)</label>
+          <input type="text" id="goalIcon" placeholder="fa-solid fa-plane" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="flex space-x-3 pt-2">
+          <button id="deleteGoalBtn" class="hidden px-4 py-3 bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-semibold rounded-xl text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50"><i class="fa-solid fa-trash-can"></i></button>
+          <button onclick="window.app.goals.saveGoal()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu Mục Tiêu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Event/Bill Modal -->
+  <div id="eventModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 scale-95 opacity-0 transition-all duration-300 transform">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Sự kiện / Hóa đơn</h3>
+        <button onclick="window.app.calendar.closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <input type="hidden" id="eventId">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Tên</label>
+          <input type="text" id="eventTitle" placeholder="Tiền điện, Sinh nhật, Đám cưới..." class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày</label>
+            <input type="date" id="eventDate" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân loại</label>
+            <select id="eventType" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="window.app.calendar.toggleAmountField()">
+              <option value="event">Sự kiện</option>
+              <option value="bill">Hóa đơn cần đóng</option>
+            </select>
+          </div>
+        </div>
+        <div id="eventAmountContainer" class="hidden">
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (Tùy chọn)</label>
+          <input type="text" id="eventAmount" placeholder="100,000" inputmode="numeric" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" oninput="Utils.formatNumberInput(this)">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú</label>
+          <input type="text" id="eventNotes" placeholder="..." class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+        </div>
+        <div class="flex space-x-3 pt-2">
+          <button id="deleteEventBtn" class="hidden px-4 py-3 bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-semibold rounded-xl text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50"><i class="fa-solid fa-trash-can"></i></button>
+          <button onclick="window.app.calendar.saveEvent()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu Lịch Trình</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Modal -->
+  <div id="noteModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 scale-95 opacity-0 transition-all duration-300 transform">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Sổ tay</h3>
+        <button onclick="window.app.notes.closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <input type="hidden" id="noteId">
+        <div>
+          <input type="text" id="noteTitle" placeholder="Tiêu đề (VD: Mật khẩu Wifi...)" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <textarea id="noteContent" rows="6" placeholder="Nội dung ghi chú..." class="w-full px-3 py-3 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+        <div class="flex space-x-3 pt-2">
+          <button id="deleteNoteBtn" class="hidden px-4 py-3 bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-semibold rounded-xl text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50"><i class="fa-solid fa-trash-can"></i></button>
+          <button onclick="window.app.notes.saveNote()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu Ghi Chú</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="appToast" role="status" aria-live="polite"
     class="fixed left-1/2 -translate-x-1/2 bottom-20 z-[60] hidden max-w-[90%] rounded-xl px-4 py-3 text-sm font-medium shadow-lg">
   </div>
@@ -1693,6 +1902,10 @@
   <script src="js/modules/settings.js"></script>
   <script src="js/modules/cloudSync.js"></script>
   <script src="js/modules/log.js"></script>
+  <script src="js/modules/goals.js"></script>
+  <script src="js/modules/shopping.js"></script>
+  <script src="js/modules/calendar.js"></script>
+  <script src="js/modules/notes.js"></script>
   <script src="js/main.js"></script>
 </body>
 

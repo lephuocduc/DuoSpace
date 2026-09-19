@@ -61,12 +61,13 @@ class HomeModule {
     const homeTaskTotalCount = document.getElementById('homeTaskTotalCount');
     if (homeTaskTotalCount) homeTaskTotalCount.innerText = totalTasks;
 
+    this.renderUpcomingReminders();
     this.renderCategoryBreakdown();
     this.renderImportantReminders();
     this.updateDynamicInfo();
     this.updateBadges();
 
-    if (this.app.charts) {
+    if (this.app.charts && !this.app.skipCharts) {
       setTimeout(() => this.app.charts.renderBudgetChart(), 100);
     }
   }
@@ -167,6 +168,70 @@ class HomeModule {
         </div>
       `;
     }).join('');
+  }
+
+  renderUpcomingReminders() {
+    const widget = document.getElementById('homeRemindersWidget');
+    const listContainer = document.getElementById('homeRemindersList');
+    if (!widget || !listContainer) return;
+
+    let hasReminders = false;
+    let html = '';
+    const now = new Date();
+    now.setHours(0,0,0,0);
+
+    // 1. Check Events/Bills (Next 3 days)
+    const upcomingEvents = (this.app.data.events || []).filter(ev => {
+      const evDate = new Date(ev.date);
+      evDate.setHours(0,0,0,0);
+      const diffDays = Math.ceil((evDate - now) / (1000 * 60 * 60 * 24));
+      return diffDays >= 0 && diffDays <= 3;
+    }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    if (upcomingEvents.length > 0) {
+      hasReminders = true;
+      html += upcomingEvents.map(ev => {
+        const isBill = ev.type === 'bill';
+        const icon = isBill ? 'fa-solid fa-file-invoice-dollar text-rose-500' : 'fa-solid fa-calendar-day text-blue-500';
+        const amountStr = isBill && ev.amount ? ` - ${Utils.formatCurrency(ev.amount)}` : '';
+        const evDate = new Date(ev.date);
+        evDate.setHours(0,0,0,0);
+        const diffDays = Math.ceil((evDate - now) / (1000 * 60 * 60 * 24));
+        const dayStr = diffDays === 0 ? 'Hôm nay' : `Còn ${diffDays} ngày`;
+        
+        return `
+          <div class="flex items-center p-2 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-amber-100 dark:border-slate-700 cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-colors" onclick="switchTab('calendar', 'Lịch & Hóa Đơn'); window.app.calendar.openModal('${ev.id}')">
+            <div class="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center mr-3 shadow-sm shrink-0">
+              <i class="${icon} text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${ev.title}${amountStr}</p>
+              <p class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">${dayStr}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 2. Check Shopping List
+    const shopList = (this.app.data.shoppingList || []).filter(item => !item.done);
+    const shopReminder = document.getElementById('homeShoppingReminder');
+    const shopCount = document.getElementById('homeShoppingCount');
+    
+    if (shopList.length > 0) {
+      hasReminders = true;
+      if (shopReminder) shopReminder.classList.remove('hidden');
+      if (shopCount) shopCount.innerText = shopList.length;
+    } else {
+      if (shopReminder) shopReminder.classList.add('hidden');
+    }
+
+    if (hasReminders) {
+      listContainer.innerHTML = html;
+      widget.classList.remove('hidden');
+    } else {
+      widget.classList.add('hidden');
+    }
   }
 
   search(query) {

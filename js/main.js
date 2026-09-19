@@ -37,6 +37,17 @@ class DuoSpaceApp {
     this.health = new HealthModule(this);
     this.settings = new SettingsModule(this);
     this.log = new LogModule(this);
+
+    // New Features
+    this.goals = new GoalsModule(this);
+    this.shopping = new ShoppingModule(this);
+    this.calendar = new CalendarModule(this);
+    this.notes = new NotesModule(this);
+
+    // Initial config
+    if (this.data.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
     this.sync = typeof CloudSync !== 'undefined' ? new CloudSync(this.storage) : null;
 
     this.init();
@@ -70,6 +81,8 @@ class DuoSpaceApp {
 
     // Setup global listeners
     this.setupEventListeners();
+
+    this.updateToggleAmountsIcon();
 
     // Fetch realtime USD rate & Render all
     this.investment.fetchRealtimeUsdRate();
@@ -136,6 +149,25 @@ class DuoSpaceApp {
     return this.data.settings?.categories?.todo || CONFIG.CATEGORIES.TODO;
   }
 
+  toggleAmounts() {
+    this.data.hideAmounts = !this.data.hideAmounts;
+    this.save();
+    this.updateToggleAmountsIcon();
+    this.skipCharts = true;
+    this.render();
+    this.skipCharts = false;
+  }
+
+  updateToggleAmountsIcon() {
+    const icon = document.getElementById('toggleAmountsIcon');
+    if (!icon) return;
+    if (this.data.hideAmounts) {
+      icon.className = 'fa-solid fa-eye-slash text-gray-500 dark:text-slate-400 text-xs sm:text-sm';
+    } else {
+      icon.className = 'fa-solid fa-eye text-gray-500 dark:text-slate-400 text-xs sm:text-sm';
+    }
+  }
+
   /** Render các mô-đun sau khi dữ liệu thay đổi. */
   render() {
     this.home.render();
@@ -147,6 +179,12 @@ class DuoSpaceApp {
     this.health.render();
     this.settings.render();
     this.log.render();
+    
+    // Render New Features
+    this.goals.render();
+    this.shopping.render();
+    this.calendar.render();
+    this.notes.render();
   }
 
   /** Chỉ render các phần bị ảnh hưởng để tránh render toàn bộ dữ liệu. */

@@ -53,7 +53,11 @@ class Storage {
       catWeights: Array.isArray(saved.catWeights) ? saved.catWeights : defaults.catWeights,
       monthlyBudgets: Array.isArray(saved.monthlyBudgets) ? saved.monthlyBudgets : defaults.monthlyBudgets,
       healthLogs: Array.isArray(saved.healthLogs) ? saved.healthLogs : (defaults.healthLogs || []),
-      logs: Array.isArray(saved.logs) ? saved.logs : defaults.logs
+      logs: Array.isArray(saved.logs) ? saved.logs : defaults.logs,
+      savingsGoals: Array.isArray(saved.savingsGoals) ? saved.savingsGoals : defaults.savingsGoals,
+      shoppingList: Array.isArray(saved.shoppingList) ? saved.shoppingList : defaults.shoppingList,
+      events: Array.isArray(saved.events) ? saved.events : defaults.events,
+      notes: Array.isArray(saved.notes) ? saved.notes : defaults.notes
     };
   }
 
@@ -71,6 +75,10 @@ class Storage {
       catWeights: [],
       healthLogs: [],
       logs: [],
+      savingsGoals: [],
+      shoppingList: [],
+      events: [],
+      notes: [],
       settings: {
         munBreed: "Mèo Cưng",
         bongBreed: "Mèo Cưng",

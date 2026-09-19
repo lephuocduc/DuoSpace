@@ -17,7 +17,7 @@ class InvestmentModule {
   }
 
   render() {
-    this.renderInvestmentList();
+    this.renderInvestmentList(!this.app.skipCharts);
     this.recordDailyNetWorth();
   }
 
@@ -185,10 +185,8 @@ class InvestmentModule {
       existingIndex = this.app.data.investments.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
     }
 
-    const expenseId = Utils.createId('expense');
     const newPurchase = {
       id: Utils.createId('purchase'),
-      expenseId,
       date: purchaseDate,
       quantity: quantity,
       buyPrice: buyPrice,
@@ -240,17 +238,6 @@ class InvestmentModule {
       };
       this.app.data.investments.push(newItem);
     }
-
-    if (!this.app.data.expenses) this.app.data.expenses = [];
-    this.app.data.expenses.push({
-      id: expenseId,
-      amount: Math.round(quantity * buyPrice),
-      desc: `Đầu tư ${name}`,
-      category: '💼 Đầu tư',
-      user: 'Đ',
-      notes,
-      date: new Date(`${purchaseDate}T12:00:00`).toISOString()
-    });
 
     this.app.log?.system(existingIndex >= 0 ? 'Thêm giao dịch mua tài sản' : 'Thêm tài sản đầu tư', `${name} · ${quantity} đơn vị · giá mua ${buyPrice.toLocaleString('vi-VN')}`);
     this.app.save();
@@ -420,10 +407,12 @@ class InvestmentModule {
 
     this.app.save();
 
-    if (this.app.charts && typeof this.app.charts.renderInvestmentCharts === 'function') {
-      this.app.charts.renderInvestmentCharts();
-    } else if (this.app.investmentChart) {
-      this.app.investmentChart.renderNetWorth(this.app.data.netWorthHistory, this.app.data.isDarkMode);
+    if (!this.app.skipCharts) {
+      if (this.app.charts && typeof this.app.charts.renderInvestmentCharts === 'function') {
+        this.app.charts.renderInvestmentCharts();
+      } else if (this.app.investmentChart) {
+        this.app.investmentChart.renderNetWorth(this.app.data.netWorthHistory, this.app.data.isDarkMode);
+      }
     }
   }
 

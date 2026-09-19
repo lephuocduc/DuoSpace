@@ -238,7 +238,11 @@ export default {
           cats,
           bikes,
           logs,
-          healthLogs
+          healthLogs,
+          savingsGoals,
+          shoppingList,
+          events,
+          notes
         ] = await Promise.all([
           db.prepare("SELECT * FROM app_state WHERE id = 'duospace_global_state'").first(),
           db.prepare("SELECT * FROM todos ORDER BY created_at DESC").all(),
@@ -248,8 +252,12 @@ export default {
           db.prepare("SELECT * FROM monthly_budgets").all(),
           db.prepare("SELECT date, mun, bong FROM cat_weights ORDER BY date ASC").all(),
           db.prepare("SELECT * FROM bike_maintenances ORDER BY date DESC").all(),
-          db.prepare("SELECT id, title, notes, type, date FROM system_logs ORDER BY date DESC LIMIT 200").all(),
-          db.prepare("SELECT * FROM health_logs ORDER BY date DESC").all()
+          db.prepare("SELECT * FROM system_logs ORDER BY date DESC").all(),
+          db.prepare("SELECT * FROM health_logs ORDER BY date DESC").all(),
+          db.prepare("SELECT * FROM savings_goals").all(),
+          db.prepare("SELECT * FROM shopping_list ORDER BY created_at ASC").all(),
+          db.prepare("SELECT * FROM events ORDER BY date ASC").all(),
+          db.prepare("SELECT * FROM notes ORDER BY updated_at DESC").all()
         ]);
 
         const expenses = [];
@@ -333,6 +341,40 @@ export default {
               notes: l.notes || "",
               type: l.type || "system",
               date: l.date
+            })),
+            savingsGoals: (savingsGoals.results || []).map(g => ({
+              id: g.id,
+              title: g.title,
+              targetAmount: g.target_amount,
+              currentAmount: g.current_amount,
+              icon: g.icon,
+              targetDate: g.target_date,
+              notes: g.notes || "",
+              createdAt: g.created_at,
+              updatedAt: g.updated_at
+            })),
+            shoppingList: (shoppingList.results || []).map(s => ({
+              id: s.id,
+              title: s.title,
+              done: Boolean(s.done),
+              createdAt: s.created_at
+            })),
+            events: (events.results || []).map(e => ({
+              id: e.id,
+              title: e.title,
+              date: e.date,
+              type: e.type,
+              amount: e.amount,
+              user: e.user,
+              notes: e.notes || "",
+              createdAt: e.created_at
+            })),
+            notes: (notes.results || []).map(n => ({
+              id: n.id,
+              title: n.title,
+              content: n.content,
+              createdAt: n.created_at,
+              updatedAt: n.updated_at
             }))
           }
         }, 200, {
@@ -355,7 +397,7 @@ export default {
         // Save app state (luôn tăng version để các client khác nhận biết thay đổi)
         statements.push(
           db.prepare(`
-            INSERT INTO app_state (id, usd_rate, settings_json, version, checksum, updated_by, updated_at)
+            INSERT OR REPLACE INTO app_state (id, usd_rate, settings_json, version, checksum, updated_by, updated_at)
             VALUES ('duospace_global_state', ?, ?, 1, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(id) DO UPDATE SET
               usd_rate = excluded.usd_rate,
@@ -374,13 +416,12 @@ export default {
 
         // Sync Todos
         if (Array.isArray(payload.todos)) {
-          statements.push(db.prepare("DELETE FROM todos"));
-          for (const item of payload.todos) {
+                    for (const item of payload.todos) {
             const id = item.id || `todo-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = item.createdAt || item.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO todos (id, title, category, user, priority, notes, done, start_date, due_date, date, created_at)
+                INSERT OR REPLACE INTO todos (id, title, category, user, priority, notes, done, start_date, due_date, date, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 id,
@@ -401,13 +442,12 @@ export default {
 
         // Sync Incomes & Expenses
         if (Array.isArray(payload.incomes) || Array.isArray(payload.expenses)) {
-          statements.push(db.prepare("DELETE FROM transactions"));
-          for (const inc of (payload.incomes || [])) {
+                    for (const inc of (payload.incomes || [])) {
             const id = inc.id || `inc-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = inc.createdAt || inc.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
+                INSERT OR REPLACE INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
                 VALUES (?, 'income', ?, ?, ?, ?, ?, ?, ?)
               `).bind(id, inc.amount || 0, inc.desc || "", inc.category || "Lương", inc.user || "Đ", inc.notes || "", inc.date || new Date().toISOString(), createdAt)
             );
@@ -417,7 +457,7 @@ export default {
             const createdAt = exp.createdAt || exp.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
+                INSERT OR REPLACE INTO transactions (id, type, amount, description, category, user, notes, date, created_at)
                 VALUES (?, 'expense', ?, ?, ?, ?, ?, ?, ?)
               `).bind(id, exp.amount || 0, exp.desc || "", exp.category || "📦 Khác", exp.user || "Đ", exp.notes || "", exp.date || new Date().toISOString(), createdAt)
             );
@@ -426,12 +466,11 @@ export default {
 
         // Sync Investments
         if (Array.isArray(payload.investments)) {
-          statements.push(db.prepare("DELETE FROM investments"));
-          for (const inv of payload.investments) {
+                    for (const inv of payload.investments) {
             const id = inv.id || `inv-${Math.random().toString(36).substr(2, 9)}`;
             statements.push(
               db.prepare(`
-                INSERT INTO investments (id, name, type, quantity, buy_price, current_price, is_usd, target_weight, notes, purchases_json, price_source_json, updated_at)
+                INSERT OR REPLACE INTO investments (id, name, type, quantity, buy_price, current_price, is_usd, target_weight, notes, purchases_json, price_source_json, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
               `).bind(
                 id,
@@ -452,12 +491,11 @@ export default {
 
         // Sync Net Worth History
         if (Array.isArray(payload.netWorthHistory)) {
-          statements.push(db.prepare("DELETE FROM net_worth_history"));
-          for (const nw of payload.netWorthHistory) {
+                    for (const nw of payload.netWorthHistory) {
             if (nw.date && nw.value !== undefined) {
               statements.push(
                 db.prepare(`
-                  INSERT INTO net_worth_history (date, value)
+                  INSERT OR REPLACE INTO net_worth_history (date, value)
                   VALUES (?, ?)
                 `).bind(nw.date, nw.value)
               );
@@ -467,12 +505,11 @@ export default {
 
         // Sync Monthly Budgets
         if (Array.isArray(payload.monthlyBudgets)) {
-          statements.push(db.prepare("DELETE FROM monthly_budgets"));
-          for (const b of payload.monthlyBudgets) {
+                    for (const b of payload.monthlyBudgets) {
             if (b.month) {
               statements.push(
                 db.prepare(`
-                  INSERT INTO monthly_budgets (month, budget, spent, updated_at)
+                  INSERT OR REPLACE INTO monthly_budgets (month, budget, spent, updated_at)
                   VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                 `).bind(b.month, b.budget || 0, b.spent || 0)
               );
@@ -482,12 +519,11 @@ export default {
 
         // Sync Cat Weights
         if (Array.isArray(payload.catWeights)) {
-          statements.push(db.prepare("DELETE FROM cat_weights"));
-          for (const c of payload.catWeights) {
+                    for (const c of payload.catWeights) {
             if (c.date) {
               statements.push(
                 db.prepare(`
-                  INSERT INTO cat_weights (date, mun, bong)
+                  INSERT OR REPLACE INTO cat_weights (date, mun, bong)
                   VALUES (?, ?, ?)
                 `).bind(c.date, c.mun || 0, c.bong || 0)
               );
@@ -497,12 +533,11 @@ export default {
 
         // Sync Bike Maintenances
         if (Array.isArray(payload.bikeMaintenances)) {
-          statements.push(db.prepare("DELETE FROM bike_maintenances"));
-          for (const bm of payload.bikeMaintenances) {
+                    for (const bm of payload.bikeMaintenances) {
             const id = bm.id || `bike-${Math.random().toString(36).substr(2, 9)}`;
             statements.push(
               db.prepare(`
-                INSERT INTO bike_maintenances (id, bike, title, odo, cost, date, notes)
+                INSERT OR REPLACE INTO bike_maintenances (id, bike, title, odo, cost, date, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `).bind(id, bm.bike || "NMAX", bm.title || "", bm.odo || 0, bm.cost || 0, bm.date || "", bm.notes || "")
             );
@@ -511,13 +546,12 @@ export default {
 
         // Sync Health Logs
         if (Array.isArray(payload.healthLogs)) {
-          statements.push(db.prepare("DELETE FROM health_logs"));
-          for (const h of payload.healthLogs) {
+                    for (const h of payload.healthLogs) {
             const id = h.id || `health-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = h.createdAt || h.date || new Date().toISOString();
             statements.push(
               db.prepare(`
-                INSERT INTO health_logs (id, user, date, weight, height, water_ml, steps, notes, created_at)
+                INSERT OR REPLACE INTO health_logs (id, user, date, weight, height, water_ml, steps, notes, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 id,
@@ -536,14 +570,73 @@ export default {
 
         // Sync System Logs
         if (Array.isArray(payload.logs)) {
-          statements.push(db.prepare("DELETE FROM system_logs"));
-          for (const l of payload.logs.slice(-200)) {
+                    for (const l of payload.logs.slice(-200)) {
             const id = l.id || `log-${Math.random().toString(36).substr(2, 9)}`;
             statements.push(
               db.prepare(`
-                INSERT INTO system_logs (id, title, notes, type, date)
+                INSERT OR REPLACE INTO system_logs (id, title, notes, type, date)
                 VALUES (?, ?, ?, ?, ?)
               `).bind(id, l.title || "", l.notes || "", l.type || "system", l.date || new Date().toISOString())
+            );
+          }
+        }
+
+        // Sync Savings Goals
+        if (Array.isArray(payload.savingsGoals)) {
+          for (const g of payload.savingsGoals) {
+            const id = g.id || `goal-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = g.createdAt || new Date().toISOString();
+            statements.push(
+              db.prepare(`
+                INSERT OR REPLACE INTO savings_goals (id, title, target_amount, current_amount, icon, target_date, notes, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+              `).bind(
+                id, g.title || "", g.targetAmount || 0, g.currentAmount || 0, g.icon || "", g.targetDate || null, g.notes || "", createdAt
+              )
+            );
+          }
+        }
+
+        // Sync Shopping List
+        if (Array.isArray(payload.shoppingList)) {
+          for (const s of payload.shoppingList) {
+            const id = s.id || `shop-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = s.createdAt || new Date().toISOString();
+            statements.push(
+              db.prepare(`
+                INSERT OR REPLACE INTO shopping_list (id, title, done, created_at)
+                VALUES (?, ?, ?, ?)
+              `).bind(id, s.title || "", s.done ? 1 : 0, createdAt)
+            );
+          }
+        }
+
+        // Sync Events
+        if (Array.isArray(payload.events)) {
+          for (const e of payload.events) {
+            const id = e.id || `event-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = e.createdAt || e.date || new Date().toISOString();
+            statements.push(
+              db.prepare(`
+                INSERT OR REPLACE INTO events (id, title, date, type, amount, user, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              `).bind(
+                id, e.title || "", e.date || new Date().toISOString().slice(0, 10), e.type || "event", e.amount || 0, e.user || "Both", e.notes || "", createdAt
+              )
+            );
+          }
+        }
+
+        // Sync Notes
+        if (Array.isArray(payload.notes)) {
+          for (const n of payload.notes) {
+            const id = n.id || `note-${Math.random().toString(36).substr(2, 9)}`;
+            const createdAt = n.createdAt || new Date().toISOString();
+            statements.push(
+              db.prepare(`
+                INSERT OR REPLACE INTO notes (id, title, content, created_at, updated_at)
+                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+              `).bind(id, n.title || "", n.content || "", createdAt)
             );
           }
         }
