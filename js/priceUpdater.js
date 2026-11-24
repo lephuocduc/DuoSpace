@@ -210,6 +210,65 @@ class PriceUpdater {
   }
 
   /**
+   * Fetch giá bạc DOJI trong nước (VND/lượng).
+   * Nguồn chính: currency-api (XAG/VND × 1.2057, CORS OK), fallback mirror & CoinGecko KAG.
+   * @returns {number|null}
+   */
+  async fetchVnSilverPrice() {
+    const cacheKey = 'silver:DOJI_VND';
+    const cached = this._getCached(cacheKey);
+    if (cached !== null) return cached;
+
+    const cfg = PRICE_CONFIG.SILVER || {};
+    const taelToOz = cfg.taelToOz || 1.2057;
+
+    // 1. Primary & mirror: fawazahmed0 currency-api (XAG -> VND/oz -> VND/lượng)
+    const currencyUrls = [
+      cfg.currencyApi || 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xag.json',
+      cfg.currencyApiFallback || 'https://latest.currency-api.pages.dev/v1/currencies/xag.json',
+    ];
+    for (const url of currencyUrls) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const vndPerOz = Number(data?.xag?.vnd);
+        if (vndPerOz > 0) {
+          const pricePerTael = Math.round((vndPerOz * taelToOz) / 1000) * 1000;
+          if (pricePerTael >= 100000 && pricePerTael <= 50000000) {
+            this._setCache(cacheKey, pricePerTael);
+            return pricePerTael;
+          }
+        }
+      } catch (err) {
+        console.warn(`[PriceUpdater] Silver currency-api (${url}) error:`, err);
+      }
+    }
+
+    // 2. Fallback: CoinGecko Kinesis Silver (1 KAG = 1 troy oz silver)
+    try {
+      const id = cfg.coingeckoId || 'kinesis-silver';
+      const url = `${PRICE_CONFIG.CRYPTO.api}${PRICE_CONFIG.CRYPTO.endpoint}?ids=${encodeURIComponent(id)}&vs_currencies=vnd`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const vndPerOz = Number(data?.[id]?.vnd);
+        if (vndPerOz > 0) {
+          const pricePerTael = Math.round((vndPerOz * taelToOz) / 1000) * 1000;
+          if (pricePerTael >= 100000 && pricePerTael <= 50000000) {
+            this._setCache(cacheKey, pricePerTael);
+            return pricePerTael;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[PriceUpdater] Silver CoinGecko fallback error:', err);
+    }
+
+    return null;
+  }
+
+  /**
    * Fetch tỷ giá USD/VND
    * @returns {number|null}
    */
@@ -268,6 +327,15 @@ class PriceUpdater {
           const priceUsdPerOz = await this.fetchGoldPriceUsd();
           if (priceUsdPerOz !== null) {
             newPrice = item.isUsd ? priceUsdPerOz : priceUsdPerOz * usdRate;
+          }
+          break;
+        }
+
+        case 'silver_vn': {
+          // Bạc DOJI trong nước: VND/lượng
+          newPrice = await this.fetchVnSilverPrice();
+          if (newPrice !== null && item.isUsd && usdRate > 0) {
+            newPrice = newPrice / usdRate;
           }
           break;
         }

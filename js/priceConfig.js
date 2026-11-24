@@ -45,6 +45,15 @@ const PRICE_CONFIG = {
     taelToOz: 1.2057,       // 1 lượng VN = 1.2057 troy oz
   },
 
+  // --- Silver: Bạc DOJI (VND/lượng) quy đổi từ XAG/VND (currency-api + CoinGecko KAG fallback, CORS OK) ---
+  SILVER: {
+    currencyApi: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xag.json',
+    currencyApiFallback: 'https://latest.currency-api.pages.dev/v1/currencies/xag.json',
+    coingeckoId: 'kinesis-silver', // 1 KAG = 1 troy oz bạc vật chất
+    taelToOz: 1.2057,              // 1 lượng VN = 1.2057 troy oz
+    refreshInterval: 86400,        // 1 ngày
+  },
+
   // --- USD/VND: Open Exchange Rates ---
   USD: {
     api: 'https://open.er-api.com/v6/latest',

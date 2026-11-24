@@ -98,6 +98,71 @@ const Utils = {
   },
 
   /**
+   * Format a numeric price with Vietnamese thousand dot separators (.) and optional decimal comma (,)
+   * @param {number|string} value
+   * @returns {string}
+   */
+  formatPriceValue(value) {
+    if (value === '' || value === null || value === undefined) return '';
+    const num = typeof value === 'number' ? value : this.parseDecimalInput(value);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('vi-VN', { maximumFractionDigits: 8 });
+  },
+
+  /**
+   * Format numeric input with thousand dot separators (.) while allowing comma (,) decimals
+   * @param {HTMLInputElement} input
+   */
+  formatDecimalInput(input) {
+    if (!input) return;
+    const originalValue = input.value;
+    const cursorOffsetFromEnd = originalValue.length - (input.selectionEnd || 0);
+
+    // Strip everything except digits and comma (dots are auto-inserted thousand separators)
+    let cleaned = originalValue.replace(/[^\d,]/g, '');
+    if (!cleaned) {
+      input.value = '';
+      return;
+    }
+
+    const commaIndex = cleaned.indexOf(',');
+    let intPart = commaIndex >= 0 ? cleaned.slice(0, commaIndex) : cleaned;
+    const decPart = commaIndex >= 0 ? cleaned.slice(commaIndex + 1).replace(/,/g, '') : null;
+
+    // Remove redundant leading zeros (keep single '0' if decimal like 0,5)
+    intPart = intPart.replace(/^0+(?=\d)/, '');
+    if (!intPart && decPart !== null) intPart = '0';
+
+    const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formatted = decPart !== null ? `${formattedInt},${decPart}` : formattedInt;
+
+    input.value = formatted;
+    const newCursor = Math.max(0, formatted.length - cursorOffsetFromEnd);
+    try {
+      input.setSelectionRange(newCursor, newCursor);
+    } catch (_) {}
+  },
+
+  /**
+   * Parse formatted Vietnamese price string (e.g. "130.000.000" or "3.651,95") to number
+   * @param {string|number} value
+   * @returns {number}
+   */
+  parseDecimalInput(value) {
+    if (typeof value === 'number') return value;
+    const str = String(value || '').trim().replace(/\s+/g, '');
+    if (!str) return NaN;
+    if (str.includes(',')) {
+      return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+    }
+    const dotParts = str.split('.');
+    if (dotParts.length === 2 && (dotParts[0] === '0' || dotParts[1].length !== 3)) {
+      return parseFloat(str);
+    }
+    return parseFloat(str.replace(/\./g, ''));
+  },
+
+  /**
    * Escape HTML to prevent XSS
    * @param {string} str
    * @returns {string}
