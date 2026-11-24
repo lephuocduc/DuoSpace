@@ -5,7 +5,7 @@
  *
  * v4.0: Bỏ cấu hình thủ công nguồn giá & mã tài sản.
  *       Hệ thống tự động suy luận nguồn giá dựa trên tên tài sản từ catalog.
- *       Gold API: local Puppeteer DOJI scraper, with vang.today fallback.
+ *       Gold API: vang.today (DOJINHTV / DOHNL / SJL1L10 / XAUUSD, CORS OK), with local Puppeteer fallback.
  */
 class PriceUpdater {
   constructor() {
@@ -68,23 +68,32 @@ class PriceUpdater {
 
   /**
    * Fetch giá vàng từ vang.today
-   * @param {string} typeCode - 'SJL1L10' (SJC VN) hoặc 'XAUUSD' (world)
+   * @param {string} typeCode - 'DOJINHTV' (DOJI Nhẫn HTV), 'DOHNL' (DOJI HN), 'SJL1L10' (SJC VN), hoặc 'XAUUSD' (world)
    * @param {'buy'|'sell'} side - lấy giá mua hay bán
    * @returns {number|null}
    */
-  async _fetchVangToday(typeCode, side = 'sell') {
+  async _fetchVangToday(typeCode, side = 'buy') {
+    if (!typeCode) return null;
     const cacheKey = `vang.today:${typeCode}:${side}`;
     const cached = this._getCached(cacheKey);
     if (cached !== null) return cached;
 
     try {
-      const url = `${PRICE_CONFIG.GOLD.vangTodayApi}?type=${typeCode}`;
+      const url = `${PRICE_CONFIG.GOLD.vangTodayApi}?type=${encodeURIComponent(typeCode)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (!data.success || !Array.isArray(data.data) || data.data.length === 0) return null;
-      const item = data.data[0];
-      const price = parseFloat(item[side] || item.buy || 0);
+      if (!data || !data.success) return null;
+
+      // vang.today returns a flat object { success, type, name, buy, sell, ... }
+      // Also support legacy { data: [...] } or { prices: { [typeCode]: {...} } } formats.
+      const item = Array.isArray(data.data)
+        ? data.data[0]
+        : (data.prices?.[typeCode] || data);
+      if (!item) return null;
+
+      const altSide = side === 'buy' ? 'sell' : 'buy';
+      const price = parseFloat(item[side] || item[altSide] || 0);
       if (price > 0) {
         this._setCache(cacheKey, price);
         return price;
@@ -97,7 +106,8 @@ class PriceUpdater {
   }
 
   /**
-   * Fetch giá vàng DOJI từ local Puppeteer scraper (VND/lượng).
+   * Fetch giá vàng DOJI trong nước (VND/lượng).
+   * Ưu tiên vang.today (DOJINHTV -> DOHNL -> SJL1L10), fallback sang local Puppeteer scraper nếu có.
    * @returns {number|null}
    */
   async fetchVnGoldPrice() {
@@ -105,6 +115,21 @@ class PriceUpdater {
     const cached = this._getCached(cacheKey);
     if (cached !== null) return cached;
 
+    // 1. Primary: vang.today API (HTTPS + CORS OK, hoạt động trực tiếp trên trình duyệt)
+    const codes = [
+      PRICE_CONFIG.GOLD.dojiCode || 'DOJINHTV',
+      PRICE_CONFIG.GOLD.dojiFallbackCode || 'DOHNL',
+      PRICE_CONFIG.GOLD.sjcCode || 'SJL1L10',
+    ];
+    for (const code of codes) {
+      const price = await this._fetchVangToday(code, 'buy');
+      if (price !== null && price >= 10000000 && price <= 500000000) {
+        this._setCache(cacheKey, price);
+        return price;
+      }
+    }
+
+    // 2. Fallback: local Puppeteer DOJI scraper (chỉ dùng khi chạy local dev với npm run doji-server)
     try {
       const res = await fetch(PRICE_CONFIG.GOLD.dojiScraperApi, {
         headers: { Accept: 'application/json' },
@@ -120,31 +145,23 @@ class PriceUpdater {
       let price = typeof rawPrice === 'number'
         ? rawPrice
         : Number(String(rawPrice || '').replace(/[^0-9]/g, ''));
-      // DOJI displays thousand VND, e.g. 89.500.
+      // DOJI displays thousand VND, e.g. 130.000.
       if (price > 0 && price < 10000000) price *= 1000;
-      if (price >= 10000000 && price <= 200000000) {
+      if (price >= 10000000 && price <= 500000000) {
         this._setCache(cacheKey, price);
         return price;
       }
       throw new Error('Giá DOJI không hợp lệ');
     } catch (err) {
-      console.warn('[PriceUpdater] DOJI scraper fetch error:', err);
-    }
-
-    // Fallback: vang.today (SJC) when DOJI is temporarily unavailable.
-    const fallback = await this._fetchVangToday(PRICE_CONFIG.GOLD.sjcCode, 'sell');
-    if (fallback !== null) {
-      this._setCache(cacheKey, fallback);
-      return fallback;
+      console.warn('[PriceUpdater] DOJI scraper fallback error:', err);
     }
 
     return null;
   }
 
   /**
-   * Fetch giá vàng thế giới từ chartgoldprice.com (USD/troy oz)
-   * Endpoint: https://www.chartgoldprice.com/api/data
-   * Response: { prices: { gold: { troy_ounce, gram } }, meta: { updated_at } }
+   * Fetch giá vàng thế giới (USD/troy oz)
+   * Ưu tiên vang.today (XAUUSD), fallback chartgoldprice.com và metals.live
    * @returns {number|null} - USD/troy oz
    */
   async fetchGoldPriceUsd() {
@@ -152,18 +169,24 @@ class PriceUpdater {
     const cached = this._getCached(cacheKey);
     if (cached !== null) return cached;
 
-    // 1. Fetch từ chartgoldprice.com — đúng path: data.prices.gold.troy_ounce
+    // 1. Primary: vang.today XAUUSD
+    const vtPrice = await this._fetchVangToday(PRICE_CONFIG.GOLD.xauCode || 'XAUUSD', 'buy');
+    if (vtPrice !== null && vtPrice > 500 && vtPrice < 20000) {
+      this._setCache(cacheKey, vtPrice);
+      return vtPrice;
+    }
+
+    // 2. Fallback: chartgoldprice.com — path: data.prices.gold.troy_ounce
     try {
       const url = PRICE_CONFIG.GOLD.chartGoldPriceApi || 'https://www.chartgoldprice.com/api/data';
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        // Đúng theo API response: { prices: { gold: { troy_ounce, gram } }, meta: {...} }
         const price =
           data?.prices?.gold?.troy_ounce ??
-          data?.prices?.gold?.gram * 31.1035 ??  // fallback: gram * 31.1035 = troy oz
+          (data?.prices?.gold?.gram ? data.prices.gold.gram * 31.1035 : null) ??
           (typeof data.price === 'number' ? data.price : null);
-        if (price !== null && price > 500 && price < 10000) {
+        if (price !== null && price > 500 && price < 20000) {
           console.log('[PriceUpdater] XAU/USD (chartgoldprice.com):', price);
           this._setCache(cacheKey, price);
           return price;
@@ -171,13 +194,6 @@ class PriceUpdater {
       }
     } catch (err) {
       console.warn('[PriceUpdater] chartgoldprice.com fetch error:', err);
-    }
-
-    // 2. Fallback: vang.today XAUUSD
-    const vtPrice = await this._fetchVangToday(PRICE_CONFIG.GOLD.xauCode, 'buy');
-    if (vtPrice !== null && vtPrice > 500) {
-      this._setCache(cacheKey, vtPrice);
-      return vtPrice;
     }
 
     // 3. Fallback: metals.live
