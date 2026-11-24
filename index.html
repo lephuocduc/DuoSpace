@@ -485,8 +485,8 @@
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
             <div>
-              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chi phí (VNĐ)</label>
-              <input type="number" id="maintCost" placeholder="350000"
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chi phí (VNĐ - Tùy chọn)</label>
+              <input type="number" id="maintCost" placeholder="Không bắt buộc..."
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
@@ -505,6 +505,15 @@
                 class="text-xs bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg font-semibold">
                 + Bảo dưỡng
               </button>
+            </div>
+
+            <div class="flex gap-1.5 text-[11px]">
+              <button onclick="filterBikeMaintenance('all')" id="bikeMaintFilter-all"
+                class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold transition-colors">Tất cả</button>
+              <button onclick="filterBikeMaintenance('NMAX')" id="bikeMaintFilter-NMAX"
+                class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold transition-colors">NMAX</button>
+              <button onclick="filterBikeMaintenance('Grande')" id="bikeMaintFilter-Grande"
+                class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold transition-colors">Grande</button>
             </div>
 
             <div id="bikeMaintenanceList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
@@ -1555,7 +1564,7 @@
   <script src="js/modules/home.js?v=3.2"></script>
   <script src="js/modules/todo.js"></script>
   <script src="js/modules/investment.js?v=3.3"></script>
-  <script src="js/modules/motorbike.js?v=3.2"></script>
+  <script src="js/modules/motorbike.js?v=3.5"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
   <script src="js/modules/settings.js"></script>

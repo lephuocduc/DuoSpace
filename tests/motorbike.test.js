@@ -63,3 +63,42 @@ test('saveBikeMaintenance saves Lọc bụi nồi and updates bike ODO', () => {
   assert.equal(app.data.bikeMaintenances[0].title, 'Lọc bụi nồi');
   assert.equal(app.data.settings.nmaxOdo, 15500);
 });
+
+test('saveBikeMaintenance allows empty cost (defaults to 0)', () => {
+  const { ctx, app, moto, elements } = setupMotorbike();
+  elements.maintBikeName.value = 'Grande';
+  elements.maintTitleSelect.value = 'Lọc bụi nồi';
+  elements.maintOdo.value = '9000';
+  elements.maintCost.value = '';
+  elements.maintDate.value = '2026-11-24';
+
+  moto.saveBikeMaintenance();
+  assert.equal(ctx._alerts.length, 0);
+  assert.equal(app.data.bikeMaintenances.length, 1);
+  assert.equal(app.data.bikeMaintenances[0].cost, 0);
+});
+
+test('renderMaintenanceList sorts newest date first and filters by NMAX / Grande', () => {
+  const { app, moto, elements } = setupMotorbike();
+  app.data.bikeMaintenances = [
+    { id: '1', bike: 'NMAX', title: 'Cũ nhất', odo: 10000, cost: 200000, date: '2026-01-10T12:00:00.000Z' },
+    { id: '2', bike: 'Grande', title: 'Mới nhất', odo: 8500, cost: 0, date: '2026-11-24T12:00:00.000Z' },
+    { id: '3', bike: 'NMAX', title: 'Giữa', odo: 12000, cost: 150000, date: '2026-06-15T12:00:00.000Z' }
+  ];
+
+  moto.renderMaintenanceList();
+  const htmlAll = elements.bikeMaintenanceList.innerHTML;
+  assert.ok(htmlAll.indexOf('Mới nhất') < htmlAll.indexOf('Giữa'));
+  assert.ok(htmlAll.indexOf('Giữa') < htmlAll.indexOf('Cũ nhất'));
+
+  moto.filterMaintenanceBike('NMAX');
+  const htmlNmax = elements.bikeMaintenanceList.innerHTML;
+  assert.ok(htmlNmax.includes('Giữa'));
+  assert.ok(htmlNmax.includes('Cũ nhất'));
+  assert.equal(htmlNmax.includes('Mới nhất'), false);
+
+  moto.filterMaintenanceBike('Grande');
+  const htmlGrande = elements.bikeMaintenanceList.innerHTML;
+  assert.ok(htmlGrande.includes('Mới nhất'));
+  assert.equal(htmlGrande.includes('Giữa'), false);
+});

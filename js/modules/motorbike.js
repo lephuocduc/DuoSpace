@@ -6,6 +6,7 @@ class MotorbikeModule {
   constructor(app) {
     this.app = app;
     this.currentPartsBike = 'NMAX';
+    this.maintenanceFilter = 'all';
   }
 
   render() {
@@ -63,10 +64,13 @@ class MotorbikeModule {
     }
     
     const odo = parseInt(document.getElementById('maintOdo').value);
-    const cost = parseInt(document.getElementById('maintCost').value);
+    const rawCost = String(document.getElementById('maintCost')?.value ?? '').trim();
+    const cost = rawCost === '' ? 0 : parseInt(rawCost, 10);
     const date = document.getElementById('maintDate').value;
 
-    if (!title || isNaN(odo) || isNaN(cost) || !date) return alert('Vui lòng nhập đầy đủ thông tin bảo dưỡng!');
+    if (!title || isNaN(odo) || !date || (rawCost !== '' && (isNaN(cost) || cost < 0))) {
+      return alert('Vui lòng nhập đầy đủ: Hạng mục, Số ODO và Ngày làm!');
+    }
 
     if (!this.app.data.bikeMaintenances) this.app.data.bikeMaintenances = [];
     const maintenanceId = Utils.createId('maintenance');
@@ -77,7 +81,8 @@ class MotorbikeModule {
     if (bike === 'NMAX') this.app.data.settings.nmaxOdo = Math.max(this.app.data.settings.nmaxOdo || 0, odo);
     if (bike === 'Grande') this.app.data.settings.grandeOdo = Math.max(this.app.data.settings.grandeOdo || 0, odo);
 
-    this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km · ${cost.toLocaleString('vi-VN')} VNĐ`);
+    const costLog = cost > 0 ? ` · ${cost.toLocaleString('vi-VN')} VNĐ` : '';
+    this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km${costLog}`);
 
     this.app.save();
     this.app.render();
@@ -103,20 +108,46 @@ class MotorbikeModule {
     }
   }
 
+  filterMaintenanceBike(bike = 'all') {
+    this.maintenanceFilter = bike;
+    ['all', 'NMAX', 'Grande'].forEach(key => {
+      const btn = document.getElementById(`bikeMaintFilter-${key}`);
+      if (btn) {
+        btn.className = key === bike
+          ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold transition-colors'
+          : 'px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-semibold transition-colors';
+      }
+    });
+    this.renderMaintenanceList();
+  }
+
   renderMaintenanceList() {
     const container = document.getElementById('bikeMaintenanceList');
     if (!container) return;
 
-    const list = (this.app.data.bikeMaintenances || []).slice().reverse();
+    const list = (this.app.data.bikeMaintenances || [])
+      .map((item, realIdx) => ({ item, realIdx }))
+      .filter(({ item }) => this.maintenanceFilter === 'all' || item.bike === this.maintenanceFilter)
+      .sort((a, b) => {
+        const timeA = a.item.date ? new Date(a.item.date).getTime() : 0;
+        const timeB = b.item.date ? new Date(b.item.date).getTime() : 0;
+        if (timeB !== timeA) return timeB - timeA;
+        return b.realIdx - a.realIdx;
+      });
 
     if (list.length === 0) {
-      container.innerHTML = '<p class="text-xs text-gray-400 text-center py-3">Chưa có lịch sử bảo dưỡng nào</p>';
+      const emptyLabel = this.maintenanceFilter === 'all'
+        ? 'Chưa có lịch sử bảo dưỡng nào'
+        : `Chưa có lịch sử bảo dưỡng cho ${this.maintenanceFilter}`;
+      container.innerHTML = `<p class="text-xs text-gray-400 text-center py-3">${emptyLabel}</p>`;
       return;
     }
 
-    container.innerHTML = list.map((item, idx) => {
-      const realIdx = (this.app.data.bikeMaintenances.length - 1) - idx;
+    container.innerHTML = list.map(({ item, realIdx }) => {
       const formattedDate = Utils.formatDate(item.date);
+      const costHtml = item.cost > 0
+        ? `<span class="font-bold text-rose-500">${Utils.formatCurrency(item.cost)}</span>`
+        : '';
       return `
         <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-xl border border-gray-100 dark:border-slate-800 text-xs">
           <div>
@@ -127,7 +158,7 @@ class MotorbikeModule {
             <p class="text-[10px] text-gray-400 mt-0.5">📅 ${formattedDate} • 📍 ${Number(item.odo).toLocaleString('vi-VN')} km</p>
           </div>
           <div class="flex items-center space-x-2.5">
-            <span class="font-bold text-rose-500">${Utils.formatCurrency(item.cost)}</span>
+            ${costHtml}
             <button onclick="window.app.motorbike.deleteBikeMaintenance(${realIdx})" class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-500 hover:text-rose-700 flex items-center justify-center transition-colors active:scale-95" title="Xóa lịch sử bảo dưỡng">
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
@@ -375,3 +406,4 @@ function deleteBikeMaintenance(idx) { window.app.motorbike.deleteBikeMaintenance
 function openPartsStatusModal(bike) { window.app.motorbike.openPartsStatusModal(bike); }
 function closePartsStatusModal() { window.app.motorbike.closePartsStatusModal(); }
 function saveBikeInfo() { window.app.motorbike.saveBikeInfo(); }
+function filterBikeMaintenance(bike) { window.app.motorbike.filterMaintenanceBike(bike); }
