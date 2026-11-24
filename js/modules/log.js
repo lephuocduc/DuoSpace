@@ -113,7 +113,13 @@ class LogModule {
 
   system(title, notes = '') {
     if (!this.app.data.logs) this.app.data.logs = [];
-    this.app.data.logs.push({ title, notes, type: 'system', date: new Date().toISOString() });
+    this.app.data.logs.push({
+      id: (typeof Utils !== 'undefined' && Utils.createId) ? Utils.createId('log') : `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      title,
+      notes,
+      type: 'system',
+      date: new Date().toISOString()
+    });
     // Keep the activity history useful without allowing it to grow forever.
     if (this.app.data.logs.length > 200) this.app.data.logs.splice(0, this.app.data.logs.length - 200);
   }

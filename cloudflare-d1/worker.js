@@ -779,15 +779,20 @@ export default {
           }
         }
 
-        // Sync System Logs
+        // Sync System Logs (chống trùng lặp theo id hoặc date+title+notes)
         if (Array.isArray(payload.logs)) {
-                    for (const l of payload.logs.slice(-200)) {
-            const id = l.id || `log-${Math.random().toString(36).substr(2, 9)}`;
+          const seenLogs = new Set();
+          for (const l of payload.logs.slice(-200)) {
+            const logDate = l.date || new Date().toISOString();
+            const dedupeKey = `${logDate}|${l.title || ""}|${l.notes || ""}`;
+            if (seenLogs.has(dedupeKey)) continue;
+            seenLogs.add(dedupeKey);
+            const id = l.id || `log-${logDate}-${(l.title || "").slice(0, 20)}`;
             statements.push(
               db.prepare(`
                 INSERT OR REPLACE INTO system_logs (id, title, notes, type, date)
                 VALUES (?, ?, ?, ?, ?)
-              `).bind(id, l.title || "", l.notes || "", l.type || "system", l.date || new Date().toISOString())
+              `).bind(id, l.title || "", l.notes || "", l.type || "system", logDate)
             );
           }
         }
