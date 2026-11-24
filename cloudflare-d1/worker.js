@@ -469,18 +469,25 @@ export default {
           else expenses.push(item);
         }
 
-        const invList = (investments.results || []).map(i => ({
-          name: i.name,
-          type: i.type,
-          quantity: i.quantity,
-          buyPrice: i.buy_price,
-          currentPrice: i.current_price,
-          isUsd: Boolean(i.is_usd),
-          targetWeight: i.target_weight,
-          notes: i.notes || "",
-          purchases: i.purchases_json ? JSON.parse(i.purchases_json) : [],
-          priceSource: i.price_source_json ? JSON.parse(i.price_source_json) : null
-        }));
+        const invMap = new Map();
+        for (const i of (investments.results || [])) {
+          const key = (i.name || '').trim().toLowerCase();
+          if (!key) continue;
+          invMap.set(key, {
+            id: i.id,
+            name: i.name,
+            type: i.type,
+            quantity: i.quantity,
+            buyPrice: i.buy_price,
+            currentPrice: i.current_price,
+            isUsd: Boolean(i.is_usd),
+            targetWeight: i.target_weight,
+            notes: i.notes || "",
+            purchases: i.purchases_json ? JSON.parse(i.purchases_json) : [],
+            priceSource: i.price_source_json ? JSON.parse(i.price_source_json) : null
+          });
+        }
+        const invList = Array.from(invMap.values());
 
         let parsedSettings = {};
         if (appState && appState.settings_json) {
@@ -661,10 +668,17 @@ export default {
           }
         }
 
-        // Sync Investments
+        // Sync Investments (chống trùng lặp theo tên & đồng bộ xóa tài sản)
         if (Array.isArray(payload.investments)) {
-                    for (const inv of payload.investments) {
-            const id = inv.id || `inv-${Math.random().toString(36).substr(2, 9)}`;
+          const uniqueInvestments = new Map();
+          for (const inv of payload.investments) {
+            const key = (inv.name || "").trim().toLowerCase();
+            if (!key) continue;
+            uniqueInvestments.set(key, inv);
+          }
+          statements.push(db.prepare("DELETE FROM investments"));
+          for (const [key, inv] of uniqueInvestments.entries()) {
+            const id = inv.id || `inv-${key.replace(/[^a-z0-9]+/g, '-')}`;
             statements.push(
               db.prepare(`
                 INSERT OR REPLACE INTO investments (id, name, type, quantity, buy_price, current_price, is_usd, target_weight, notes, purchases_json, price_source_json, updated_at)

@@ -47,7 +47,7 @@ class Storage {
       todos: Array.isArray(saved.todos) ? saved.todos : defaults.todos,
       expenses: Array.isArray(saved.expenses) ? saved.expenses : defaults.expenses,
       incomes: Array.isArray(saved.incomes) ? saved.incomes : defaults.incomes,
-      investments: Array.isArray(saved.investments) ? saved.investments : defaults.investments,
+      investments: Array.isArray(saved.investments) ? this._dedupeInvestments(saved.investments) : defaults.investments,
       netWorthHistory: Array.isArray(saved.netWorthHistory) ? saved.netWorthHistory : (defaults.netWorthHistory || []),
       bikeMaintenances: Array.isArray(saved.bikeMaintenances) ? saved.bikeMaintenances : defaults.bikeMaintenances,
       catWeights: Array.isArray(saved.catWeights) ? saved.catWeights : defaults.catWeights,
@@ -59,6 +59,16 @@ class Storage {
       events: Array.isArray(saved.events) ? saved.events : defaults.events,
       notes: Array.isArray(saved.notes) ? saved.notes : defaults.notes
     };
+  }
+
+  _dedupeInvestments(list) {
+    const map = new Map();
+    for (const item of list) {
+      if (!item || !item.name) continue;
+      const key = item.name.trim().toLowerCase();
+      map.set(key, item);
+    }
+    return Array.from(map.values());
   }
 
   defaultData() {
