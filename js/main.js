@@ -48,6 +48,7 @@ class DuoSpaceApp {
   }
 
   init() {
+    this._isInitializing = true;
     // Setup Dark Mode & System theme listener
     ThemeManager.init(this);
 
@@ -79,8 +80,9 @@ class DuoSpaceApp {
     this.updateToggleAmountsIcon();
 
     // Fetch realtime USD rate & Render all
-    this.investment.fetchRealtimeUsdRate();
     this.render();
+    this._isInitializing = false;
+    this.investment.fetchRealtimeUsdRate();
 
     // ── RESTORE ACTIVE TAB AFTER REFRESH ──
     if (typeof TabsManager !== 'undefined' && typeof TabsManager.initFromStorage === 'function') {
@@ -126,7 +128,7 @@ class DuoSpaceApp {
   /** Lưu trạng thái ứng dụng hiện tại vào LocalStorage và đồng bộ ngầm lên Cloudflare D1. */
   save() {
     this.storage.save(this.data);
-    if (this.sync && this.sync.isEnabled) {
+    if (!this._isInitializing && this.sync && this.sync.isEnabled) {
       this.sync.debouncePushToCloud();
     }
   }

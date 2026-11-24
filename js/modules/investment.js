@@ -432,18 +432,25 @@ class InvestmentModule {
 
     const todayStr = new Date().toISOString().split('T')[0];
     const existing = this.app.data.netWorthHistory.find(h => h.date === todayStr);
+    let changed = false;
 
     if (existing) {
-      existing.value = netWorthVnd;
+      if (existing.value !== netWorthVnd) {
+        existing.value = netWorthVnd;
+        changed = true;
+      }
     } else {
       this.app.data.netWorthHistory.push({ date: todayStr, value: netWorthVnd });
       // Giữ tối đa 60 ngày gần nhất
       if (this.app.data.netWorthHistory.length > 60) {
         this.app.data.netWorthHistory = this.app.data.netWorthHistory.slice(-60);
       }
+      changed = true;
     }
 
-    this.app.save();
+    if (changed) {
+      this.app.save();
+    }
 
     if (!this.app.skipCharts) {
       if (this.app.charts && typeof this.app.charts.renderInvestmentCharts === 'function') {
@@ -979,12 +986,15 @@ class InvestmentModule {
     try {
       const rate = await priceUpdater.fetchUsdRate();
       if (rate) {
+        const rateChanged = rate !== this.app.data.usdRate;
         this.app.data.usdRate = rate;
         const rateInput = document.getElementById('usdRateInput');
         if (rateInput) rateInput.value = rate;
-        this.app.save();
-        this.renderInvestmentList(true);
-        this.recordDailyNetWorth();
+        if (rateChanged) {
+          this.app.save();
+          this.renderInvestmentList(true);
+          this.recordDailyNetWorth();
+        }
         if (status) status.textContent = `Đã cập nhật tỷ giá: ${rate.toLocaleString('vi-VN')} VNĐ cho một USD.`;
       } else {
         if (status) status.textContent = 'Không nhận được tỷ giá mới; đang dùng tỷ giá đã lưu.';
