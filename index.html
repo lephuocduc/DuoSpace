@@ -420,7 +420,8 @@
             </div>
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">NMAX ODO (km)</label>
-              <input type="number" id="bikeNmaxOdo" placeholder="14850"
+              <input type="text" inputmode="numeric" id="bikeNmaxOdo" placeholder="14.850"
+                oninput="Utils.formatNumberInput(this)"
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
             <div>
@@ -430,7 +431,8 @@
             </div>
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">Grande ODO (km)</label>
-              <input type="number" id="bikeGrandeOdo" placeholder="8200"
+              <input type="text" inputmode="numeric" id="bikeGrandeOdo" placeholder="8.200"
+                oninput="Utils.formatNumberInput(this)"
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
@@ -481,12 +483,14 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">Số Odo (km)</label>
-              <input type="number" id="maintOdo" placeholder="14850"
+              <input type="text" inputmode="numeric" id="maintOdo" placeholder="14.850"
+                oninput="Utils.formatNumberInput(this)"
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
             <div>
               <label class="block text-[10px] text-gray-500 font-semibold mb-1">Chi phí (VNĐ - Tùy chọn)</label>
-              <input type="number" id="maintCost" placeholder="Không bắt buộc..."
+              <input type="text" inputmode="numeric" id="maintCost" placeholder="VD: 350.000 (không bắt buộc)"
+                oninput="Utils.formatNumberInput(this)"
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
@@ -1564,7 +1568,7 @@
   <script src="js/modules/home.js?v=3.2"></script>
   <script src="js/modules/todo.js"></script>
   <script src="js/modules/investment.js?v=3.3"></script>
-  <script src="js/modules/motorbike.js?v=3.5"></script>
+  <script src="js/modules/motorbike.js?v=3.6"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
   <script src="js/modules/settings.js"></script>

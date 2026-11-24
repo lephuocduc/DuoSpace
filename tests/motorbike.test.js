@@ -78,6 +78,21 @@ test('saveBikeMaintenance allows empty cost (defaults to 0)', () => {
   assert.equal(app.data.bikeMaintenances[0].cost, 0);
 });
 
+test('saveBikeMaintenance parses dot-formatted ODO and cost values', () => {
+  const { ctx, app, moto, elements } = setupMotorbike();
+  elements.maintBikeName.value = 'NMAX';
+  elements.maintTitleSelect.value = 'Thay nhớt máy';
+  elements.maintOdo.value = '16.500';
+  elements.maintCost.value = '350.000';
+  elements.maintDate.value = '2026-11-24';
+
+  moto.saveBikeMaintenance();
+  assert.equal(ctx._alerts.length, 0);
+  assert.equal(app.data.bikeMaintenances[0].odo, 16500);
+  assert.equal(app.data.bikeMaintenances[0].cost, 350000);
+  assert.equal(app.data.settings.nmaxOdo, 16500);
+});
+
 test('renderMaintenanceList sorts newest date first and filters by NMAX / Grande', () => {
   const { app, moto, elements } = setupMotorbike();
   app.data.bikeMaintenances = [

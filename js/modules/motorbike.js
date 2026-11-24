@@ -15,11 +15,16 @@ class MotorbikeModule {
     this.renderTodoList();
   }
 
+  _parseIntegerInput(value) {
+    const digits = String(value ?? '').replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : NaN;
+  }
+
   loadBikeInfoToForm() {
     const s = this.app.data.settings || {};
     const fields = {
-      bikeNmaxOdo: s.nmaxOdo || '',
-      bikeGrandeOdo: s.grandeOdo || '',
+      bikeNmaxOdo: s.nmaxOdo ? Number(s.nmaxOdo).toLocaleString('vi-VN') : '',
+      bikeGrandeOdo: s.grandeOdo ? Number(s.grandeOdo).toLocaleString('vi-VN') : '',
     };
     Object.entries(fields).forEach(([id, value]) => {
       const input = document.getElementById(id);
@@ -29,8 +34,8 @@ class MotorbikeModule {
 
   saveBikeInfo() {
     const s = this.app.data.settings || (this.app.data.settings = {});
-    s.nmaxOdo = parseInt(document.getElementById('bikeNmaxOdo')?.value, 10) || 0;
-    s.grandeOdo = parseInt(document.getElementById('bikeGrandeOdo')?.value, 10) || 0;
+    s.nmaxOdo = this._parseIntegerInput(document.getElementById('bikeNmaxOdo')?.value) || 0;
+    s.grandeOdo = this._parseIntegerInput(document.getElementById('bikeGrandeOdo')?.value) || 0;
     this.app.save();
     this.app.render();
     alert('Đã cập nhật thông tin xe.');
@@ -63,9 +68,9 @@ class MotorbikeModule {
       title = customTitleInput ? customTitleInput.value.trim() : '';
     }
     
-    const odo = parseInt(document.getElementById('maintOdo').value);
+    const odo = this._parseIntegerInput(document.getElementById('maintOdo').value);
     const rawCost = String(document.getElementById('maintCost')?.value ?? '').trim();
-    const cost = rawCost === '' ? 0 : parseInt(rawCost, 10);
+    const cost = rawCost === '' ? 0 : this._parseIntegerInput(rawCost);
     const date = document.getElementById('maintDate').value;
 
     if (!title || isNaN(odo) || !date || (rawCost !== '' && (isNaN(cost) || cost < 0))) {
