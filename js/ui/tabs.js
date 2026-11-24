@@ -44,6 +44,12 @@ const TabsManager = {
     const target = document.getElementById(`tab-${tabId}`);
     if (target) target.classList.remove('hidden');
 
+    // Chỉ hiển thị nút ẩn/hiện số tiền (hình mắt) khi đang ở tab Tài Sản
+    const toggleAmountsBtn = document.getElementById('toggleAmountsBtn');
+    if (toggleAmountsBtn) {
+      toggleAmountsBtn.classList.toggle('hidden', tabId !== 'investment');
+    }
+
     if (window.app && window.app.charts) {
       if (tabId === 'cats') setTimeout(() => window.app.charts.renderCatChart(), 100);
       if (tabId === 'investment') setTimeout(() => window.app.charts.renderInvestmentCharts(), 100);
