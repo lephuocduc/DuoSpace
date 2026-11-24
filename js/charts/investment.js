@@ -7,16 +7,16 @@ class InvestmentChart {
     this.netWorthChart = null;
   }
 
-  render(investments, usdRate, isDark, cashSurplus = 0) {
-    this.renderAssetAllocation(investments, usdRate, isDark, cashSurplus);
+  render(investments, usdRate, isDark) {
+    this.renderAssetAllocation(investments, usdRate, isDark);
   }
 
-  renderAssetAllocation(investments, usdRate, isDark, cashSurplus = 0) {
+  renderAssetAllocation(investments, usdRate, isDark) {
     const ctx = document.getElementById('assetAllocationChart');
     if (!ctx) return;
 
     const list = investments || [];
-    if (list.length === 0 && cashSurplus <= 0) {
+    if (list.length === 0) {
       this.destroyAllocation();
       return;
     }
@@ -33,18 +33,12 @@ class InvestmentChart {
       if (categoryTotals[key] <= 0) delete categoryTotals[key];
     });
 
-    // Thêm tiền dư thu chi vào biểu đồ phân bổ nếu > 0
-    if (cashSurplus > 0) {
-      categoryTotals['💵 Tiền dư VNĐ'] = cashSurplus;
-    }
-
     const labels = Object.keys(categoryTotals);
     const dataValues = Object.values(categoryTotals);
-    // Màu cuối cùng luôn dành cho Tiền dư VNĐ
     const backgroundColors = [
       '#6366f1', '#3b82f6', '#f59e0b', '#10b981',
       '#ec4899', '#8b5cf6', '#06b6d4', '#64748b',
-      '#22c55e'  // xanh lá cho tiền dư VNĐ nếu là phần tử cuối
+      '#22c55e'
     ];
 
     this.destroyAllocation();

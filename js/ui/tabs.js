@@ -7,7 +7,6 @@ const TabsManager = {
   tabTitles: {
     'home': 'Tổng quan',
     'todo': 'Công việc chung',
-    'finance': 'Quản lý Thu Chi',
     'investment': 'Tài Sản',
     'motorbike': 'Xe Máy',
     'cats': 'Mun & Bông',
@@ -21,12 +20,14 @@ const TabsManager = {
   },
 
   initFromStorage() {
-    const savedTab = localStorage.getItem('duospace_active_tab') || 'home';
+    const rawSavedTab = localStorage.getItem('duospace_active_tab') || 'home';
+    const savedTab = this.tabTitles[rawSavedTab] ? rawSavedTab : 'home';
     const title = this.tabTitles[savedTab] || 'Tổng quan';
     this.switchTab(savedTab, title, null);
   },
 
   switchTab(tabId, title, btn) {
+    if (!this.tabTitles[tabId]) tabId = 'home';
     this.currentTab = tabId;
     localStorage.setItem('duospace_active_tab', tabId);
 
@@ -34,7 +35,7 @@ const TabsManager = {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = actualTitle;
 
-    const tabs = ['home', 'todo', 'finance', 'investment', 'motorbike', 'cats', 'health', 'shopping', 'calendar', 'notes', 'setting', 'log', 'guide'];
+    const tabs = ['home', 'todo', 'investment', 'motorbike', 'cats', 'health', 'shopping', 'calendar', 'notes', 'setting', 'log', 'guide'];
     tabs.forEach(id => {
       const el = document.getElementById(`tab-${id}`);
       if (el) el.classList.add('hidden');
@@ -45,7 +46,6 @@ const TabsManager = {
 
     if (window.app && window.app.charts) {
       if (tabId === 'cats') setTimeout(() => window.app.charts.renderCatChart(), 100);
-      if (tabId === 'home') setTimeout(() => window.app.charts.renderBudgetChart(), 100);
       if (tabId === 'investment') setTimeout(() => window.app.charts.renderInvestmentCharts(), 100);
     }
 

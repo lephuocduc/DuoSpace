@@ -361,15 +361,11 @@ class InvestmentModule {
   }
 
   // ──────────────────────────────────────────────
-  // CASH SURPLUS FROM FINANCE
+  // CASH SURPLUS (Deprecated — Finance module removed)
   // ──────────────────────────────────────────────
 
   getCashSurplusVnd() {
-    const expenses = this.app.data.expenses || [];
-    const incomes = this.app.data.incomes || [];
-    const totalIncome = incomes.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
-    const totalExpense = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-    return Math.max(0, totalIncome - totalExpense);
+    return 0;
   }
 
   // ──────────────────────────────────────────────
@@ -388,9 +384,7 @@ class InvestmentModule {
       totalValueVnd += value;
     });
 
-    // Cộng thêm tiền dư từ Quản lý thu chi
-    const cashSurplus = this.getCashSurplusVnd();
-    const netWorthVnd = totalValueVnd + cashSurplus;
+    const netWorthVnd = totalValueVnd;
 
     const todayStr = new Date().toISOString().split('T')[0];
     const existing = this.app.data.netWorthHistory.find(h => h.date === todayStr);
@@ -478,19 +472,11 @@ class InvestmentModule {
       totalValueVnd += value;
     });
 
-    const cashSurplus = this.getCashSurplusVnd();
-    const totalNetWorthVnd = totalValueVnd + cashSurplus;
     const totalPnL = totalValueVnd - totalCostVnd;
     const totalRoi = totalCostVnd > 0 ? (totalPnL / totalCostVnd) * 100 : 0;
 
     const totalValEl = document.getElementById('investTotalValue');
-    if (totalValEl) totalValEl.innerText = Utils.formatCurrency(totalNetWorthVnd);
-
-    const assetsOnlyEl = document.getElementById('investAssetsOnly');
-    if (assetsOnlyEl) assetsOnlyEl.innerText = Utils.formatCurrency(totalValueVnd);
-
-    const cashSurplusEl = document.getElementById('investCashSurplus');
-    if (cashSurplusEl) cashSurplusEl.innerText = Utils.formatCurrency(cashSurplus);
+    if (totalValEl) totalValEl.innerText = Utils.formatCurrency(totalValueVnd);
 
     const totalCostEl = document.getElementById('investTotalCost');
     if (totalCostEl) totalCostEl.innerText = Utils.formatCurrency(totalCostVnd);

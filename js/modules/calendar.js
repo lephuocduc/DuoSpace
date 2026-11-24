@@ -186,26 +186,16 @@ class CalendarModule {
   payBill(id) {
     const ev = (this.app.data.events || []).find(e => e.id === id);
     if (!ev) return;
-    
-    if (!confirm(`Bạn có muốn tự động ghi nhận khoản chi ${Utils.formatCurrency(ev.amount || 0)} cho "${ev.title}" vào Quản lý Thu Chi không?`)) return;
-    
-    // Add to expenses
-    if (!this.app.data.expenses) this.app.data.expenses = [];
-    this.app.data.expenses.push({
-      id: 'expense-' + Date.now(),
-      amount: ev.amount || 0,
-      category: 'Hóa đơn',
-      date: new Date().toISOString().slice(0, 10),
-      note: ev.title + (ev.notes ? ` - ${ev.notes}` : ''),
-      user: 'Both',
-      createdAt: new Date().toISOString()
-    });
-    
+
+    const amountText = ev.amount ? ` (${Utils.formatCurrency(ev.amount)})` : '';
+    if (!confirm(`Xác nhận đã đóng hóa đơn "${ev.title}"${amountText}?`)) return;
+
     // Remove the bill from calendar
     this.app.data.events = this.app.data.events.filter(e => e.id !== id);
-    
+    this.app.log?.system('Đã đóng hóa đơn', `${ev.title}${amountText}`);
+
     this.app.save();
-    this.app.render(); // Re-render everything to update finance tab
-    Utils.notify('Đã thanh toán và ghi nhận chi tiêu!', 'success');
+    this.app.render();
+    Utils.notify('Đã đánh dấu hóa đơn đã đóng!', 'success');
   }
 }

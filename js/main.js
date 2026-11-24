@@ -7,20 +7,16 @@ class DuoSpaceApp {
     this.data = this.storage.getData();
 
     // Chart Controllers
-    this.budgetChart = new BudgetChart();
     this.weightChart = new WeightChart();
     this.investmentChart = new InvestmentChart();
 
     this.charts = {
-      renderBudgetChart: () => this.budgetChart.render(this.data, this.data.isDarkMode),
       renderCatChart: () => this.weightChart.render(this.data.catWeights, this.data.isDarkMode),
       renderAssetAllocationChart: () => {
-        const cs = this.investment ? this.investment.getCashSurplusVnd() : 0;
-        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode, cs);
+        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode);
       },
       renderInvestmentCharts: () => {
-        const cs = this.investment ? this.investment.getCashSurplusVnd() : 0;
-        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode, cs);
+        this.investmentChart.render(this.data.investments, this.data.usdRate, this.data.isDarkMode);
         this.investmentChart.renderNetWorth(this.data.netWorthHistory, this.data.isDarkMode);
       }
     };
@@ -30,7 +26,6 @@ class DuoSpaceApp {
     this.auth.app = this;
     this.home = new HomeModule(this);
     this.todo = new TodoModule(this);
-    this.finance = new FinanceModule(this);
     this.investment = new InvestmentModule(this);
     this.motorbike = new MotorbikeModule(this);
     this.cats = new CatsModule(this);
@@ -39,7 +34,6 @@ class DuoSpaceApp {
     this.log = new LogModule(this);
 
     // New Features
-    this.goals = new GoalsModule(this);
     this.shopping = new ShoppingModule(this);
     this.calendar = new CalendarModule(this);
     this.notes = new NotesModule(this);
@@ -137,14 +131,6 @@ class DuoSpaceApp {
     }
   }
 
-  getExpenseCategories() {
-    return this.data.settings?.categories?.expense || CONFIG.CATEGORIES.EXPENSE;
-  }
-
-  getIncomeCategories() {
-    return this.data.settings?.categories?.income || CONFIG.CATEGORIES.INCOME;
-  }
-
   getTodoCategories() {
     return this.data.settings?.categories?.todo || CONFIG.CATEGORIES.TODO;
   }
@@ -172,16 +158,14 @@ class DuoSpaceApp {
   render() {
     this.home.render();
     this.todo.render();
-    this.finance.render();
     this.investment.render();
     this.motorbike.render();
     this.cats.render();
     this.health.render();
     this.settings.render();
     this.log.render();
-    
+
     // Render New Features
-    this.goals.render();
     this.shopping.render();
     this.calendar.render();
     this.notes.render();
@@ -190,7 +174,7 @@ class DuoSpaceApp {
   /** Chỉ render các phần bị ảnh hưởng để tránh render toàn bộ dữ liệu. */
   renderParts(parts = []) {
     const renderers = {
-      home: () => this.home.render(), todo: () => this.todo.render(), finance: () => this.finance.render(),
+      home: () => this.home.render(), todo: () => this.todo.render(),
       investment: () => this.investment.render(), motorbike: () => this.motorbike.render(), cats: () => this.cats.render(),
       health: () => this.health.render(), settings: () => this.settings.render(), log: () => this.log.render()
     };
@@ -239,7 +223,6 @@ class DuoSpaceApp {
 // Global helper for tab-aware category
 function getDefaultCategoryByTab(tabName) {
   const categoryMap = {
-    'finance': 'Chi Tiêu',
     'motorbike': 'Xe Máy',
     'todo': 'Việc nhà',
     'cats': 'Mun & Bông',
@@ -251,7 +234,6 @@ function getDefaultCategoryByTab(tabName) {
 }
 
 // Global chart rendering functions for event calls
-function renderBudgetChart() { if (window.app && window.app.charts) window.app.charts.renderBudgetChart(); }
 function renderAssetAllocationChart() { if (window.app && window.app.charts) window.app.charts.renderAssetAllocationChart(); }
 
 // Global auth helpers for direct inline button calls

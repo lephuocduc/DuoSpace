@@ -160,7 +160,6 @@ class TodoModule {
     const todo = this.app.data.todos[index];
 
     document.getElementById('modalMainTitle').innerText = "Chỉnh sửa công việc";
-    document.getElementById('typeSelector').classList.add('hidden');
     ModalManager.setAddType('todo');
 
     document.getElementById('todoInput').value = todo.title || '';

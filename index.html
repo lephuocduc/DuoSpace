@@ -87,69 +87,21 @@
 
       <!-- TAB 1: HOME -->
       <div id="tab-home" class="space-y-5 tab-content">
-        <div id="fundCard"
-          class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg space-y-3 transition-colors duration-300">
-          <div class="flex justify-between items-center text-blue-100 text-xs font-semibold">
-            <span>QUỸ CHUNG HÀNG THÁNG</span>
-            <i class="fa-solid fa-wallet text-base"></i>
-          </div>
-          <div id="totalBudget" class="text-3xl font-extrabold">0 đ</div>
-          <div class="flex justify-between text-xs pt-2 border-t border-white/20 text-blue-100">
-            <span>Thu nhập: <strong id="spentAmount" class="text-white">0 đ</strong></span>
-            <span>Chi tiêu: <strong id="remainAmount" class="text-white">0 đ</strong></span>
-          </div>
-        </div>
-
-        <section class="grid grid-cols-2 gap-3">
+        <section>
           <div
-            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
-            <div class="text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">Chi tuần này</div>
-            <div id="homeWeekSpend" class="text-base font-bold text-rose-500">0 đ</div>
-            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-1">Chi tháng: <span id="homeMonthSpend"
-                class="font-semibold text-gray-700 dark:text-slate-300">0 đ</span></div>
-          </div>
-
-          <div
-            class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60">
+            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
             <div
-              class="flex justify-between items-center text-[11px] font-semibold text-gray-400 dark:text-slate-400 mb-1">
+              class="flex justify-between items-center text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
               <span>% Hoàn thành To-Do</span>
               <span id="homeTaskPct" class="text-blue-600 dark:text-blue-400 font-bold">0%</span>
             </div>
-            <div class="w-full bg-gray-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mt-2">
+            <div class="w-full bg-gray-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden mt-2">
               <div id="homeTaskProgressBar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
             </div>
-            <div class="text-[10px] text-gray-400 dark:text-slate-500 mt-2"><span id="homeTaskDoneCount">0</span>/<span
+            <div class="text-[11px] text-gray-400 dark:text-slate-500 mt-2"><span id="homeTaskDoneCount">0</span>/<span
                 id="homeTaskTotalCount">0</span> việc hoàn thành</div>
           </div>
         </section>
-
-        <!-- Grid 2 cột trên Tablet / Desktop cho Phân bổ Category & Biểu đồ -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- PHÂN PHỐI CHI TIÊU THEO CATEGORY -->
-          <section
-            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-            <div class="flex justify-between items-center">
-              <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">Chi tháng này theo
-                Category</h3>
-              <span id="homeCategoryTotalText" class="text-xs font-bold text-rose-500">0đ</span>
-            </div>
-            <div id="homeCategoryBreakdown" class="space-y-2.5">
-            </div>
-          </section>
-
-          <section
-            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2">
-            <div class="flex justify-between items-center">
-              <h3 class="text-xs font-bold text-gray-800 dark:text-slate-200 uppercase tracking-wider">So sánh Thu - Chi
-                theo Tháng</h3>
-              <span class="text-[10px] text-gray-400">3 tháng gần nhất</span>
-            </div>
-            <div class="w-full h-44 relative">
-              <canvas id="budgetComparisonChart"></canvas>
-            </div>
-          </section>
-        </div>
 
         <!-- UPCOMING REMINDERS WIDGET -->
         <section id="homeRemindersWidget" class="hidden">
@@ -230,107 +182,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: FINANCE -->
-      <div id="tab-finance" class="hidden space-y-4 tab-content">
-        <div class="grid grid-cols-2 gap-3">
-          <div
-            class="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/40">
-            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">Tổng Thu Nhập</div>
-            <div id="incomeTotal" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">0 đ</div>
-          </div>
-          <div class="bg-rose-50 dark:bg-rose-950/40 rounded-xl p-3 border border-rose-100 dark:border-rose-800/40">
-            <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold mb-1">Tổng Chi Tiêu</div>
-            <div id="expenseTotal" class="text-lg font-bold text-rose-600 dark:text-rose-400">0 đ</div>
-          </div>
-        </div>
-
-        <!-- 🔍 DATE RANGE FILTER PANEL -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
-              <i class="fa-solid fa-calendar-days text-blue-500 mr-1.5"></i>Lọc Theo Khoảng Ngày
-            </h4>
-            <span id="filterSummary" class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold hidden"></span>
-          </div>
-
-          <!-- Quick Presets -->
-          <div class="flex space-x-1.5 overflow-x-auto pb-1 custom-scrollbar text-[11px]">
-            <button onclick="setDateFilterRange('thisMonth')"
-              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng
-              này</button>
-            <button onclick="setDateFilterRange('lastMonth')"
-              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Tháng
-              trước</button>
-            <button onclick="setDateFilterRange('last30Days')"
-              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">30
-              ngày qua</button>
-            <button onclick="setDateFilterRange('thisYear')"
-              class="px-2.5 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-600 rounded-lg text-gray-600 dark:text-slate-300 whitespace-nowrap transition-colors">Năm
-              nay</button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] text-gray-400 font-medium mb-0.5">Từ ngày:</label>
-              <input type="date" id="filterDateFrom"
-                class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
-            </div>
-            <div>
-              <label class="block text-[10px] text-gray-400 font-medium mb-0.5">Đến ngày:</label>
-              <input type="date" id="filterDateTo"
-                class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
-            </div>
-          </div>
-
-          <div class="flex space-x-2 pt-0.5">
-            <button onclick="applyDateFilter()" id="applyFilterBtn"
-              class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
-              Áp dụng lọc
-            </button>
-            <button onclick="resetDateFilter()" id="resetFilterBtn"
-              class="px-3 py-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors">
-              Đặt lại
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch sử giao dịch</h3>
-            <div class="flex bg-gray-100 dark:bg-slate-700 p-0.5 rounded-lg text-xs font-medium">
-              <button onclick="filterFinance('all')" id="finFilter-all"
-                class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 shadow-sm text-gray-800 dark:text-slate-200">Tất
-                cả</button>
-              <button onclick="filterFinance('expense')" id="finFilter-expense"
-                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Chi</button>
-              <button onclick="filterFinance('income')" id="finFilter-income"
-                class="px-2.5 py-1 rounded-md text-gray-500 dark:text-slate-400">Thu</button>
-            </div>
-          </div>
-
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" oninput="searchFinance(this.value)" placeholder="Tìm kiếm giao dịch..."
-              class="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-slate-200">
-          </div>
-
-          <div id="financeList" class="space-y-2">
-            <p class="text-sm text-gray-400 text-center py-4">Chưa có giao dịch nào</p>
-          </div>
-
-          <!-- 📥 LOAD MORE BUTTON CONTAINER -->
-          <div id="loadMoreContainer" class="hidden text-center pt-2 border-t border-gray-100 dark:border-slate-700/50">
-            <button id="loadMoreBtn" onclick="loadMoreTransactions()"
-              class="w-full py-2 bg-gray-50 hover:bg-gray-100 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold text-xs rounded-xl border border-gray-200 dark:border-slate-700 transition-all">
-              📥 Tải thêm (Xem tuần trước)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 4: ĐẦU TƯ (PORTFOLIO MANAGEMENT) -->
+      <!-- TAB 3: ĐẦU TƯ (PORTFOLIO MANAGEMENT) -->
       <div id="tab-investment" class="hidden space-y-4 tab-content">
 
         <!-- SUMMARY CARD: VỐN, HIỆN TẠI, LÃI LỖ -->
@@ -358,14 +210,8 @@
           </div>
 
           <div class="relative z-10 space-y-1">
-            <p class="text-[11px] text-indigo-200 font-medium">Tổng tài sản (Danh mục + Tiền dư Thu Chi)</p>
+            <p class="text-[11px] text-indigo-200 font-medium">Tổng giá trị danh mục tài sản</p>
             <div id="investTotalValue" class="text-3xl font-extrabold tracking-tight">0 đ</div>
-            <div id="investNetWorthBreakdown"
-              class="flex items-center space-x-2 text-[10px] text-indigo-200/90 font-medium pt-0.5">
-              <span>Đầu tư: <b id="investAssetsOnly" class="text-white">0 đ</b></span>
-              <span>•</span>
-              <span>Tiền dư thu chi: <b id="investCashSurplus" class="text-emerald-300">0 đ</b></span>
-            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 relative z-10">
@@ -884,66 +730,12 @@
               <h2 class="text-sm font-bold text-gray-800 dark:text-slate-200 flex items-center">
                 <i class="fa-solid fa-tags text-blue-500 mr-2"></i>Quản lý Danh Mục
               </h2>
-              <p class="text-xs text-gray-400 mt-0.5">Tùy chỉnh danh mục Chi tiêu, Thu nhập và Công việc To-Do</p>
-            </div>
-          </div>
-
-          <!-- Danh mục Chi Tiêu -->
-          <div class="space-y-2.5 pt-1">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
-                <i class="fa-solid fa-receipt text-rose-500 mr-1.5"></i>Danh mục Chi tiêu
-              </span>
-              <button type="button" onclick="resetCategories('expense')"
-                class="text-[11px] text-gray-400 hover:text-rose-500 transition-colors">
-                <i class="fa-solid fa-rotate-left mr-1"></i>Mặc định
-              </button>
-            </div>
-            
-            <div class="flex gap-2">
-              <input type="text" id="newExpenseCategoryInput" placeholder="Ví dụ: ☕ Cà phê, 🎓 Học tập..."
-                onkeydown="if(event.key==='Enter') addCategory('expense')"
-                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500">
-              <button type="button" onclick="addCategory('expense')"
-                class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm">
-                <i class="fa-solid fa-plus mr-1"></i>Thêm
-              </button>
-            </div>
-
-            <div id="expenseCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
-              <!-- Render động từ SettingsModule -->
-            </div>
-          </div>
-
-          <!-- Danh mục Thu Nhập -->
-          <div class="space-y-2.5 pt-3 border-t border-gray-100 dark:border-slate-700/60">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
-                <i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i>Danh mục Thu nhập
-              </span>
-              <button type="button" onclick="resetCategories('income')"
-                class="text-[11px] text-gray-400 hover:text-emerald-500 transition-colors">
-                <i class="fa-solid fa-rotate-left mr-1"></i>Mặc định
-              </button>
-            </div>
-            
-            <div class="flex gap-2">
-              <input type="text" id="newIncomeCategoryInput" placeholder="Ví dụ: 💻 Freelance, 🏢 Cho thuê..."
-                onkeydown="if(event.key==='Enter') addCategory('income')"
-                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <button type="button" onclick="addCategory('income')"
-                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm">
-                <i class="fa-solid fa-plus mr-1"></i>Thêm
-              </button>
-            </div>
-
-            <div id="incomeCategoryListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
-              <!-- Render động từ SettingsModule -->
+              <p class="text-xs text-gray-400 mt-0.5">Tùy chỉnh danh mục Công việc To-Do</p>
             </div>
           </div>
 
           <!-- Danh mục To-Do -->
-          <div class="space-y-2.5 pt-3 border-t border-gray-100 dark:border-slate-700/60">
+          <div class="space-y-2.5 pt-1">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center">
                 <i class="fa-solid fa-list-check text-blue-500 mr-1.5"></i>Danh mục Công việc (To-Do)
@@ -984,9 +776,6 @@
             class="block w-full py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-xl text-sm font-semibold text-center cursor-pointer"><i
               class="fa-solid fa-upload mr-2"></i>Khôi phục từ bản sao lưu<input id="backupImportInput" type="file"
               accept="application/json,.json" class="hidden" onchange="importBackup(this.files[0])"></label>
-          <button onclick="exportFinanceCsv()"
-            class="w-full py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold"><i
-              class="fa-solid fa-file-csv mr-2"></i>Xuất thu chi CSV</button>
           <div class="pt-2 border-t border-gray-100 dark:border-slate-700/60">
             <button onclick="window.app.sync?.pullFromCloud()"
               class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center">
@@ -1077,48 +866,35 @@
             </p>
           </div>
 
-          <!-- 3. Thu Chi Tài Chính -->
+          <!-- 3. Quản lý Đầu Tư & Tài Sản -->
           <div class="space-y-1.5">
             <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
-              <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">3</span>
-              Quản lý Tài Chính & Thu Chi
-            </p>
-            <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
-              • <strong>Ghi chép:</strong> Thêm khoản Chi tiêu hoặc Thu nhập, chọn danh mục và người chi trả (Đức / Sương). Lịch sử luôn tự động xếp giao dịch mới nhất lên đầu.<br>
-              • <strong>Bộ lọc khoảng ngày:</strong> Chọn nhanh "Tháng này", "Tháng trước", "30 ngày qua", "Năm nay" hoặc tùy chỉnh Từ ngày - Đến ngày để xem tổng thu, tổng chi chính xác.<br>
-              • <strong>Biểu đồ so sánh:</strong> Cột Y tự động co giãn theo số tiền thực tế 3 tháng gần nhất để dễ quan sát biến động dòng tiền.
-            </p>
-          </div>
-
-          <!-- 4. Quản lý Đầu Tư & Tài Sản -->
-          <div class="space-y-1.5">
-            <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
-              <span class="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">4</span>
+              <span class="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">3</span>
               Đầu Tư & Tổng Tài Sản
             </p>
             <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
-              • <strong>Theo dõi đa tài sản:</strong> Hỗ trợ Crypto (BTC, BNB...), Vàng nhẫn 9999, Tiền mặt USD, VND và Tiền gửi tiết kiệm.<br>
-              • <strong>Cập nhật giá thị trường:</strong> Nhấn "Cập nhật giá" để tự động lấy giá Coin và tỷ giá USD/VND theo thời gian thực (hỗ trợ crawl giá vàng DOJI qua server riêng).<br>
-              • <strong>Bán / Khớp lệnh:</strong> Hỗ trợ bán từng phần tài sản, tự động tính lãi/lỗ và tạo giao dịch thu nhập vào quỹ.
+              • <strong>Theo dõi đa tài sản:</strong> Hỗ trợ Crypto (BTC, BNB...), Vàng nhẫn 9999 DOJI/SJC, Tiền mặt USD, VND và Tiền gửi tiết kiệm.<br>
+              • <strong>Cập nhật giá thị trường:</strong> Nhấn "Cập nhật giá" để tự động lấy giá Coin, giá vàng DOJI/SJC, vàng thế giới và tỷ giá USD/VND theo thời gian thực.<br>
+              • <strong>Bán / Khớp lệnh:</strong> Hỗ trợ bán từng phần tài sản và tự động tính lại số lượng & lãi/lỗ.
             </p>
           </div>
 
-          <!-- 5. Xe Máy & Mèo Cưng -->
+          <!-- 4. Xe Máy & Mèo Cưng -->
           <div class="space-y-1.5">
             <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
-              <span class="w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">5</span>
+              <span class="w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">4</span>
               Xe Máy (NMAX & Grande) & Mèo Cưng
             </p>
             <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
-              • <strong>Xe máy:</strong> Theo dõi số km ODO hiện tại và tuổi thọ phụ tùng (Nhớt máy, nhớt láp, lọc gió, bugi, dây curoa...). Chi phí bảo dưỡng tự động liên kết với Thu Chi.<br>
+              • <strong>Xe máy:</strong> Theo dõi số km ODO hiện tại và tuổi thọ phụ tùng (Nhớt máy, nhớt láp, lọc gió, bugi, dây curoa...).<br>
               • <strong>Mun & Bông:</strong> Theo dõi cân nặng hàng tháng của 2 bé mèo kèm biểu đồ tăng trưởng trực quan.
             </p>
           </div>
 
-          <!-- 6. Sức Khỏe Cá Nhân -->
+          <!-- 5. Sức Khỏe Cá Nhân -->
           <div class="space-y-1.5">
             <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
-              <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">6</span>
+              <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">5</span>
               Theo dõi Sức Khỏe (Health)
             </p>
             <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
@@ -1127,16 +903,15 @@
             </p>
           </div>
 
-          <!-- 7. Sao Lưu & Dự Phòng -->
+          <!-- 6. Sao Lưu & Dự Phòng -->
           <div class="space-y-1.5">
             <p class="font-semibold text-gray-900 dark:text-slate-100 flex items-center text-xs">
-              <span class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">7</span>
+              <span class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 inline-flex items-center justify-center mr-2 text-[10px] font-bold">6</span>
               Sao Lưu & Khôi Phục Dữ Liệu
             </p>
             <p class="text-xs leading-relaxed text-gray-500 dark:text-slate-400 pl-7">
               • Trong tab <strong>Cài đặt</strong>, bạn có thể bấm <em>"Tải bản sao lưu JSON"</em> về máy bất cứ lúc nào đề phòng trường hợp khẩn cấp.<br>
-              • Khi chuyển sang thiết bị mới, bấm <em>"Khôi phục từ bản sao lưu"</em> để nạp lại dữ liệu, hệ thống sẽ tự động đồng bộ ngay lên Cloudflare D1.<br>
-              • Hỗ trợ xuất file Excel CSV cho dữ liệu thu chi để làm báo cáo thống kê.
+              • Khi chuyển sang thiết bị mới, bấm <em>"Khôi phục từ bản sao lưu"</em> để nạp lại dữ liệu, hệ thống sẽ tự động đồng bộ ngay lên Cloudflare D1.
             </p>
           </div>
         </section>
@@ -1215,12 +990,6 @@
         class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 hover:text-blue-500 transition-colors">
         <i class="fa-solid fa-chart-line text-lg md:text-xl"></i>
         <span class="text-[10px] md:text-xs font-medium">Tài sản</span>
-      </button>
-
-      <button onclick="switchTab('finance', 'Quản lý Thu Chi', this)"
-        class="tab-btn flex flex-col items-center text-gray-400 dark:text-slate-500 space-y-1 hover:text-blue-500 transition-colors">
-        <i class="fa-solid fa-coins text-lg md:text-xl"></i>
-        <span class="text-[10px] md:text-xs font-medium">Tài chính</span>
       </button>
     </nav>
 
@@ -1490,25 +1259,10 @@
       <div onclick="event.stopPropagation()"
         class="bg-white dark:bg-slate-900 w-full rounded-t-3xl md:rounded-3xl p-6 space-y-4 max-w-md md:max-w-lg transform translate-y-full transition-transform duration-300 border-t md:border border-gray-100 dark:border-slate-800 max-h-[90vh] md:max-h-[85vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-2">
-          <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm mới</h2>
+          <h2 id="modalMainTitle" class="text-lg font-bold text-gray-900 dark:text-white">Thêm công việc mới</h2>
           <button onclick="closeAddModal()" aria-label="Đóng biểu mẫu"
             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
-        </div>
-
-        <div id="typeSelector" class="grid grid-cols-3 gap-2 mb-2">
-          <button onclick="setAddType('todo')" id="typeBtn-todo"
-            class="py-2.5 px-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs border-2 border-blue-600">
-            <i class="fa-solid fa-list-check block text-sm mb-1"></i> To-Do
-          </button>
-          <button onclick="setAddType('expense')" id="typeBtn-expense"
-            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
-            <i class="fa-solid fa-money-bill block text-sm mb-1"></i> Chi Tiêu
-          </button>
-          <button onclick="setAddType('income')" id="typeBtn-income"
-            class="py-2.5 px-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-semibold text-xs border-2 border-transparent">
-            <i class="fa-solid fa-piggy-bank block text-sm mb-1"></i> Thu Nhập
           </button>
         </div>
 
@@ -1572,110 +1326,6 @@
           <button id="saveTodoBtn" onclick="saveTodoAction()"
             class="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
             công việc</button>
-        </div>
-
-        <!-- Form Chi Tiêu -->
-        <div id="addExpenseForm" class="hidden space-y-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
-            <input type="text" inputmode="numeric" id="expenseAmount" placeholder="0" oninput="Utils.formatNumberInput(this)"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày chi</label>
-            <input type="date" id="expenseDate"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Category (Danh
-                mục)</label>
-              <select id="expenseCategory"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-                <option value="🍜 Ăn uống">🍜 Ăn uống</option>
-                <option value="🏠 Nhà cửa">🏠 Nhà cửa</option>
-                <option value="🛒 Siêu thị">🛒 Siêu thị</option>
-                <option value="🛵 Xe">🛵 Xe</option>
-                <option value="🐱 Mèo">🐱 Mèo</option>
-                <option value="💊 Sức khỏe">💊 Sức khỏe</option>
-                <option value="🎮 Giải trí">🎮 Giải trí</option>
-                <option value="💼 Đầu tư">💼 Đầu tư</option>
-                <option value="📦 Khác" selected>📦 Khác</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người chi trả</label>
-              <select id="expenseUser"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-                <option value="Đ">Đức</option>
-                <option value="S">Sương</option>
-                <option value="Both">Cả hai</option>
-              </select>
-            </div>
-          </div>
-          <div id="expenseDescriptionRow">
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả khoản chi</label>
-            <input type="text" id="expenseDesc" placeholder="Mô tả..."
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
-              (Notes)</label>
-            <textarea id="expenseNotes" rows="2" placeholder="Ghi chú chi tiết..."
-              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
-          </div>
-          <button id="saveExpenseBtn" onclick="saveExpenseAction()"
-            class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
-            khoản chi</button>
-        </div>
-
-        <!-- Form Thu Nhập -->
-        <div id="addIncomeForm" class="hidden space-y-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền (VNĐ)</label>
-            <input type="text" inputmode="numeric" id="incomeAmount" placeholder="0" oninput="Utils.formatNumberInput(this)"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày nhận</label>
-            <input type="date" id="incomeDate"
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Danh mục thu nhập</label>
-              <select id="incomeCategory"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="💼 Lương">💼 Lương</option>
-                <option value="🎁 Thưởng">🎁 Thưởng</option>
-                <option value="📈 Đầu tư / Lãi">📈 Đầu tư / Lãi</option>
-                <option value="📦 Khác">📦 Khác</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Người nhận</label>
-              <select id="incomeUser"
-                class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="Đ">Đức</option>
-                <option value="S">Sương</option>
-                <option value="Both">Cả hai</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Mô tả chi tiết / Nguồn thu (tùy chọn)</label>
-            <input type="text" id="incomeDesc" placeholder="Ví dụ: Lương tháng 9, Thưởng quý..."
-              class="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ghi chú thêm
-              (Notes)</label>
-            <textarea id="incomeNotes" rows="2" placeholder="Ghi chú thêm..."
-              class="w-full px-3.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-          </div>
-          <button id="saveIncomeBtn" onclick="saveIncomeAction()"
-            class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu
-            khoản thu</button>
         </div>
       </div>
     </div>
@@ -1765,42 +1415,6 @@
   </div>
 
   <!-- MODALS FOR NEW FEATURES -->
-  <!-- Goal Modal -->
-  <div id="goalModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 scale-95 opacity-0 transition-all duration-300 transform">
-      <div class="flex justify-between items-center mb-5">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Mục tiêu tài chính</h3>
-        <button onclick="window.app.goals.closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="space-y-4">
-        <input type="hidden" id="goalId">
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Tên mục tiêu</label>
-          <input type="text" id="goalTitle" placeholder="Ví dụ: Du lịch Nhật Bản" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Số tiền mục tiêu (VND)</label>
-          <input type="text" id="goalTarget" placeholder="10,000,000" inputmode="numeric" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="Utils.formatNumberInput(this)">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Đã tích lũy (VND)</label>
-          <input type="text" id="goalCurrent" placeholder="2,000,000" inputmode="numeric" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="Utils.formatNumberInput(this)">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Icon (FontAwesome)</label>
-          <input type="text" id="goalIcon" placeholder="fa-solid fa-plane" class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div class="flex space-x-3 pt-2">
-          <button id="deleteGoalBtn" class="hidden px-4 py-3 bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-semibold rounded-xl text-sm hover:bg-rose-100 dark:hover:bg-rose-900/50"><i class="fa-solid fa-trash-can"></i></button>
-          <button onclick="window.app.goals.saveGoal()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm shadow-md active:scale-98 transition-transform">Lưu Mục Tiêu</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
   <!-- Event/Bill Modal -->
   <div id="eventModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 scale-95 opacity-0 transition-all duration-300 transform">
@@ -1888,13 +1502,11 @@
   <script src="js/ui/sidebar.js"></script>
   <script src="js/ui/tabs.js"></script>
   <script src="js/ui/modal.js"></script>
-  <script src="js/charts/budget.js"></script>
   <script src="js/charts/weight.js"></script>
   <script src="js/charts/investment.js"></script>
   <script src="js/modules/auth.js"></script>
   <script src="js/modules/home.js"></script>
   <script src="js/modules/todo.js"></script>
-  <script src="js/modules/finance.js"></script>
   <script src="js/modules/investment.js"></script>
   <script src="js/modules/motorbike.js"></script>
   <script src="js/modules/cats.js"></script>
@@ -1902,7 +1514,6 @@
   <script src="js/modules/settings.js"></script>
   <script src="js/modules/cloudSync.js"></script>
   <script src="js/modules/log.js"></script>
-  <script src="js/modules/goals.js"></script>
   <script src="js/modules/shopping.js"></script>
   <script src="js/modules/calendar.js"></script>
   <script src="js/modules/notes.js"></script>

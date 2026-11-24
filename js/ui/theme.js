@@ -13,7 +13,6 @@ const ThemeManager = {
       this.applyDarkMode(this.app.data.isDarkMode);
       if (this.app.charts) {
         this.app.charts.renderCatChart();
-        this.app.charts.renderBudgetChart();
         this.app.charts.renderAssetAllocationChart();
       }
     });

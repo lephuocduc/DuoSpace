@@ -42,57 +42,11 @@ class SettingsModule {
   }
 
   renderCategoriesUI() {
-    const expenseContainer = document.getElementById('expenseCategoryListContainer');
-    const incomeContainer = document.getElementById('incomeCategoryListContainer');
     const todoContainer = document.getElementById('todoCategoryListContainer');
-    if (!expenseContainer && !incomeContainer && !todoContainer) return;
+    if (!todoContainer) return;
 
-    const expenseCats = this.getCategories('expense');
-    const incomeCats = this.getCategories('income');
     const todoCats = this.getCategories('todo');
-
-    if (expenseContainer) {
-      expenseContainer.innerHTML = expenseCats.map((cat, idx) => `
-        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/60 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
-          <div class="flex items-center space-x-2 min-w-0 pr-2">
-            <span class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(cat)}</span>
-          </div>
-          <div class="flex items-center space-x-1 shrink-0">
-            <button type="button" onclick="window.app.settings.editCategory('expense', ${idx})" title="Sửa tên danh mục"
-              class="w-7 h-7 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center transition-colors">
-              <i class="fa-solid fa-pen text-xs"></i>
-            </button>
-            <button type="button" onclick="window.app.settings.deleteCategory('expense', ${idx})" title="Xóa danh mục"
-              class="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors">
-              <i class="fa-solid fa-trash text-xs"></i>
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    if (incomeContainer) {
-      incomeContainer.innerHTML = incomeCats.map((cat, idx) => `
-        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/60 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
-          <div class="flex items-center space-x-2 min-w-0 pr-2">
-            <span class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(cat)}</span>
-          </div>
-          <div class="flex items-center space-x-1 shrink-0">
-            <button type="button" onclick="window.app.settings.editCategory('income', ${idx})" title="Sửa tên danh mục"
-              class="w-7 h-7 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 flex items-center justify-center transition-colors">
-              <i class="fa-solid fa-pen text-xs"></i>
-            </button>
-            <button type="button" onclick="window.app.settings.deleteCategory('income', ${idx})" title="Xóa danh mục"
-              class="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors">
-              <i class="fa-solid fa-trash text-xs"></i>
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    if (todoContainer) {
-      todoContainer.innerHTML = todoCats.map((cat, idx) => `
+    todoContainer.innerHTML = todoCats.map((cat, idx) => `
         <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/60 rounded-xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition-colors">
           <div class="flex items-center space-x-2 min-w-0 pr-2">
             <span class="text-xs font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(cat)}</span>
@@ -109,7 +63,6 @@ class SettingsModule {
           </div>
         </div>
       `).join('');
-    }
 
     // Refresh Modal Select Options when categories change
     if (typeof ModalManager !== 'undefined' && typeof ModalManager.populateCategorySelects === 'function') {
@@ -208,7 +161,7 @@ class SettingsModule {
     this.app.log?.system(`Cập nhật danh mục ${typeLabel}`, `${oldName} → ${trimmed} (đã đồng bộ ${updateExisting ? countAffected : 0} mục cũ)`);
     this.app.save();
     this.renderCategoriesUI();
-    this.app.renderParts([type === 'todo' ? 'todo' : 'finance', 'home']);
+    this.app.renderParts(['todo', 'home']);
     if (typeof Utils !== 'undefined' && Utils.notify) {
       Utils.notify(`Đã đổi tên danh mục thành "${trimmed}"`, 'success');
     }
