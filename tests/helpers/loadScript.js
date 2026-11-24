@@ -49,7 +49,7 @@ function createSandbox(overrides = {}) {
 
   const document = {
     visibilityState: 'visible',
-    addEventListener() {},
+    addEventListener() { },
     body: { classList: { add() { }, remove() { } } },
     getElementById(id) {
       return Object.prototype.hasOwnProperty.call(elements, id) ? elements[id] : null;
@@ -90,7 +90,7 @@ function createSandbox(overrides = {}) {
     clearInterval,
     document,
     localStorage,
-    addEventListener() {},
+    addEventListener() { },
     alert(msg) { alerts.push(msg); },
     confirm: overrides.confirm || (() => true),
     fetch: overrides.fetch || (async () => { throw new Error('Mock fetch not configured'); }),
