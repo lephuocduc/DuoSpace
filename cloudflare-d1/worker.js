@@ -21,6 +21,187 @@ const ALLOWED_EMAILS = [
 let cachedJwks = null;
 let cachedJwksExpiry = 0;
 
+// Đảm bảo các bảng mới (notes, shopping_list, events, savings_goals) luôn tồn tại trên D1
+let extendedTablesEnsured = false;
+async function ensureExtendedTables(db) {
+  if (extendedTablesEnsured) return;
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS savings_goals (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, target_amount REAL DEFAULT 0, current_amount REAL DEFAULT 0,
+      icon TEXT, target_date DATE, notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS shopping_list (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, done INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS events (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, date DATE NOT NULL, type TEXT DEFAULT 'event',
+      amount REAL DEFAULT 0, user TEXT DEFAULT 'Both', notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS notes (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, content TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`)
+  ]);
+  extendedTablesEnsured = true;
+}
+
+// Cache giá bạc trong nước (5 phút)
+let cachedSilverPrice = null;
+let cachedSilverExpiry = 0;
+
+const DOJI_TABLE_API = 'https://banggia.doji.vn/api/TablePrice/GetTablePrice';
+const DOJI_TABLE_KEY_HEX = '7a4b8c3d1e9f2a5b6c0d4e8f3a7b1c5d9e2f6a0b4c8d3e7f1a5b9c2d6e0f4a8b';
+
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+export function parseDojiSilverTable(rows) {
+  if (!Array.isArray(rows)) return null;
+  const silverRows = rows.filter(r => r && r.type === 'S');
+  const target = silverRows.find(r => String(r.materialCode) === '14')
+    || silverRows.find(r => /1\s*lượng/i.test(r.materialName || ''))
+    || silverRows[0];
+  if (!target) return null;
+
+  let buy = Number(target.priceDojiBuyIn || 0);
+  let sell = Number(target.priceDojiSellOut || 0);
+  // DOJI niêm yết theo nghìn VNĐ (vd: 1541 -> 1.541.000 VNĐ/lượng)
+  if (buy > 0 && buy < 100000) buy = Math.round(buy * 1000);
+  if (sell > 0 && sell < 100000) sell = Math.round(sell * 1000);
+  if (buy < 100000 || buy > 50000000) return null;
+
+  return {
+    product: target.materialName || 'BẠC DOJI 99.9 - 1 LƯỢNG',
+    unit: 'lượng',
+    buy,
+    sell: sell >= 100000 ? sell : buy,
+    updatedAt: target.updateDate || new Date().toISOString()
+  };
+}
+
+async function fetchDojiSilverPrice() {
+  const res = await fetch(DOJI_TABLE_API, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; DuoSpaceBot/1.0)' }
+  });
+  if (!res.ok) return null;
+  const payload = await res.json();
+  if (!payload || !payload.status || !payload.data) return null;
+
+  const raw = base64ToBytes(payload.data);
+  if (raw.length <= 16) return null;
+  const iv = raw.slice(0, 16);
+  const ciphertext = raw.slice(16);
+  const key = await crypto.subtle.importKey('raw', hexToBytes(DOJI_TABLE_KEY_HEX), { name: 'AES-CBC' }, false, ['decrypt']);
+  const plainBuf = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
+  const rows = JSON.parse(new TextDecoder().decode(plainBuf));
+  const parsed = parseDojiSilverTable(rows);
+  if (!parsed) return null;
+
+  return {
+    success: true,
+    source: 'banggia.doji.vn',
+    ...parsed
+  };
+}
+
+function decodeHtmlEntities(str) {
+  return String(str || '')
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function parseVnSilverHtml(html) {
+  const rows = String(html || '').match(/<tr[\s\S]*?<\/tr>/gi) || [];
+  for (const row of rows) {
+    const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m =>
+      decodeHtmlEntities(m[1].replace(/<[^>]+>/g, ' '))
+    );
+    if (cells.length < 3) continue;
+    const product = cells[0].toLowerCase();
+    const unit = (cells[1] || '').toLowerCase();
+    const isTaelRow = unit.includes('lượng') || product.includes('1 lượng');
+    const isKgRow = unit.includes('kg') || product.includes('kilo');
+    if (!isTaelRow || isKgRow) continue;
+
+    // Lấy 2 cột số cuối cùng (Mua vào, Bán ra)
+    const numericCells = cells.slice(2)
+      .map(c => Number(c.replace(/[^0-9]/g, '')))
+      .filter(n => n >= 100000 && n <= 50000000);
+
+    if (numericCells.length >= 1) {
+      return {
+        product: cells[0],
+        unit: 'lượng',
+        buy: numericCells[0],
+        sell: numericCells[1] || numericCells[0],
+      };
+    }
+  }
+  return null;
+}
+
+async function fetchLiveVnSilverPrice() {
+  const now = Date.now();
+  if (cachedSilverPrice && now < cachedSilverExpiry) {
+    return cachedSilverPrice;
+  }
+
+  // 1. Primary: Bảng giá Bạc DOJI chính thức (banggia.doji.vn)
+  try {
+    const doji = await fetchDojiSilverPrice();
+    if (doji) {
+      cachedSilverPrice = doji;
+      cachedSilverExpiry = now + 5 * 60 * 1000;
+      return cachedSilverPrice;
+    }
+  } catch (_) {}
+
+  // 2. Fallback: Bảng giá Bạc Phú Quý / giabac.vn
+  const sources = [
+    { name: 'giabac.phuquygroup.vn', url: 'https://giabac.phuquygroup.vn/' },
+    { name: 'giabac.vn', url: 'https://giabac.vn/' },
+  ];
+
+  for (const src of sources) {
+    try {
+      const res = await fetch(src.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; DuoSpaceBot/1.0)' }
+      });
+      if (!res.ok) continue;
+      const html = await res.text();
+      const parsed = parseVnSilverHtml(html);
+      if (parsed) {
+        cachedSilverPrice = {
+          success: true,
+          source: src.name,
+          ...parsed,
+          updatedAt: new Date().toISOString()
+        };
+        cachedSilverExpiry = now + 5 * 60 * 1000;
+        return cachedSilverPrice;
+      }
+    } catch (_) {}
+  }
+
+  return null;
+}
+
 function jsonResponse(data, status = 200, customHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -157,14 +338,24 @@ export default {
       return new Response(null, { headers: CORS_HEADERS });
     }
 
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // Public read-only endpoint: Lấy giá bạc trong nước (VND/lượng) có CORS
+    if (request.method === "GET" && path === "/api/prices/silver") {
+      const data = await fetchLiveVnSilverPrice();
+      if (!data) {
+        return jsonResponse({ success: false, error: "Không thể lấy giá bạc trong nước lúc này" }, 502);
+      }
+      return jsonResponse(data, 200, { "Cache-Control": "public, max-age=300" });
+    }
+
     // Xác thực Google Firebase Auth Token (Chỉ Đức & Sương)
     const authResult = await authenticateRequest(request, env);
     if (!authResult.ok) {
       return jsonResponse({ error: authResult.error }, authResult.status);
     }
 
-    const url = new URL(request.url);
-    const path = url.pathname;
     const db = env.DB || env.duospace_db; // Binding Cloudflare D1
 
     if (!db) {
@@ -172,6 +363,7 @@ export default {
     }
 
     try {
+      await ensureExtendedTables(db);
       // 1. GET /api/sync/check: Kiểm tra nhanh phiên bản và thay đổi trên D1 (chỉ tốn 1 read nhẹ)
       if (request.method === "GET" && path === "/api/sync/check") {
         const clientVersion = parseInt(url.searchParams.get("v") || "0", 10);
@@ -391,7 +583,12 @@ export default {
         const statements = [];
 
         // Tạo checksum mới từ mốc thời gian và tổng lượng item
-        const countItems = (payload.todos?.length || 0) + (payload.expenses?.length || 0) + (payload.incomes?.length || 0);
+        const countItems = (payload.todos?.length || 0)
+          + (payload.expenses?.length || 0)
+          + (payload.incomes?.length || 0)
+          + (payload.notes?.length || 0)
+          + (payload.shoppingList?.length || 0)
+          + (payload.events?.length || 0);
         const newChecksum = `${Date.now()}-${countItems}`;
 
         // Save app state (luôn tăng version để các client khác nhận biết thay đổi)
@@ -627,16 +824,18 @@ export default {
           }
         }
 
-        // Sync Notes
+        // Sync Notes (xóa các ghi chú đã bị gỡ trên client để đồng bộ xóa giữa các tab/thiết bị)
         if (Array.isArray(payload.notes)) {
+          statements.push(db.prepare("DELETE FROM notes"));
           for (const n of payload.notes) {
             const id = n.id || `note-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = n.createdAt || new Date().toISOString();
+            const updatedAt = n.updatedAt || createdAt;
             statements.push(
               db.prepare(`
                 INSERT OR REPLACE INTO notes (id, title, content, created_at, updated_at)
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-              `).bind(id, n.title || "", n.content || "", createdAt)
+                VALUES (?, ?, ?, ?, ?)
+              `).bind(id, n.title || "", n.content || "", createdAt, updatedAt)
             );
           }
         }

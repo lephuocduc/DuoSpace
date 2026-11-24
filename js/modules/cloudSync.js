@@ -9,6 +9,48 @@ class CloudSync {
     this.isSyncing = false;
     this.cachedEtag = localStorage.getItem('duospace_sync_etag') || null;
     this.localVersion = parseInt(localStorage.getItem('duospace_sync_version') || '0', 10);
+    this.hasPendingPush = localStorage.getItem('duospace_sync_pending') === '1';
+    this._bindLifecycleListeners();
+  }
+
+  _bindLifecycleListeners() {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (this._listenersBound) return;
+    this._listenersBound = true;
+
+    // Đẩy ngay thay đổi đang chờ khi người dùng chuyển tab hoặc đóng/refresh trang
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && this.hasPendingPush) {
+        if (this.syncTimeout) {
+          clearTimeout(this.syncTimeout);
+          this.syncTimeout = null;
+        }
+        this.pushToCloud();
+      }
+    });
+
+    // Đồng bộ tức thì giữa các tab trình duyệt cùng mở ứng dụng
+    window.addEventListener('storage', (e) => {
+      if (e.key === this.storage.key && e.newValue) {
+        try {
+          const updated = this.storage.mergeWithDefaults(JSON.parse(e.newValue));
+          this.storage.data = updated;
+          if (window.app && typeof window.app.render === 'function') {
+            window.app.data = updated;
+            window.app.render();
+          }
+        } catch (_) {}
+      }
+    });
+  }
+
+  _setPendingPush(pending) {
+    this.hasPendingPush = Boolean(pending);
+    if (this.hasPendingPush) {
+      localStorage.setItem('duospace_sync_pending', '1');
+    } else {
+      localStorage.removeItem('duospace_sync_pending');
+    }
   }
 
   get apiUrl() {
@@ -31,6 +73,13 @@ class CloudSync {
     const idToken = await window.authManager?.getIdToken();
     if (!idToken) {
       return false;
+    }
+
+    // Nếu còn thay đổi local chưa kịp đẩy lên Cloud (vd: vừa thêm ghi chú rồi refresh ngay),
+    // ưu tiên đẩy lên Cloud trước để không bị dữ liệu cũ trên Cloud ghi đè mất!
+    if (!force && this.hasPendingPush) {
+      const pushed = await this.pushToCloud();
+      if (pushed) return true;
     }
 
     try {
@@ -99,7 +148,15 @@ class CloudSync {
         }
 
         // Merge dữ liệu từ Cloud vào LocalStorage
-        const merged = this.storage.mergeWithDefaults(result.data);
+        // Bảo toàn các trường mới (notes, shoppingList, events, savingsGoals) nếu Worker chưa trả về trường đó
+        const localBefore = this.storage.getData() || {};
+        const cloudData = { ...result.data };
+        for (const key of ['notes', 'shoppingList', 'events', 'savingsGoals']) {
+          if (cloudData[key] === undefined && Array.isArray(localBefore[key])) {
+            cloudData[key] = localBefore[key];
+          }
+        }
+        const merged = this.storage.mergeWithDefaults(cloudData);
         this.storage.save(merged);
         if (window.app && typeof window.app.render === 'function') {
           window.app.data = merged;
@@ -115,12 +172,14 @@ class CloudSync {
     return false;
   }
 
-  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (tăng debounce lên 3.5s để gom nhiều thao tác thành 1 request)
-  debouncePushToCloud(delay = 3500) {
+  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (debounce 1.2s + đánh dấu pending để tránh mất dữ liệu khi refresh)
+  debouncePushToCloud(delay = 1200) {
     if (!this.isEnabled) return;
+    this._setPendingPush(true);
     if (this.syncTimeout) clearTimeout(this.syncTimeout);
 
     this.syncTimeout = setTimeout(() => {
+      this.syncTimeout = null;
       this.pushToCloud();
     }, delay);
   }
@@ -162,6 +221,7 @@ class CloudSync {
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const result = await res.json();
       if (result.success) {
+        this._setPendingPush(false);
         // Cập nhật ETag & Version mới từ phản hồi POST
         const newEtag = res.headers.get('ETag');
         const newVersion = result.version || parseInt(res.headers.get('X-Data-Version') || '0', 10);

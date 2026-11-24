@@ -26,15 +26,36 @@ class InvestmentModule {
   // ──────────────────────────────────────────────
   getAssetCatalog() {
     return {
-      'BTC': { type: '₿ BTC', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BTC', defaultInterval: 3600, icon: 'fa-brands fa-bitcoin', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
-      'BNB': { type: '💎 BNB', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BNB', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/60' },
-      'Vàng DOJI / SJC (VND/lượng)': { type: '🥇 Vàng', defaultIsUsd: false, psType: 'gold_vn', psSymbol: 'XAU', defaultInterval: 86400, icon: 'fa-solid fa-gem', iconColor: 'text-amber-600 bg-amber-100 dark:bg-amber-950/60' },
-      'Vàng thế giới (XAU/USD)': { type: '🥇 Vàng', defaultIsUsd: true, psType: 'gold_world', psSymbol: 'XAU', defaultInterval: 86400, icon: 'fa-solid fa-earth-americas', iconColor: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-950/60' },
-      'Bạc DOJI (VND/lượng)': { type: '🥈 Bạc', defaultIsUsd: false, psType: 'silver_vn', psSymbol: 'XAG', defaultInterval: 86400, icon: 'fa-solid fa-coins', iconColor: 'text-slate-600 bg-slate-200 dark:bg-slate-700/80 dark:text-slate-300' },
-      'Tiết kiệm USD': { type: '💵 USD', defaultIsUsd: true, psType: 'usd', psSymbol: 'USD', defaultInterval: 3600, icon: 'fa-solid fa-dollar-sign', iconColor: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/60' },
-      'Tiết kiệm VNĐ': { type: '🏦 Tiết kiệm', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-building-columns', iconColor: 'text-blue-500 bg-blue-100 dark:bg-blue-950/60' },
-      'Khác': { type: '💼 Khác', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-wallet', iconColor: 'text-indigo-500 bg-indigo-100 dark:bg-indigo-950/60' }
+      'BTC': { type: '₿ BTC', unit: 'BTC', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BTC', defaultInterval: 3600, icon: 'fa-brands fa-bitcoin', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
+      'BNB': { type: '💎 BNB', unit: 'BNB', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BNB', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/60' },
+      'Vàng DOJI / SJC (VND/chỉ)': { type: '🥇 Vàng', unit: 'chỉ', defaultIsUsd: false, psType: 'gold_vn', psSymbol: 'XAU', defaultInterval: 86400, icon: 'fa-solid fa-gem', iconColor: 'text-amber-600 bg-amber-100 dark:bg-amber-950/60' },
+      'Vàng thế giới (XAU/USD)': { type: '🥇 Vàng', unit: 'oz', defaultIsUsd: true, psType: 'gold_world', psSymbol: 'XAU', defaultInterval: 86400, icon: 'fa-solid fa-earth-americas', iconColor: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-950/60' },
+      'Bạc DOJI (VND/lượng)': { type: '🥈 Bạc', unit: 'lượng', defaultIsUsd: false, psType: 'silver_vn', psSymbol: 'XAG', defaultInterval: 86400, icon: 'fa-solid fa-coins', iconColor: 'text-slate-600 bg-slate-200 dark:bg-slate-700/80 dark:text-slate-300' },
+      'Tiết kiệm USD': { type: '💵 USD', unit: 'USD', defaultIsUsd: true, psType: 'usd', psSymbol: 'USD', defaultInterval: 3600, icon: 'fa-solid fa-dollar-sign', iconColor: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/60' },
+      'Tiết kiệm VNĐ': { type: '🏦 Tiết kiệm', unit: 'VNĐ', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-building-columns', iconColor: 'text-blue-500 bg-blue-100 dark:bg-blue-950/60' },
+      'Khác': { type: '💼 Khác', unit: 'đơn vị', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-wallet', iconColor: 'text-indigo-500 bg-indigo-100 dark:bg-indigo-950/60' }
     };
+  }
+
+  getAssetUnit(itemOrName) {
+    const isObj = itemOrName && typeof itemOrName === 'object';
+    if (isObj && itemOrName.unit) return itemOrName.unit;
+    const name = isObj ? (itemOrName.name || '') : String(itemOrName || '');
+    const catalog = this.getAssetCatalog();
+    if (catalog[name]?.unit) return catalog[name].unit;
+
+    const lower = name.toLowerCase();
+    const psType = isObj ? itemOrName.priceSource?.type : '';
+    if (psType === 'silver_vn' || lower.includes('bạc') || lower.includes('silver')) return 'lượng';
+    if (psType === 'gold_world' || lower.includes('xau/usd') || lower.includes('thế giới')) return 'oz';
+    if (psType === 'gold_vn' || lower.includes('vàng') || lower.includes('sjc') || lower.includes('doji')) {
+      return lower.includes('vnd/lượng') ? 'lượng' : 'chỉ';
+    }
+    if (lower.includes('btc') || lower.includes('bitcoin')) return 'BTC';
+    if (lower.includes('bnb') || lower.includes('binance')) return 'BNB';
+    if (lower.includes('tiết kiệm usd') || psType === 'usd') return 'USD';
+    if (lower.includes('tiết kiệm vnđ')) return 'VNĐ';
+    return 'đơn vị';
   }
 
   onAssetNameChange() {
@@ -55,12 +76,18 @@ class InvestmentModule {
       if (isUsdEl) isUsdEl.checked = info.defaultIsUsd;
     }
 
+    const unit = this.getAssetUnit(selVal);
+    const qtyUnitEl = document.getElementById('investQtyUnitLabel');
+    if (qtyUnitEl) qtyUnitEl.textContent = `(${unit})`;
+    const buyPriceUnitEl = document.getElementById('investBuyPriceUnitLabel');
+    if (buyPriceUnitEl) buyPriceUnitEl.textContent = unit;
+
     const hintEl = document.getElementById('investAutoPriceHint');
     if (hintEl) {
       if (info && info.psType !== 'manual') {
-        hintEl.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">⚡ Tự động cập nhật giá</span>';
+        hintEl.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">⚡ Giá TT tự cập nhật để tính lời/lỗ</span>';
       } else {
-        hintEl.innerHTML = '<span class="text-amber-600 dark:text-amber-400">✋ Nhập giá thủ công</span>';
+        hintEl.innerHTML = '<span class="text-amber-600 dark:text-amber-400">✋ Tài sản giữ nguyên theo giá vốn</span>';
       }
     }
   }
@@ -106,11 +133,11 @@ class InvestmentModule {
 
       document.getElementById('investQuantity').value = '';
       document.getElementById('investBuyPrice').value = item.buyPrice !== undefined ? Utils.formatPriceValue(item.buyPrice) : '';
-      document.getElementById('investCurrentPrice').value = item.currentPrice !== undefined ? Utils.formatPriceValue(item.currentPrice) : '';
       document.getElementById('investTarget').value = item.targetWeight || '';
       document.getElementById('investIsUsd').checked = item.isUsd || false;
       document.getElementById('investNotes').value = '';
       document.getElementById('saveInvestBtn').innerText = 'Lưu giao dịch mua';
+      this.onAssetNameChange();
     } else {
       document.getElementById('investFormTitle').innerText = 'Thêm Giao Dịch / Tài Sản Mới';
       if (nameSelect) {
@@ -126,7 +153,6 @@ class InvestmentModule {
 
       document.getElementById('investQuantity').value = '';
       document.getElementById('investBuyPrice').value = '';
-      document.getElementById('investCurrentPrice').value = '';
       document.getElementById('investTarget').value = '';
       document.getElementById('investIsUsd').checked = true;
       document.getElementById('investNotes').value = '';
@@ -153,19 +179,19 @@ class InvestmentModule {
 
     const quantity = parseFloat(document.getElementById('investQuantity').value);
     const buyPrice = Utils.parseDecimalInput(document.getElementById('investBuyPrice').value);
-    const currentPrice = Utils.parseDecimalInput(document.getElementById('investCurrentPrice').value);
     const targetWeight = parseFloat(document.getElementById('investTarget').value) || null;
     const isUsd = document.getElementById('investIsUsd').checked;
     const notes = Utils.sanitizeText(document.getElementById('investNotes').value);
     const purchaseDate = document.getElementById('investPurchaseDate')?.value || new Date().toISOString().split('T')[0];
 
-    if (!name || isNaN(quantity) || isNaN(buyPrice) || isNaN(currentPrice) || quantity <= 0) {
-      return alert('Vui lòng nhập đủ: Tên tài sản, Số lượng (> 0), Giá mua và Giá hiện tại!');
+    if (!name || isNaN(quantity) || isNaN(buyPrice) || quantity <= 0 || buyPrice < 0) {
+      return alert('Vui lòng nhập đủ: Tên tài sản, Số lượng (> 0) và Giá mua!');
     }
 
     const catalog = this.getAssetCatalog();
     const catInfo = catalog[name] || {};
     const type = catInfo.type || (name.includes('BTC') ? '₿ BTC' : (name.includes('BNB') ? '💎 BNB' : (name.includes('Bạc') ? '🥈 Bạc' : (name.includes('Vàng') ? '🥇 Vàng' : (name.includes('USD') ? '💵 USD' : '💼 Khác')))));
+    const unit = this.getAssetUnit(name);
 
     // Tự động xác định nguồn giá dựa trên tên tài sản, không cần DOM
     const priceSource = {
@@ -194,6 +220,7 @@ class InvestmentModule {
       notes: notes
     };
 
+    let savedIndex = existingIndex;
     if (existingIndex >= 0) {
       // Đã có tài sản: GOM NHÓM (Tính lại số lượng, giá vốn TB)
       const existing = this.app.data.investments[existingIndex];
@@ -210,9 +237,13 @@ class InvestmentModule {
 
       existing.name = name;
       existing.type = type;
+      existing.unit = existing.unit || unit;
       existing.quantity = totalQty;
       existing.buyPrice = avgBuyPrice;
-      existing.currentPrice = currentPrice;
+      // Giữ giá thị trường hiện có (nếu chưa có thì tạm bằng giá vốn TB, sau đó tự cập nhật)
+      if (existing.currentPrice === undefined || existing.currentPrice === null || isNaN(existing.currentPrice)) {
+        existing.currentPrice = avgBuyPrice;
+      }
       if (targetWeight !== null) existing.targetWeight = targetWeight;
       existing.isUsd = isUsd;
       existing.purchases = purchases;
@@ -224,13 +255,14 @@ class InvestmentModule {
       }
       existing.priceSource = priceSource;
     } else {
-      // Tạo tài sản mới
+      // Tạo tài sản mới: tạm gán currentPrice = buyPrice, giá thị trường sẽ tự cập nhật ngầm
       const newItem = {
         name,
         type,
+        unit,
         quantity,
         buyPrice,
-        currentPrice,
+        currentPrice: buyPrice,
         targetWeight,
         isUsd,
         notes,
@@ -238,13 +270,23 @@ class InvestmentModule {
         priceSource
       };
       this.app.data.investments.push(newItem);
+      savedIndex = this.app.data.investments.length - 1;
     }
 
-    this.app.log?.system(existingIndex >= 0 ? 'Thêm giao dịch mua tài sản' : 'Thêm tài sản đầu tư', `${name} · ${quantity} đơn vị · giá mua ${buyPrice.toLocaleString('vi-VN')}`);
+    this.app.log?.system(existingIndex >= 0 ? 'Thêm giao dịch mua tài sản' : 'Thêm tài sản đầu tư', `${name} · ${quantity} ${unit} · giá mua ${buyPrice.toLocaleString('vi-VN')}`);
     this.app.save();
     this.toggleForm();
     this.renderInvestmentList();
     this.recordDailyNetWorth();
+
+    // Tự động lấy giá thị trường ngầm ngay sau khi thêm tài sản tự động (không hiện alert)
+    const savedItem = this.app.data.investments[savedIndex];
+    if (savedItem && savedItem.priceSource && savedItem.priceSource.type !== 'manual' && typeof priceUpdater !== 'undefined') {
+      const needsImmediateFetch = existingIndex < 0 || savedItem.priceSource.fetchStatus !== 'success';
+      if (needsImmediateFetch) {
+        this.refreshSingle(savedIndex);
+      }
+    }
   }
 
   // ──────────────────────────────────────────────
@@ -552,13 +594,14 @@ class InvestmentModule {
         const isExpanded = !!this.expandedCards[item.name];
 
         const catalog = this.getAssetCatalog();
+        const assetUnit = this.getAssetUnit(item);
         let assetInfo = catalog[item.name];
         if (!assetInfo) {
           const upperName = (item.name || '').toUpperCase();
           if (upperName.includes('BTC') || upperName.includes('BITCOIN')) assetInfo = catalog['BTC'];
           else if (upperName.includes('BNB') || upperName.includes('BINANCE')) assetInfo = catalog['BNB'];
           else if (upperName.includes('BẠC') || upperName.includes('SILVER')) assetInfo = catalog['Bạc DOJI (VND/lượng)'];
-          else if (upperName.includes('VÀNG') || upperName.includes('SJC') || upperName.includes('DOJI')) assetInfo = catalog['Vàng DOJI / SJC (VND/lượng)'];
+          else if (upperName.includes('VÀNG') || upperName.includes('SJC') || upperName.includes('DOJI')) assetInfo = catalog['Vàng DOJI / SJC (VND/chỉ)'];
           else if (upperName.includes('USD') || upperName.includes('DOLLAR')) assetInfo = catalog['Tiết kiệm USD'];
           else if (upperName.includes('TIẾT KIỆM')) assetInfo = catalog['Tiết kiệm VNĐ'];
         }
@@ -625,7 +668,7 @@ class InvestmentModule {
                     <div>
                       <div class="font-semibold text-gray-800 dark:text-slate-200">
                         <span>${icon} ${p.date ? Utils.formatDate(p.date) : 'N/A'}</span>
-                        <span class="ml-2 font-bold ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${item.isUsd ? 'đơn vị' : 'lượng'}</span>
+                        <span class="ml-2 font-bold ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${assetUnit}</span>
                       </div>
                       <div class="text-gray-400 mt-0.5">
                         ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)} ${p.notes ? '• ' + Utils.escapeHtml(p.notes) : ''}
@@ -669,7 +712,7 @@ class InvestmentModule {
                 <p>Giá TT: <span class="font-semibold text-gray-800 dark:text-slate-200">${dollarSign}${cPrice.toLocaleString(priceFormat, { maximumFractionDigits: 4 })}</span></p>
               </div>
               <div class="text-right space-y-1.5 flex flex-col justify-between h-full">
-                <p>Tổng SL: <span class="font-semibold text-gray-800 dark:text-slate-200">${item.quantity.toLocaleString(priceFormat, { maximumFractionDigits: 6 })}</span></p>
+                <p>Tổng SL: <span class="font-semibold text-gray-800 dark:text-slate-200">${item.quantity.toLocaleString(priceFormat, { maximumFractionDigits: 6 })} ${assetUnit}</span></p>
                 <div class="flex space-x-1.5 justify-end mt-1 items-center">
                   ${refreshBtn}
                   <button onclick="window.app.investment.toggleCardHistory(${assetNameArg})" title="Xem lịch sử mua" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center justify-center transition-colors active:scale-95">
@@ -767,7 +810,10 @@ class InvestmentModule {
     const psSymbol = info.psSymbol || (upperName.includes('BTC') ? 'BTC' : (upperName.includes('BNB') ? 'BNB' : ''));
     if (psType === 'manual') return null;
     if (psType === 'crypto') return priceUpdater.fetchCryptoPrice(psSymbol);
-    if (psType === 'gold_vn') return priceUpdater.fetchVnGoldPrice();
+    if (psType === 'gold_vn') {
+      const isTael = name.toLowerCase().includes('vnd/lượng');
+      return priceUpdater.fetchVnGoldPrice(isTael ? 'tael' : 'chi');
+    }
     if (psType === 'gold_world') return priceUpdater.fetchGoldPriceUsd();
     if (psType === 'silver_vn') return priceUpdater.fetchVnSilverPrice();
     if (psType === 'usd') return priceUpdater.fetchUsdRate();
@@ -780,27 +826,15 @@ class InvestmentModule {
     if (name === 'Khác') {
       name = (document.getElementById('investCustomName')?.value || '').trim();
     }
-    if (!name) return alert('Vui lòng chọn hoặc nhập tên tài sản trước!');
+    if (!name) return null;
 
-    const catalog = this.getAssetCatalog();
-    const info = catalog[name] || {};
-    const psType = info.psType || (name.toUpperCase().includes('BTC') ? 'crypto' : (name.toUpperCase().includes('BNB') ? 'crypto' : (name.includes('Bạc') ? 'silver_vn' : (name.includes('Vàng') ? 'gold_vn' : 'manual'))));
-
-    if (psType === 'manual') {
-      alert(`Tài sản "${name}" là loại thủ công, bạn vui lòng tự nhập giá.`);
-      return;
-    }
-
-    const priceInput = document.getElementById('investCurrentPrice');
     const price = await this.fetchMarketPrice(name);
-
     if (price !== null && !isNaN(price)) {
-      const formattedPrice = Utils.formatPriceValue(parseFloat(price.toFixed(8)));
-      if (priceInput) priceInput.value = formattedPrice;
-      alert(`✅ Lấy giá thành công: ${formattedPrice} ${info.defaultIsUsd ? 'USD' : 'VNĐ'}`);
-    } else {
-      alert('❌ Không thể lấy giá tự động lúc này. Vui lòng kiểm tra kết nối mạng hoặc tự nhập giá.');
+      const priceInput = document.getElementById('investCurrentPrice');
+      if (priceInput) priceInput.value = Utils.formatPriceValue(parseFloat(price.toFixed(8)));
+      return price;
     }
+    return null;
   }
 
   // ──────────────────────────────────────────────
@@ -821,7 +855,7 @@ class InvestmentModule {
     }
 
     select.innerHTML = list.map((item, idx) => `
-      <option value="${idx}">${Utils.escapeHtml(item.name)} (${item.quantity} ${item.isUsd ? '$' : 'đ'})</option>
+      <option value="${idx}">${Utils.escapeHtml(item.name)} (${item.quantity} ${this.getAssetUnit(item)})</option>
     `).join('');
 
     if (preselectName) {
@@ -878,7 +912,7 @@ class InvestmentModule {
     const dollarSign = item.isUsd ? '$' : '';
     const priceFormat = item.isUsd ? 'en-US' : 'vi-VN';
 
-    if (qtyEl) qtyEl.innerText = `${item.quantity.toLocaleString(priceFormat)} đơn vị`;
+    if (qtyEl) qtyEl.innerText = `${item.quantity.toLocaleString(priceFormat)} ${this.getAssetUnit(item)}`;
     if (avgBuyEl) avgBuyEl.innerText = `${dollarSign}${bPrice.toLocaleString(priceFormat)}`;
     if (priceEl) priceEl.innerText = `${dollarSign}${cPrice.toLocaleString(priceFormat)}`;
     if (sellPriceInput && !sellPriceInput.value) {

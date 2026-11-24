@@ -91,22 +91,6 @@
 
       <!-- TAB 1: HOME -->
       <div id="tab-home" class="space-y-5 tab-content">
-        <section>
-          <div
-            class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-            <div
-              class="flex justify-between items-center text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1.5">
-              <span>% Hoàn thành To-Do</span>
-              <span id="homeTaskPct" class="text-blue-600 dark:text-blue-400 font-bold">0%</span>
-            </div>
-            <div class="w-full bg-gray-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden mt-2">
-              <div id="homeTaskProgressBar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
-            </div>
-            <div class="text-[11px] text-gray-400 dark:text-slate-500 mt-2"><span id="homeTaskDoneCount">0</span>/<span
-                id="homeTaskTotalCount">0</span> việc hoàn thành</div>
-          </div>
-        </section>
-
         <!-- UPCOMING REMINDERS WIDGET -->
         <section id="homeRemindersWidget" class="hidden">
           <div
@@ -290,7 +274,7 @@
                 class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none">
                 <option value="BTC" selected>₿ Bitcoin (BTC)</option>
                 <option value="BNB">💎 Binance Coin (BNB)</option>
-                <option value="Vàng DOJI / SJC (VND/lượng)">🥇 Vàng DOJI / SJC (VND/lượng)</option>
+                <option value="Vàng DOJI / SJC (VND/chỉ)">🥇 Vàng DOJI / SJC (VND/chỉ)</option>
                 <option value="Vàng thế giới (XAU/USD)">🥇 Vàng thế giới (XAU/USD)</option>
                 <option value="Bạc DOJI (VND/lượng)">🥈 Bạc DOJI (VND/lượng)</option>
                 <option value="Tiết kiệm USD">💵 Tiết kiệm USD</option>
@@ -310,6 +294,7 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Số lượng mua <span
+                  id="investQtyUnitLabel" class="text-indigo-500 dark:text-indigo-400">(BTC)</span> <span
                   class="text-red-500">*</span></label>
               <input type="number" step="any" id="investQuantity" placeholder="0"
                 class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
@@ -323,29 +308,12 @@
 
           <div
             class="space-y-2 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 đơn vị
-                  <span class="text-red-500">*</span></label>
-                <input type="text" inputmode="decimal" id="investBuyPrice" placeholder="Giá mua..."
-                  oninput="Utils.formatDecimalInput(this)"
-                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-              </div>
-              <div>
-                <div class="flex justify-between items-center mb-1">
-                  <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold">Giá thị trường <span
-                      class="text-red-500">*</span></label>
-                  <button type="button" onclick="fetchPriceForCurrentForm()"
-                    title="Lấy giá thị trường hiện tại từ Internet"
-                    class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold">
-                    <i class="fa-solid fa-rotate text-[9px]"></i>
-                    <span>Lấy giá live</span>
-                  </button>
-                </div>
-                <input type="text" inputmode="decimal" id="investCurrentPrice" placeholder="Giá TT..."
-                  oninput="Utils.formatDecimalInput(this)"
-                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
-              </div>
+            <div>
+              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 <span
+                  id="investBuyPriceUnitLabel">BTC</span> <span class="text-red-500">*</span></label>
+              <input type="text" inputmode="decimal" id="investBuyPrice" placeholder="Giá mua..."
+                oninput="Utils.formatDecimalInput(this)"
+                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
             </div>
             <div class="flex items-center justify-between pt-1">
               <div class="flex items-center">
@@ -356,8 +324,8 @@
                   Giá tính theo USD ($)
                 </label>
               </div>
-              <span id="investAutoPriceHint" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ Tự
-                động cập nhật giá</span>
+              <span id="investAutoPriceHint" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">⚡
+                Giá TT tự cập nhật để tính lời/lỗ</span>
             </div>
           </div>
 
@@ -494,6 +462,7 @@
                 <option value="Thay nhớt máy" selected>🛢️ Thay nhớt máy (Engine Oil)</option>
                 <option value="Thay nhớt lap / Hộp số">💧 Thay nhớt lap / Hộp số (Gear Oil)</option>
                 <option value="Thay lọc gió">💨 Thay lọc gió (Air Filter)</option>
+                <option value="Lọc bụi nồi">🧹 Lọc bụi nồi (CVT Dust Filter)</option>
                 <option value="Thay bugi">⚡ Thay bugi (Spark Plug)</option>
                 <option value="Thay nước làm mát">🌡️ Thay nước làm mát (Coolant)</option>
                 <option value="Thay dây curoa & Bi nồi">🔄 Thay dây curoa & Bi nồi (V-Belt & Rollers)</option>
@@ -1574,8 +1543,8 @@
   <script src="js/authConfig.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js"></script>
-  <script src="js/priceConfig.js"></script>
-  <script src="js/priceUpdater.js"></script>
+  <script src="js/priceConfig.js?v=3.2"></script>
+  <script src="js/priceUpdater.js?v=3.2"></script>
   <script src="js/ui/theme.js"></script>
   <script src="js/ui/sidebar.js"></script>
   <script src="js/ui/tabs.js"></script>
@@ -1583,19 +1552,19 @@
   <script src="js/charts/weight.js"></script>
   <script src="js/charts/investment.js"></script>
   <script src="js/modules/auth.js"></script>
-  <script src="js/modules/home.js"></script>
+  <script src="js/modules/home.js?v=3.2"></script>
   <script src="js/modules/todo.js"></script>
-  <script src="js/modules/investment.js"></script>
-  <script src="js/modules/motorbike.js"></script>
+  <script src="js/modules/investment.js?v=3.2"></script>
+  <script src="js/modules/motorbike.js?v=3.2"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
   <script src="js/modules/settings.js"></script>
-  <script src="js/modules/cloudSync.js"></script>
+  <script src="js/modules/cloudSync.js?v=3.2"></script>
   <script src="js/modules/log.js"></script>
   <script src="js/modules/shopping.js"></script>
   <script src="js/modules/calendar.js"></script>
   <script src="js/modules/notes.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=3.2"></script>
 </body>
 
 </html>

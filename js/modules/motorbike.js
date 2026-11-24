@@ -178,6 +178,16 @@ class MotorbikeModule {
         keywords: ['lọc gió', 'loc gio', 'air filter']
       },
       {
+        id: 'cvt_dust_filter',
+        name: 'Lọc bụi nồi (CVT Dust Filter)',
+        icon: 'fa-filter',
+        color: 'text-cyan-500',
+        intervalKm: 5000,
+        intervalMonths: 6,
+        recommendation: 'Khuyến nghị vệ sinh / thay sau 5.000 km hoặc 6 tháng',
+        keywords: ['lọc bụi nồi', 'loc bui noi', 'bụi nồi', 'bui noi']
+      },
+      {
         id: 'spark_plug',
         name: 'Bugi (Spark Plug)',
         icon: 'fa-bolt',
@@ -205,7 +215,7 @@ class MotorbikeModule {
         intervalKm: 20000,
         intervalMonths: 24,
         recommendation: 'Khuyến nghị kiểm tra sau 10.000 km, thay sau 20.000 km hoặc 2 năm',
-        keywords: ['curoa', 'dây curoa', 'bi nồi', 'nồi', 'noi']
+        keywords: ['curoa', 'dây curoa', 'bi nồi', 'vệ sinh nồi', 'làm nồi']
       },
       {
         id: 'brake_pads',

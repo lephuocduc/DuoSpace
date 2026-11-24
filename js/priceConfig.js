@@ -34,7 +34,7 @@ const PRICE_CONFIG = {
   // --- Gold: DOJI Nhẫn tròn 9999 Hưng Thịnh Vượng & World Gold (vang.today API, CORS OK) ---
   GOLD: {
     vangTodayApi: 'https://www.vang.today/api/prices',
-    dojiCode: 'DOJINHTV',         // DOJI Nhẫn tròn 9999 Hưng Thịnh Vượng (VND/lượng)
+    dojiCode: 'DOJINHTV',         // DOJI Nhẫn tròn 9999 Hưng Thịnh Vượng (VND/lượng -> chia 10 ra VND/chỉ)
     dojiFallbackCode: 'DOHNL',    // DOJI Hà Nội fallback (VND/lượng)
     sjcCode: 'SJL1L10',           // SJC 9999 fallback (VND/lượng)
     xauCode: 'XAUUSD',            // World gold XAU/USD (USD/oz)
@@ -43,13 +43,15 @@ const PRICE_CONFIG = {
     chartGoldPriceApi: 'https://www.chartgoldprice.com/api/data', // World gold fallback API
     refreshInterval: 86400, // 1 ngày
     taelToOz: 1.2057,       // 1 lượng VN = 1.2057 troy oz
+    chiPerTael: 10,         // 1 lượng = 10 chỉ
   },
 
-  // --- Silver: Bạc DOJI (VND/lượng) quy đổi từ XAG/VND (currency-api + CoinGecko KAG fallback, CORS OK) ---
+  // --- Silver: Bạc trong nước (VND/lượng) qua Cloudflare Worker (Phú Quý live) + CoinGecko KAG + currency-api fallback ---
   SILVER: {
+    workerEndpoint: '/api/prices/silver',
+    coingeckoId: 'kinesis-silver', // 1 KAG = 1 troy oz bạc vật chất (realtime)
     currencyApi: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xag.json',
     currencyApiFallback: 'https://latest.currency-api.pages.dev/v1/currencies/xag.json',
-    coingeckoId: 'kinesis-silver', // 1 KAG = 1 troy oz bạc vật chất
     taelToOz: 1.2057,              // 1 lượng VN = 1.2057 troy oz
     refreshInterval: 86400,        // 1 ngày
   },

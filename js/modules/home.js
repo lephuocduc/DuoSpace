@@ -8,23 +8,6 @@ class HomeModule {
   }
 
   render() {
-    const data = this.app.data;
-    const totalTasks = (data.todos || []).length;
-    const doneTasks = (data.todos || []).filter(t => t.done).length;
-    const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-
-    const homeTaskPct = document.getElementById('homeTaskPct');
-    if (homeTaskPct) homeTaskPct.innerText = `${pct}%`;
-
-    const homeTaskProgressBar = document.getElementById('homeTaskProgressBar');
-    if (homeTaskProgressBar) homeTaskProgressBar.style.width = `${pct}%`;
-
-    const homeTaskDoneCount = document.getElementById('homeTaskDoneCount');
-    if (homeTaskDoneCount) homeTaskDoneCount.innerText = doneTasks;
-
-    const homeTaskTotalCount = document.getElementById('homeTaskTotalCount');
-    if (homeTaskTotalCount) homeTaskTotalCount.innerText = totalTasks;
-
     this.renderUpcomingReminders();
     this.renderImportantReminders();
     this.updateDynamicInfo();

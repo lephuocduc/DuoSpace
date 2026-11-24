@@ -106,14 +106,18 @@ class PriceUpdater {
   }
 
   /**
-   * Fetch giá vàng DOJI trong nước (VND/lượng).
+   * Fetch giá vàng DOJI trong nước.
    * Ưu tiên vang.today (DOJINHTV -> DOHNL -> SJL1L10), fallback sang local Puppeteer scraper nếu có.
+   * @param {'chi'|'tael'} unit - 'chi' (VND/chỉ, mặc định) hoặc 'tael' (VND/lượng)
    * @returns {number|null}
    */
-  async fetchVnGoldPrice() {
-    const cacheKey = 'gold:DOJI_NHAN_9999';
+  async fetchVnGoldPrice(unit = 'chi') {
+    const chiPerTael = PRICE_CONFIG.GOLD.chiPerTael || 10;
+    const convertUnit = (pricePerTael) => (unit === 'tael' ? pricePerTael : Math.round(pricePerTael / chiPerTael));
+
+    const cacheKey = 'gold:DOJI_NHAN_9999_TAEL';
     const cached = this._getCached(cacheKey);
-    if (cached !== null) return cached;
+    if (cached !== null) return convertUnit(cached);
 
     // 1. Primary: vang.today API (HTTPS + CORS OK, hoạt động trực tiếp trên trình duyệt)
     const codes = [
@@ -125,7 +129,7 @@ class PriceUpdater {
       const price = await this._fetchVangToday(code, 'buy');
       if (price !== null && price >= 10000000 && price <= 500000000) {
         this._setCache(cacheKey, price);
-        return price;
+        return convertUnit(price);
       }
     }
 
@@ -149,7 +153,7 @@ class PriceUpdater {
       if (price > 0 && price < 10000000) price *= 1000;
       if (price >= 10000000 && price <= 500000000) {
         this._setCache(cacheKey, price);
-        return price;
+        return convertUnit(price);
       }
       throw new Error('Giá DOJI không hợp lệ');
     } catch (err) {
@@ -210,19 +214,60 @@ class PriceUpdater {
   }
 
   /**
-   * Fetch giá bạc DOJI trong nước (VND/lượng).
-   * Nguồn chính: currency-api (XAG/VND × 1.2057, CORS OK), fallback mirror & CoinGecko KAG.
+   * Fetch giá bạc trong nước (VND/lượng).
+   * Ưu tiên Cloudflare Worker (/api/prices/silver - lấy giá trực tiếp từ Phú Quý/giabac.vn),
+   * fallback sang CoinGecko KAG (realtime) rồi currency-api (XAG/VND × 1.2057).
    * @returns {number|null}
    */
   async fetchVnSilverPrice() {
-    const cacheKey = 'silver:DOJI_VND';
+    const cacheKey = 'silver:VN_TAEL_VND';
     const cached = this._getCached(cacheKey);
     if (cached !== null) return cached;
 
     const cfg = PRICE_CONFIG.SILVER || {};
     const taelToOz = cfg.taelToOz || 1.2057;
+    const isValidSilverTael = (p) => typeof p === 'number' && !isNaN(p) && p >= 100000 && p <= 50000000;
 
-    // 1. Primary & mirror: fawazahmed0 currency-api (XAG -> VND/oz -> VND/lượng)
+    // 1. Primary: Cloudflare Worker live Vietnam domestic silver price (giabac.phuquygroup.vn / giabac.vn)
+    const workerBase = (typeof CONFIG !== 'undefined' && CONFIG.D1_API_URL) ? CONFIG.D1_API_URL.replace(/\/$/, '') : '';
+    const workerUrl = cfg.workerApi || (workerBase && cfg.workerEndpoint ? `${workerBase}${cfg.workerEndpoint}` : '');
+    if (workerUrl) {
+      try {
+        const res = await fetch(workerUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const price = Number(data?.buy || data?.sell || data?.price || 0);
+          if (isValidSilverTael(price)) {
+            this._setCache(cacheKey, price);
+            return price;
+          }
+        }
+      } catch (err) {
+        console.warn('[PriceUpdater] Silver worker API error:', err);
+      }
+    }
+
+    // 2. Fallback 1: CoinGecko Kinesis Silver (1 KAG = 1 troy oz physical silver, realtime)
+    try {
+      const id = cfg.coingeckoId || 'kinesis-silver';
+      const url = `${PRICE_CONFIG.CRYPTO.api}${PRICE_CONFIG.CRYPTO.endpoint}?ids=${encodeURIComponent(id)}&vs_currencies=vnd`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const vndPerOz = Number(data?.[id]?.vnd);
+        if (vndPerOz > 0) {
+          const pricePerTael = Math.round((vndPerOz * taelToOz) / 1000) * 1000;
+          if (isValidSilverTael(pricePerTael)) {
+            this._setCache(cacheKey, pricePerTael);
+            return pricePerTael;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[PriceUpdater] Silver CoinGecko fallback error:', err);
+    }
+
+    // 3. Fallback 2: fawazahmed0 currency-api (XAG -> VND/oz -> VND/lượng)
     const currencyUrls = [
       cfg.currencyApi || 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xag.json',
       cfg.currencyApiFallback || 'https://latest.currency-api.pages.dev/v1/currencies/xag.json',
@@ -235,7 +280,7 @@ class PriceUpdater {
         const vndPerOz = Number(data?.xag?.vnd);
         if (vndPerOz > 0) {
           const pricePerTael = Math.round((vndPerOz * taelToOz) / 1000) * 1000;
-          if (pricePerTael >= 100000 && pricePerTael <= 50000000) {
+          if (isValidSilverTael(pricePerTael)) {
             this._setCache(cacheKey, pricePerTael);
             return pricePerTael;
           }
@@ -243,26 +288,6 @@ class PriceUpdater {
       } catch (err) {
         console.warn(`[PriceUpdater] Silver currency-api (${url}) error:`, err);
       }
-    }
-
-    // 2. Fallback: CoinGecko Kinesis Silver (1 KAG = 1 troy oz silver)
-    try {
-      const id = cfg.coingeckoId || 'kinesis-silver';
-      const url = `${PRICE_CONFIG.CRYPTO.api}${PRICE_CONFIG.CRYPTO.endpoint}?ids=${encodeURIComponent(id)}&vs_currencies=vnd`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const vndPerOz = Number(data?.[id]?.vnd);
-        if (vndPerOz > 0) {
-          const pricePerTael = Math.round((vndPerOz * taelToOz) / 1000) * 1000;
-          if (pricePerTael >= 100000 && pricePerTael <= 50000000) {
-            this._setCache(cacheKey, pricePerTael);
-            return pricePerTael;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('[PriceUpdater] Silver CoinGecko fallback error:', err);
     }
 
     return null;
@@ -313,8 +338,9 @@ class PriceUpdater {
           break;
 
         case 'gold_vn': {
-          // Vàng trong nước: VND/lượng → trực tiếp sử dụng không cần chuyển đổi
-          newPrice = await this.fetchVnGoldPrice();
+          // Vàng trong nước: mặc định tính theo chỉ (VND/chỉ), giữ tương thích ngược nếu tài sản ghi rõ VND/lượng
+          const isTael = item.unit === 'lượng' || (item.name || '').toLowerCase().includes('vnd/lượng');
+          newPrice = await this.fetchVnGoldPrice(isTael ? 'tael' : 'chi');
           // Nếu item tính theo USD, chuyển đổi ngược
           if (newPrice !== null && item.isUsd && usdRate > 0) {
             newPrice = newPrice / usdRate;
@@ -432,6 +458,21 @@ class PriceUpdater {
           lastUpdated: new Date(0).toISOString(), // force refresh
         };
         delete inv.priceSource.goldUnit;
+      }
+      // Migration: gold_vn tính theo chỉ nhưng bị lưu nhầm giá theo lượng (>= 50tr/lượng) → chia 10 ra VND/chỉ
+      if (inv.priceSource.type === 'gold_vn' && !inv.isUsd) {
+        const isExplicitTael = inv.unit === 'lượng' || (inv.name || '').toLowerCase().includes('vnd/lượng');
+        if (!isExplicitTael && typeof inv.currentPrice === 'number' && inv.currentPrice >= 50000000) {
+          return {
+            ...inv,
+            unit: inv.unit || 'chỉ',
+            currentPrice: Math.round(inv.currentPrice / (PRICE_CONFIG.GOLD.chiPerTael || 10)),
+            priceSource: {
+              ...inv.priceSource,
+              lastUpdated: new Date(0).toISOString(),
+            }
+          };
+        }
       }
       return inv;
     });
