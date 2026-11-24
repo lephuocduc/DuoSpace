@@ -721,18 +721,8 @@ class InvestmentModule {
               <div class="text-right space-y-1.5 flex flex-col justify-between h-full">
                 <p>Tổng SL: <span class="font-semibold text-gray-800 dark:text-slate-200">${item.quantity.toLocaleString(priceFormat, { maximumFractionDigits: 6 })} ${assetUnit}</span></p>
                 <div class="flex space-x-1.5 justify-end mt-1 items-center">
-                  ${refreshBtn}
-                  <button onclick="window.app.investment.toggleCardHistory(${assetNameArg})" title="Xem lịch sử mua" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center justify-center transition-colors active:scale-95">
+                  <button onclick="window.app.investment.toggleCardHistory(${assetNameArg})" title="Xem lịch sử mua bán" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 flex items-center justify-center transition-colors active:scale-95">
                     <i class="fa-solid fa-clock-rotate-left text-sm"></i>
-                  </button>
-                  <button onclick="window.app.investment.openForm(${item.rawIdx})" title="Thêm lần mua mới" class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 flex items-center justify-center transition-colors active:scale-95">
-                    <i class="fa-solid fa-plus text-sm"></i>
-                  </button>
-                  <button onclick="window.app.investment.openSellModal(${assetNameArg})" title="Bán bớt tài sản này" class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 flex items-center justify-center transition-colors active:scale-95">
-                    <i class="fa-solid fa-arrow-trend-down text-sm"></i>
-                  </button>
-                  <button onclick="window.app.investment.deleteItem(${item.rawIdx})" title="Xóa tài sản" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-500 hover:text-rose-600 flex items-center justify-center transition-colors active:scale-95">
-                    <i class="fa-solid fa-trash-can text-sm"></i>
                   </button>
                 </div>
               </div>
