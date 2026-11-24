@@ -420,7 +420,57 @@ class InvestmentModule {
     if (!this.app.data.netWorthHistory) this.app.data.netWorthHistory = [];
     const list = this.app.data.investments || [];
     const usdRate = this.app.data.usdRate || 25400;
+    const todayStr = new Date().toISOString().split('T')[0];
 
+    const toDateStr = (val) => {
+      if (!val || typeof val !== 'string') return null;
+      const m = val.match(/^(\d{4}-\d{2}-\d{2})/);
+      return m ? m[1] : null;
+    };
+
+    // 1. Thu thập các mốc ngày giao dịch trong quá khứ (< hôm nay) để tự động dựng lại lịch sử biến động
+    const pastDates = new Set();
+    list.forEach(item => {
+      (item.purchases || []).forEach(p => {
+        const d = toDateStr(p.date);
+        if (d && d < todayStr) pastDates.add(d);
+      });
+    });
+
+    const historyByDate = new Map();
+    this.app.data.netWorthHistory.forEach(h => {
+      if (h && h.date) historyByDate.set(h.date, h.value);
+    });
+
+    let changed = false;
+
+    for (const d of Array.from(pastDates).sort()) {
+      let dayValueVnd = 0;
+      list.forEach(item => {
+        const purchasesUpToDate = (item.purchases || [])
+          .filter(p => {
+            const pd = toDateStr(p.date);
+            return pd && pd <= d;
+          })
+          .sort((a, b) => (toDateStr(a.date) || '').localeCompare(toDateStr(b.date) || ''));
+
+        if (!purchasesUpToDate.length) return;
+        const qty = purchasesUpToDate.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
+        if (qty <= 0) return;
+
+        // Dùng giá giao dịch gần nhất tính tới ngày d
+        const refPrice = parseFloat(purchasesUpToDate[purchasesUpToDate.length - 1].buyPrice) || 0;
+        dayValueVnd += item.isUsd ? (qty * refPrice * usdRate) : (qty * refPrice);
+      });
+
+      const roundedDayVal = Math.round(dayValueVnd);
+      if (historyByDate.get(d) !== roundedDayVal) {
+        historyByDate.set(d, roundedDayVal);
+        changed = true;
+      }
+    }
+
+    // 2. Tính tổng giá trị thị trường hiện tại cho ngày hôm nay
     let totalValueVnd = 0;
     list.forEach(item => {
       const cPrice = item.currentPrice !== undefined ? item.currentPrice : (item.price || 0);
@@ -428,27 +478,19 @@ class InvestmentModule {
       totalValueVnd += value;
     });
 
-    const netWorthVnd = totalValueVnd;
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const existing = this.app.data.netWorthHistory.find(h => h.date === todayStr);
-    let changed = false;
-
-    if (existing) {
-      if (existing.value !== netWorthVnd) {
-        existing.value = netWorthVnd;
-        changed = true;
-      }
-    } else {
-      this.app.data.netWorthHistory.push({ date: todayStr, value: netWorthVnd });
-      // Giữ tối đa 60 ngày gần nhất
-      if (this.app.data.netWorthHistory.length > 60) {
-        this.app.data.netWorthHistory = this.app.data.netWorthHistory.slice(-60);
-      }
+    const netWorthVnd = Math.round(totalValueVnd);
+    if (historyByDate.get(todayStr) !== netWorthVnd) {
+      historyByDate.set(todayStr, netWorthVnd);
       changed = true;
     }
 
-    if (changed) {
+    const sortedHistory = Array.from(historyByDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-60)
+      .map(([date, value]) => ({ date, value }));
+
+    if (changed || sortedHistory.length !== this.app.data.netWorthHistory.length) {
+      this.app.data.netWorthHistory = sortedHistory;
       this.app.save();
     }
 

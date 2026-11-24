@@ -182,3 +182,40 @@ test('recordDailyNetWorth sums VND and USD assets accurately', () => {
   // 2*13,000,000 + 5*1,340,000 + 0.1*90,000*25,000 = 26,000,000 + 6,700,000 + 225,000,000 = 257,700,000
   assert.equal(app.data.netWorthHistory[0].value, 257700000);
 });
+
+test('recordDailyNetWorth backfills past purchase dates chronologically', () => {
+  const { app, inv } = setupInvestment();
+  app.data.usdRate = 25000;
+  app.data.investments = [
+    {
+      name: 'BTC',
+      quantity: 0.0007,
+      buyPrice: 63157.14,
+      currentPrice: 60000,
+      isUsd: true,
+      purchases: [
+        { date: '2026-11-14', quantity: 0.00027, buyPrice: 65000 },
+        { date: '2026-11-20', quantity: 0.00043, buyPrice: 62000 }
+      ]
+    },
+    {
+      name: 'Vàng DOJI / SJC (VND/chỉ)',
+      quantity: 0.5,
+      buyPrice: 13750000,
+      currentPrice: 13000000,
+      isUsd: false,
+      purchases: [
+        { date: '2026-11-15', quantity: 0.5, buyPrice: 13750000 }
+      ]
+    }
+  ];
+
+  inv.recordDailyNetWorth();
+  const dates = app.data.netWorthHistory.map(h => h.date);
+  assert.equal(dates[0], '2026-11-14');
+  assert.equal(dates[1], '2026-11-15');
+  assert.equal(dates[2], '2026-11-20');
+  assert.equal(dates.length, 4); // 3 past dates + today
+  assert.equal(app.data.netWorthHistory[0].value, Math.round(0.00027 * 65000 * 25000));
+  assert.equal(app.data.netWorthHistory[1].value, Math.round(0.00027 * 65000 * 25000 + 0.5 * 13750000));
+});
