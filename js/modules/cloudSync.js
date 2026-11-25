@@ -10,6 +10,7 @@ class CloudSync {
     this.cachedEtag = localStorage.getItem('duospace_sync_etag') || null;
     this.localVersion = parseInt(localStorage.getItem('duospace_sync_version') || '0', 10);
     this.hasPendingPush = localStorage.getItem('duospace_sync_pending') === '1';
+    this.pendingPushAt = parseInt(localStorage.getItem('duospace_sync_pending_at') || '0', 10);
     this._bindLifecycleListeners();
   }
 
@@ -47,9 +48,13 @@ class CloudSync {
   _setPendingPush(pending) {
     this.hasPendingPush = Boolean(pending);
     if (this.hasPendingPush) {
+      this.pendingPushAt = Date.now();
       localStorage.setItem('duospace_sync_pending', '1');
+      localStorage.setItem('duospace_sync_pending_at', String(this.pendingPushAt));
     } else {
+      this.pendingPushAt = 0;
       localStorage.removeItem('duospace_sync_pending');
+      localStorage.removeItem('duospace_sync_pending_at');
     }
   }
 
@@ -75,11 +80,38 @@ class CloudSync {
       return false;
     }
 
-    // Nếu còn thay đổi local chưa kịp đẩy lên Cloud (vd: vừa thêm ghi chú rồi refresh ngay),
-    // ưu tiên đẩy lên Cloud trước để không bị dữ liệu cũ trên Cloud ghi đè mất!
+    // Nếu còn thay đổi local chưa kịp đẩy lên Cloud (vd: vừa thêm ghi chú rồi refresh ngay):
+    // - Chỉ cho phép đẩy nếu thay đổi còn mới (< 5 phút) VÀ Cloud chưa có phiên bản mới hơn.
+    // - Nếu là session cũ để lâu (> 5 phút) hoặc Cloud đã có dữ liệu mới từ máy khác -> hủy pending push và tải từ Cloud về!
     if (!force && this.hasPendingPush) {
-      const pushed = await this.pushToCloud();
-      if (pushed) return true;
+      const PENDING_MAX_AGE_MS = 5 * 60 * 1000;
+      const pendingAge = this.pendingPushAt > 0 ? (Date.now() - this.pendingPushAt) : Infinity;
+      let canPushPending = pendingAge <= PENDING_MAX_AGE_MS;
+
+      if (canPushPending && this.localVersion > 0) {
+        try {
+          const checkHeaders = { 'Authorization': `Bearer ${idToken}` };
+          if (CONFIG.D1_APP_SECRET) checkHeaders['X-App-Secret'] = CONFIG.D1_APP_SECRET;
+          const checkRes = await fetch(`${this.apiUrl}/api/sync/check?v=${this.localVersion}`, {
+            method: 'GET',
+            headers: checkHeaders
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            if (checkData.success && checkData.changed && checkData.version > this.localVersion) {
+              canPushPending = false;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (canPushPending) {
+        const pushed = await this.pushToCloud();
+        if (pushed) return true;
+      } else {
+        console.warn('[CloudSync] Discarding stale local pending push to avoid overwriting newer Cloud data');
+        this._setPendingPush(false);
+      }
     }
 
     try {

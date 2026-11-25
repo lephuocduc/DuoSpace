@@ -69,3 +69,68 @@ test('pullFromCloud preserves local notes if cloud response omits notes field', 
   assert.equal(storage.getData().notes.length, 1);
   assert.equal(storage.getData().notes[0].title, 'Ghi chú quan trọng');
 });
+
+test('pullFromCloud discards stale pending push (> 5 min) and pulls fresh Cloud data instead', async () => {
+  const calls = [];
+  const { storage, sync } = setupCloudSync(async (url, opts) => {
+    calls.push({ url, method: opts.method });
+    return {
+      ok: true,
+      status: 200,
+      headers: { get() { return null; } },
+      async json() {
+        return {
+          success: true,
+          version: 10,
+          data: { usdRate: 25400, todos: [{ id: 't1', title: 'Cloud todo' }], investments: [] }
+        };
+      }
+    };
+  });
+
+  // Simulate an old session from 1 hour ago with pending flag stuck in localStorage
+  sync._setPendingPush(true);
+  sync.pendingPushAt = Date.now() - (60 * 60 * 1000);
+
+  const result = await sync.pullFromCloud(false);
+  assert.equal(result, true);
+  assert.equal(calls.some(c => c.method === 'POST'), false, 'Stale session must NOT POST over Cloud');
+  assert.equal(sync.hasPendingPush, false);
+  assert.equal(storage.getData().todos[0].title, 'Cloud todo');
+});
+
+test('pullFromCloud discards pending push if Cloud already has a newer version from another device', async () => {
+  const calls = [];
+  const { storage, sync } = setupCloudSync(async (url, opts) => {
+    calls.push({ url, method: opts.method });
+    if (url.includes('/api/sync/check')) {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get() { return null; } },
+        async json() { return { success: true, changed: true, version: 20 }; }
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      headers: { get() { return null; } },
+      async json() {
+        return {
+          success: true,
+          version: 20,
+          data: { usdRate: 25400, todos: [{ id: 't2', title: 'Newer device todo' }], investments: [] }
+        };
+      }
+    };
+  });
+
+  sync.localVersion = 15;
+  sync._setPendingPush(true);
+
+  const result = await sync.pullFromCloud(false);
+  assert.equal(result, true);
+  assert.equal(calls.some(c => c.method === 'POST'), false, 'Older localVersion must NOT overwrite newer Cloud version');
+  assert.equal(sync.hasPendingPush, false);
+  assert.equal(storage.getData().todos[0].title, 'Newer device todo');
+});
