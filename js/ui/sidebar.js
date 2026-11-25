@@ -5,6 +5,7 @@ const SidebarManager = {
   isOpen: false,
 
   toggle() {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) return;
     if (this.isOpen) {
       this.close();
     } else {

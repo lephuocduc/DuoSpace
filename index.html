@@ -35,15 +35,15 @@
   class="bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased min-h-screen flex justify-center transition-colors duration-200">
 
   <div
-    class="w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-300">
+    class="w-full max-w-md md:max-w-2xl lg:max-w-none lg:pl-72 bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl lg:shadow-none relative overflow-x-hidden transition-all duration-300">
 
     <!-- HEADER -->
     <header
       class="px-3.5 sm:px-6 pt-7 md:pt-6 pb-3.5 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 dark:border-slate-800 transition-colors">
-      <div class="flex justify-between items-center gap-2">
+      <div class="flex justify-between items-center gap-2 max-w-5xl mx-auto">
         <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
           <button onclick="toggleSidebar()" aria-label="Mở menu"
-            class="w-9 h-9 bg-gray-200/60 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-700 dark:text-slate-200 active:scale-95 transition-transform hover:bg-gray-300/60 dark:hover:bg-slate-700 shrink-0">
+            class="lg:hidden w-9 h-9 bg-gray-200/60 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-700 dark:text-slate-200 active:scale-95 transition-transform hover:bg-gray-300/60 dark:hover:bg-slate-700 shrink-0">
             <i class="fa-solid fa-bars text-base"></i>
           </button>
 
@@ -87,7 +87,7 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main id="mainScrollContainer" class="px-5 sm:px-8 pt-4 flex-1 overflow-y-auto pb-24 custom-scrollbar">
+    <main id="mainScrollContainer" class="px-5 sm:px-8 pt-4 flex-1 overflow-y-auto pb-24 lg:pb-10 custom-scrollbar w-full max-w-5xl mx-auto">
 
       <!-- TAB 1: HOME -->
       <div id="tab-home" class="space-y-5 tab-content">
@@ -1036,7 +1036,7 @@
 
     <!-- BOTTOM TAB BAR -->
     <nav
-      class="fixed bottom-0 w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 sm:px-12 py-2 flex justify-around md:justify-between items-center z-20 transition-all duration-300">
+      class="lg:hidden fixed bottom-0 w-full max-w-md md:max-w-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-6 sm:px-12 py-2 flex justify-around md:justify-between items-center z-20 transition-all duration-300">
       <button onclick="switchTab('home', 'Tổng quan', this)"
         class="tab-btn flex flex-col items-center text-blue-600 dark:text-blue-400 space-y-1 hover:text-blue-500 transition-colors">
         <i class="fa-solid fa-house text-lg md:text-xl"></i>
@@ -1060,11 +1060,11 @@
 
     <!-- SIDEBAR MENU -->
     <div id="sidebarOverlay" onclick="toggleSidebar()"
-      class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-30">
+      class="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-30">
     </div>
 
     <aside id="sidebar"
-      class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-40 -translate-x-full sidebar-transition shadow-2xl p-6 flex flex-col justify-between transition-colors">
+      class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-40 -translate-x-full lg:translate-x-0 sidebar-transition shadow-2xl lg:shadow-none lg:border-r lg:border-gray-200 dark:lg:border-slate-800 p-6 flex flex-col justify-between transition-colors">
       <div class="space-y-6">
         <div class="pt-6 pb-4 border-b border-gray-100 dark:border-slate-800 space-y-3">
           <h3 class="text-lg font-bold text-gray-900 dark:text-white">Gia Đình</h3>
@@ -1089,6 +1089,31 @@
         </div>
 
         <nav class="space-y-1.5 overflow-y-auto custom-scrollbar pb-20">
+          <div class="hidden lg:block space-y-1.5 mb-4">
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">Chính</h4>
+            <a href="#" onclick="switchTab('home', 'Tổng quan'); toggleSidebar();"
+              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
+              <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <i class="fa-solid fa-house text-xs"></i>
+              </div>
+              <span>Tổng quan</span>
+            </a>
+            <a href="#" onclick="switchTab('todo', 'Công việc chung'); toggleSidebar();"
+              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
+              <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <i class="fa-solid fa-list-check text-xs"></i>
+              </div>
+              <span>To-Do</span>
+            </a>
+            <a href="#" onclick="switchTab('investment', 'Tài Sản'); toggleSidebar();"
+              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-sm transition-colors">
+              <div class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                <i class="fa-solid fa-chart-line text-xs"></i>
+              </div>
+              <span>Tài sản</span>
+            </a>
+          </div>
+
           <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">Gia Đình & Sức Khỏe
           </h4>
           <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
@@ -1584,7 +1609,7 @@
   <script src="js/priceConfig.js?v=3.4"></script>
   <script src="js/priceUpdater.js?v=3.3"></script>
   <script src="js/ui/theme.js"></script>
-  <script src="js/ui/sidebar.js"></script>
+  <script src="js/ui/sidebar.js?v=3.1"></script>
   <script src="js/ui/tabs.js?v=3.7"></script>
   <script src="js/ui/modal.js"></script>
   <script src="js/charts/weight.js"></script>
