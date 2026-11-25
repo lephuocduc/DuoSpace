@@ -29,9 +29,9 @@ class InvestmentModule {
       'BTC': { type: '₿ BTC', unit: 'BTC', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BTC', defaultInterval: 3600, icon: 'fa-brands fa-bitcoin', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
       'BNB': { type: '💎 BNB', unit: 'BNB', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BNB', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/60' },
       'PAXG': { type: '🏅 PAXG', unit: 'PAXG', defaultIsUsd: true, psType: 'crypto', psSymbol: 'PAXG', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
-      'Vàng DOJI / SJC (VND/chỉ)': { type: '🥇 Vàng', unit: 'chỉ', defaultIsUsd: false, psType: 'gold_vn', psSymbol: 'XAU', defaultInterval: 3600, icon: 'fa-solid fa-gem', iconColor: 'text-amber-600 bg-amber-100 dark:bg-amber-950/60' },
+      'Vàng DOJI': { type: '🥇 Vàng', unit: 'chỉ', defaultIsUsd: false, psType: 'gold_vn', psSymbol: 'XAU', defaultInterval: 3600, icon: 'fa-solid fa-gem', iconColor: 'text-amber-600 bg-amber-100 dark:bg-amber-950/60' },
       'Vàng thế giới (XAU/USD)': { type: '🥇 Vàng', unit: 'oz', defaultIsUsd: true, psType: 'gold_world', psSymbol: 'XAU', defaultInterval: 3600, icon: 'fa-solid fa-earth-americas', iconColor: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-950/60' },
-      'Bạc DOJI (VND/lượng)': { type: '🥈 Bạc', unit: 'lượng', defaultIsUsd: false, psType: 'silver_vn', psSymbol: 'XAG', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-slate-600 bg-slate-200 dark:bg-slate-700/80 dark:text-slate-300' },
+      'Bạc DOJI': { type: '🥈 Bạc', unit: 'lượng', defaultIsUsd: false, psType: 'silver_vn', psSymbol: 'XAG', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-slate-600 bg-slate-200 dark:bg-slate-700/80 dark:text-slate-300' },
       'Tiết kiệm USD': { type: '💵 USD', unit: 'USD', defaultIsUsd: true, psType: 'usd', psSymbol: 'USD', defaultInterval: 3600, icon: 'fa-solid fa-dollar-sign', iconColor: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/60' },
       'Tiết kiệm VNĐ': { type: '🏦 Tiết kiệm', unit: 'VNĐ', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-building-columns', iconColor: 'text-blue-500 bg-blue-100 dark:bg-blue-950/60' },
       'Khác': { type: '💼 Khác', unit: 'đơn vị', defaultIsUsd: false, psType: 'manual', psSymbol: '', defaultInterval: 86400, icon: 'fa-solid fa-wallet', iconColor: 'text-indigo-500 bg-indigo-100 dark:bg-indigo-950/60' }
@@ -230,8 +230,13 @@ class InvestmentModule {
     const feeUnit = isCrypto ? unit : 'VNĐ';
 
     // Tự động xác định nguồn giá dựa trên tên tài sản, không cần DOM
+    const inferredPsType = catInfo.psType || (
+      name.toUpperCase().includes('BTC') || name.toUpperCase().includes('BNB') || name.toUpperCase().includes('PAXG')
+        ? 'crypto'
+        : (name.includes('Bạc') ? 'silver_vn' : (name.includes('Vàng') ? 'gold_vn' : 'manual'))
+    );
     const priceSource = {
-      type: catInfo.psType || 'manual',
+      type: inferredPsType,
       symbol: catInfo.psSymbol || '',
       refreshInterval: catInfo.defaultInterval || 3600,
       lastUpdated: new Date(0).toISOString(),
@@ -706,8 +711,8 @@ class InvestmentModule {
           if (upperName.includes('BTC') || upperName.includes('BITCOIN')) assetInfo = catalog['BTC'];
           else if (upperName.includes('BNB') || upperName.includes('BINANCE')) assetInfo = catalog['BNB'];
           else if (upperName.includes('PAXG') || upperName.includes('PAX GOLD')) assetInfo = catalog['PAXG'];
-          else if (upperName.includes('BẠC') || upperName.includes('SILVER')) assetInfo = catalog['Bạc DOJI (VND/lượng)'];
-          else if (upperName.includes('VÀNG') || upperName.includes('SJC') || upperName.includes('DOJI')) assetInfo = catalog['Vàng DOJI / SJC (VND/chỉ)'];
+          else if (upperName.includes('BẠC') || upperName.includes('SILVER')) assetInfo = catalog['Bạc DOJI'];
+          else if (upperName.includes('VÀNG') || upperName.includes('SJC') || upperName.includes('DOJI')) assetInfo = catalog['Vàng DOJI'];
           else if (upperName.includes('USD') || upperName.includes('DOLLAR')) assetInfo = catalog['Tiết kiệm USD'];
           else if (upperName.includes('TIẾT KIỆM')) assetInfo = catalog['Tiết kiệm VNĐ'];
         }
