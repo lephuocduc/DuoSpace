@@ -36,6 +36,7 @@ class MotorbikeModule {
     const s = this.app.data.settings || (this.app.data.settings = {});
     s.nmaxOdo = this._parseIntegerInput(document.getElementById('bikeNmaxOdo')?.value) || 0;
     s.grandeOdo = this._parseIntegerInput(document.getElementById('bikeGrandeOdo')?.value) || 0;
+    this.syncWearTodos(['NMAX', 'Grande'], { saveAndRender: false });
     this.app.save();
     this.app.render();
     alert('Đã cập nhật thông tin xe.');
@@ -89,6 +90,7 @@ class MotorbikeModule {
     const costLog = cost > 0 ? ` · ${cost.toLocaleString('vi-VN')} VNĐ` : '';
     this.app.log?.system('Thêm lịch sử bảo dưỡng', `${bike} · ${title} · ODO ${odo.toLocaleString('vi-VN')} km${costLog}`);
 
+    this.syncWearTodos([bike], { saveAndRender: false });
     this.app.save();
     this.app.render();
 
@@ -281,6 +283,7 @@ class MotorbikeModule {
     const modal = document.getElementById('bikePartsModal');
     if (!modal) return;
 
+    this.syncWearTodos([this.currentPartsBike]);
     this.renderPartsStatusContent();
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -288,6 +291,110 @@ class MotorbikeModule {
     if (typeof Utils !== 'undefined' && Utils.lockScroll) {
       Utils.lockScroll();
     }
+  }
+
+  getPartsStatus(bike) {
+    const s = this.app.data.settings || {};
+    const currentOdo = bike === 'NMAX' ? (s.nmaxOdo || 14850) : (s.grandeOdo || 8200);
+    const catalog = this.getPartsCatalog();
+    const maintenances = (this.app.data.bikeMaintenances || [])
+      .filter(m => m.bike === bike)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return catalog.map(part => {
+      const lastMaint = maintenances.find(m => {
+        const titleLower = (m.title || '').toLowerCase();
+        return part.keywords.some(k => titleLower.includes(k));
+      });
+
+      let lastDateStr = 'Chưa ghi nhận';
+      let lastOdo = 0;
+      let nextOdo = currentOdo + part.intervalKm;
+      let nextDateStr = 'Theo mốc ODO';
+      let kmUsed = 0;
+      let progressPct = 0;
+
+      if (lastMaint) {
+        lastDateStr = Utils.formatDate(lastMaint.date);
+        lastOdo = lastMaint.odo || 0;
+        kmUsed = Math.max(0, currentOdo - lastOdo);
+        nextOdo = lastOdo + part.intervalKm;
+
+        const nextDate = new Date(lastMaint.date);
+        nextDate.setMonth(nextDate.getMonth() + part.intervalMonths);
+        nextDateStr = Utils.formatDate(nextDate.toISOString());
+
+        progressPct = Math.min(100, Math.round((kmUsed / part.intervalKm) * 100));
+      } else {
+        kmUsed = currentOdo % part.intervalKm;
+        progressPct = Math.min(100, Math.round((kmUsed / part.intervalKm) * 100));
+        nextOdo = currentOdo + (part.intervalKm - kmUsed);
+      }
+
+      return { part, currentOdo, lastMaint, lastDateStr, lastOdo, nextOdo, nextDateStr, kmUsed, progressPct };
+    });
+  }
+
+  /**
+   * Tự động tạo task To-Do ưu tiên cao khi phụ tùng đạt mức hao mòn >= 90%.
+   * NMAX -> gán cho Đức ('Đ'), Grande -> gán cho Sương ('S'). Chống tạo trùng task chưa hoàn thành.
+   */
+  syncWearTodos(bikes = ['NMAX', 'Grande'], { saveAndRender = true } = {}) {
+    if (this.app?._isInitializing) return 0;
+    if (!Array.isArray(this.app.data.todos)) this.app.data.todos = [];
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.slice(0, 10);
+    let addedCount = 0;
+
+    for (const bike of bikes) {
+      const assignee = bike === 'NMAX' ? 'Đ' : 'S';
+      const statuses = this.getPartsStatus(bike);
+
+      for (const st of statuses) {
+        if (st.progressPct < 90) continue;
+
+        const autoPartKey = `${bike}:${st.part.id}`;
+        const title = `Thay/kiểm tra ${st.part.name} (${bike})`;
+        const exists = this.app.data.todos.some(t =>
+          !t.done && (
+            t.autoPartKey === autoPartKey ||
+            (t.title && t.title.trim().toLowerCase() === title.toLowerCase())
+          )
+        );
+        if (exists) continue;
+
+        this.app.data.todos.push({
+          id: Utils.createId('todo'),
+          title,
+          category: 'Xe Máy',
+          user: assignee,
+          priority: 'high',
+          notes: `Mức hao mòn đạt ${st.progressPct}% (ODO: ${st.currentOdo.toLocaleString('vi-VN')} km · Mốc thay: ${st.nextOdo.toLocaleString('vi-VN')} km). ${st.part.recommendation}`,
+          done: false,
+          startDate: todayStr,
+          dueDate: null,
+          date: nowIso,
+          createdAt: nowIso,
+          autoPartKey
+        });
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      this.app.log?.system('Tự động thêm việc bảo dưỡng xe', `Đã tạo ${addedCount} công việc ưu tiên cao cho phụ tùng hao mòn ≥ 90%`);
+      if (saveAndRender) {
+        this.app.save();
+        if (typeof this.app.renderParts === 'function') {
+          this.app.renderParts(['todo', 'home', 'motorbike']);
+        } else {
+          this.app.render();
+        }
+      }
+    }
+
+    return addedCount;
   }
 
   closePartsStatusModal() {

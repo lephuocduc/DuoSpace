@@ -117,3 +117,33 @@ test('renderMaintenanceList sorts newest date first and filters by NMAX / Grande
   assert.ok(htmlGrande.includes('Mới nhất'));
   assert.equal(htmlGrande.includes('Giữa'), false);
 });
+
+test('syncWearTodos auto-adds high-priority todo at >=90% wear (NMAX->Đ, Grande->S) without duplicates', () => {
+  const { app, moto } = setupMotorbike();
+  app.data.todos = [];
+  // NMAX ODO = 14850; engine_oil interval = 2500 -> last change at 12500 => kmUsed = 2350 (94% >= 90%)
+  // Grande ODO = 8200; engine_oil interval = 2500 -> last change at 5900 => kmUsed = 2300 (92% >= 90%)
+  app.data.settings = { nmaxOdo: 14850, grandeOdo: 8200 };
+  app.data.bikeMaintenances = [
+    { id: 'm1', bike: 'NMAX', title: 'Thay nhớt máy', odo: 12500, cost: 0, date: '2026-10-01T12:00:00.000Z' },
+    { id: 'm2', bike: 'Grande', title: 'Thay nhớt máy', odo: 5900, cost: 0, date: '2026-10-01T12:00:00.000Z' }
+  ];
+
+  const added1 = moto.syncWearTodos(['NMAX', 'Grande']);
+  assert.ok(added1 >= 2);
+
+  const nmaxOilTodo = app.data.todos.find(t => t.autoPartKey === 'NMAX:engine_oil');
+  const grandeOilTodo = app.data.todos.find(t => t.autoPartKey === 'Grande:engine_oil');
+  assert.ok(nmaxOilTodo, 'NMAX engine oil todo should be created');
+  assert.equal(nmaxOilTodo.priority, 'high');
+  assert.equal(nmaxOilTodo.user, 'Đ');
+  assert.equal(nmaxOilTodo.category, 'Xe Máy');
+
+  assert.ok(grandeOilTodo, 'Grande engine oil todo should be created');
+  assert.equal(grandeOilTodo.priority, 'high');
+  assert.equal(grandeOilTodo.user, 'S');
+
+  // Calling again should not create duplicates
+  const added2 = moto.syncWearTodos(['NMAX', 'Grande']);
+  assert.equal(added2, 0);
+});
