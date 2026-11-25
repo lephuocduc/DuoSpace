@@ -695,6 +695,7 @@ class InvestmentModule {
           const upperName = (item.name || '').toUpperCase();
           if (upperName.includes('BTC') || upperName.includes('BITCOIN')) assetInfo = catalog['BTC'];
           else if (upperName.includes('BNB') || upperName.includes('BINANCE')) assetInfo = catalog['BNB'];
+          else if (upperName.includes('PAXG') || upperName.includes('PAX GOLD')) assetInfo = catalog['PAXG'];
           else if (upperName.includes('BẠC') || upperName.includes('SILVER')) assetInfo = catalog['Bạc DOJI (VND/lượng)'];
           else if (upperName.includes('VÀNG') || upperName.includes('SJC') || upperName.includes('DOJI')) assetInfo = catalog['Vàng DOJI / SJC (VND/chỉ)'];
           else if (upperName.includes('USD') || upperName.includes('DOLLAR')) assetInfo = catalog['Tiết kiệm USD'];
@@ -748,7 +749,9 @@ class InvestmentModule {
               </button>
             </div>
             <div class="space-y-1.5">
-              ${purchases.map((p, pIdx) => {
+              ${purchases.map((p, pIdx) => ({ p, pIdx }))
+                .sort((a, b) => String(b.p.date || '').localeCompare(String(a.p.date || '')) || b.pIdx - a.pIdx)
+                .map(({ p, pIdx }) => {
                 const isSell = p.quantity < 0;
                 const displayQty = Math.abs(p.quantity);
                 const pCostVnd = item.isUsd ? (displayQty * p.buyPrice * usdRate) : (displayQty * p.buyPrice);
@@ -758,6 +761,7 @@ class InvestmentModule {
                 const icon     = isSell ? '📤' : '📥';
                 const typeLabel = isSell ? 'Giá bán' : 'Giá mua';
                 const amountColor = isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-700 dark:text-slate-300';
+                const feeStr = (p.fee && Number(p.fee) > 0) ? ` • Phí: ${p.fee} ${Utils.escapeHtml(p.feeUnit || '')}` : '';
                 return `
                   <div class="flex justify-between items-center ${rowBg} p-2.5 rounded-xl text-[11px] border">
                     <div>
@@ -766,7 +770,7 @@ class InvestmentModule {
                         <span class="ml-2 font-bold ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${assetUnit}</span>
                       </div>
                       <div class="text-gray-400 mt-0.5">
-                        ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)} ${p.notes ? '• ' + Utils.escapeHtml(p.notes) : ''}
+                        ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)}${feeStr} ${p.notes ? '• ' + Utils.escapeHtml(p.notes) : ''}
                       </div>
                     </div>
                     <div class="flex items-center space-x-2.5">
