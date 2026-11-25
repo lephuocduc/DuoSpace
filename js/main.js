@@ -103,6 +103,11 @@ class DuoSpaceApp {
 
   setupEventListeners() {
     document.addEventListener('keydown', (e) => {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        this.toggleAmounts();
+        return;
+      }
       if (e.key === 'Escape') {
         ModalManager.closeAddModal();
         ModalManager.closeCatHistoryModal();
