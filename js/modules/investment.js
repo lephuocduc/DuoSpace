@@ -28,6 +28,7 @@ class InvestmentModule {
     return {
       'BTC': { type: '₿ BTC', unit: 'BTC', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BTC', defaultInterval: 3600, icon: 'fa-brands fa-bitcoin', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
       'BNB': { type: '💎 BNB', unit: 'BNB', defaultIsUsd: true, psType: 'crypto', psSymbol: 'BNB', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/60' },
+      'PAXG': { type: '🏅 PAXG', unit: 'PAXG', defaultIsUsd: true, psType: 'crypto', psSymbol: 'PAXG', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-amber-500 bg-amber-100 dark:bg-amber-950/60' },
       'Vàng DOJI / SJC (VND/chỉ)': { type: '🥇 Vàng', unit: 'chỉ', defaultIsUsd: false, psType: 'gold_vn', psSymbol: 'XAU', defaultInterval: 3600, icon: 'fa-solid fa-gem', iconColor: 'text-amber-600 bg-amber-100 dark:bg-amber-950/60' },
       'Vàng thế giới (XAU/USD)': { type: '🥇 Vàng', unit: 'oz', defaultIsUsd: true, psType: 'gold_world', psSymbol: 'XAU', defaultInterval: 3600, icon: 'fa-solid fa-earth-americas', iconColor: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-950/60' },
       'Bạc DOJI (VND/lượng)': { type: '🥈 Bạc', unit: 'lượng', defaultIsUsd: false, psType: 'silver_vn', psSymbol: 'XAG', defaultInterval: 3600, icon: 'fa-solid fa-coins', iconColor: 'text-slate-600 bg-slate-200 dark:bg-slate-700/80 dark:text-slate-300' },
@@ -53,9 +54,20 @@ class InvestmentModule {
     }
     if (lower.includes('btc') || lower.includes('bitcoin')) return 'BTC';
     if (lower.includes('bnb') || lower.includes('binance')) return 'BNB';
+    if (lower.includes('paxg') || lower.includes('pax gold')) return 'PAXG';
     if (lower.includes('tiết kiệm usd') || psType === 'usd') return 'USD';
     if (lower.includes('tiết kiệm vnđ')) return 'VNĐ';
     return 'đơn vị';
+  }
+
+  isCryptoAsset(itemOrName) {
+    const isObj = itemOrName && typeof itemOrName === 'object';
+    if (isObj && itemOrName.priceSource?.type === 'crypto') return true;
+    const name = isObj ? (itemOrName.name || '') : String(itemOrName || '');
+    const catalog = this.getAssetCatalog();
+    if (catalog[name]?.psType === 'crypto') return true;
+    const upper = name.toUpperCase();
+    return upper.includes('BTC') || upper.includes('BNB') || upper.includes('PAXG') || upper.includes('ETH') || upper.includes('SOL');
   }
 
   onAssetNameChange() {
@@ -81,6 +93,11 @@ class InvestmentModule {
     if (qtyUnitEl) qtyUnitEl.textContent = `(${unit})`;
     const buyPriceUnitEl = document.getElementById('investBuyPriceUnitLabel');
     if (buyPriceUnitEl) buyPriceUnitEl.textContent = unit;
+    const feeUnitEl = document.getElementById('investFeeUnitLabel');
+    if (feeUnitEl) {
+      const feeUnit = this.isCryptoAsset(selVal) ? unit : 'VNĐ';
+      feeUnitEl.textContent = `(${feeUnit})`;
+    }
 
     const hintEl = document.getElementById('investAutoPriceHint');
     if (hintEl) {
@@ -179,6 +196,8 @@ class InvestmentModule {
 
     const quantity = parseFloat(document.getElementById('investQuantity').value);
     const buyPrice = Utils.parseDecimalInput(document.getElementById('investBuyPrice').value);
+    const rawFee = Utils.parseDecimalInput(document.getElementById('investFee')?.value);
+    const fee = (!isNaN(rawFee) && rawFee > 0) ? rawFee : 0;
     const targetWeight = parseFloat(document.getElementById('investTarget').value) || null;
     const isUsd = document.getElementById('investIsUsd').checked;
     const notes = Utils.sanitizeText(document.getElementById('investNotes').value);
@@ -190,14 +209,27 @@ class InvestmentModule {
 
     const catalog = this.getAssetCatalog();
     const catInfo = catalog[name] || {};
-    const type = catInfo.type || (name.includes('BTC') ? '₿ BTC' : (name.includes('BNB') ? '💎 BNB' : (name.includes('Bạc') ? '🥈 Bạc' : (name.includes('Vàng') ? '🥇 Vàng' : (name.includes('USD') ? '💵 USD' : '💼 Khác')))));
+    const type = catInfo.type || (name.includes('BTC') ? '₿ BTC' : (name.includes('BNB') ? '💎 BNB' : (name.includes('PAXG') ? '🏅 PAXG' : (name.includes('Bạc') ? '🥈 Bạc' : (name.includes('Vàng') ? '🥇 Vàng' : (name.includes('USD') ? '💵 USD' : '💼 Khác'))))));
     const unit = this.getAssetUnit(name);
+    const isCrypto = this.isCryptoAsset(name);
+
+    // Tính số lượng thực nhận & giá vốn hiệu dụng sau phí:
+    // - Crypto: phí trả bằng chính tài sản đó → thực nhận = quantity - fee, tổng tiền = quantity * buyPrice
+    // - Vàng / Bạc / VNĐ: phí trả bằng VNĐ → thực nhận = quantity, tổng tiền = quantity * buyPrice + fee
+    const netQuantity = isCrypto ? Math.max(0, quantity - fee) : quantity;
+    if (netQuantity <= 0) {
+      return alert('Phí giao dịch không được lớn hơn hoặc bằng số lượng mua!');
+    }
+    const effectiveBuyPrice = isCrypto
+      ? (quantity * buyPrice) / netQuantity
+      : (quantity * buyPrice + fee) / quantity;
+    const feeUnit = isCrypto ? unit : 'VNĐ';
 
     // Tự động xác định nguồn giá dựa trên tên tài sản, không cần DOM
     const priceSource = {
       type: catInfo.psType || 'manual',
       symbol: catInfo.psSymbol || '',
-      refreshInterval: catInfo.defaultInterval || 86400,
+      refreshInterval: catInfo.defaultInterval || 3600,
       lastUpdated: new Date(0).toISOString(),
       fetchStatus: 'pending'
     };
@@ -215,14 +247,18 @@ class InvestmentModule {
     const newPurchase = {
       id: Utils.createId('purchase'),
       date: purchaseDate,
-      quantity: quantity,
-      buyPrice: buyPrice,
+      quantity: netQuantity,
+      grossQuantity: quantity,
+      buyPrice: effectiveBuyPrice,
+      orderPrice: buyPrice,
+      fee: fee,
+      feeUnit: feeUnit,
       notes: notes
     };
 
     let savedIndex = existingIndex;
     if (existingIndex >= 0) {
-      // Đã có tài sản: GOM NHÓM (Tính lại số lượng, giá vốn TB)
+      // Đã có tài sản: GOM NHÓM (Tính lại số lượng, giá vốn TB theo bình quân gia quyền di động)
       const existing = this.app.data.investments[existingIndex];
       let purchases = Array.isArray(existing.purchases) && existing.purchases.length > 0 
         ? [...existing.purchases] 
@@ -230,23 +266,17 @@ class InvestmentModule {
 
       purchases.push(newPurchase);
 
-      // Tính tổng số lượng & giá vốn trung bình
-      const totalQty = purchases.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
-      const totalCost = purchases.reduce((sum, p) => sum + ((parseFloat(p.quantity) || 0) * (parseFloat(p.buyPrice) || 0)), 0);
-      const avgBuyPrice = totalQty > 0 ? (totalCost / totalQty) : buyPrice;
-
       existing.name = name;
       existing.type = type;
       existing.unit = existing.unit || unit;
-      existing.quantity = totalQty;
-      existing.buyPrice = avgBuyPrice;
+      existing.purchases = purchases;
+      this.recalculateAsset(existing);
       // Giữ giá thị trường hiện có (nếu chưa có thì tạm bằng giá vốn TB, sau đó tự cập nhật)
       if (existing.currentPrice === undefined || existing.currentPrice === null || isNaN(existing.currentPrice)) {
-        existing.currentPrice = avgBuyPrice;
+        existing.currentPrice = existing.buyPrice;
       }
       if (targetWeight !== null) existing.targetWeight = targetWeight;
       existing.isUsd = isUsd;
-      existing.purchases = purchases;
 
       // Giữ lại lastUpdated nếu cùng loại tài sản để tránh refresh ngay lập tức
       if (existing.priceSource && existing.priceSource.type === priceSource.type) {
@@ -255,14 +285,14 @@ class InvestmentModule {
       }
       existing.priceSource = priceSource;
     } else {
-      // Tạo tài sản mới: tạm gán currentPrice = buyPrice, giá thị trường sẽ tự cập nhật ngầm
+      // Tạo tài sản mới: tạm gán currentPrice = effectiveBuyPrice, giá thị trường sẽ tự cập nhật ngầm
       const newItem = {
         name,
         type,
         unit,
-        quantity,
-        buyPrice,
-        currentPrice: buyPrice,
+        quantity: netQuantity,
+        buyPrice: effectiveBuyPrice,
+        currentPrice: effectiveBuyPrice,
         targetWeight,
         isUsd,
         notes,
@@ -299,9 +329,22 @@ class InvestmentModule {
   }
 
   recalculateAsset(asset) {
-    const purchases = asset.purchases || [];
-    const totalQty = purchases.reduce((sum, purchase) => sum + (parseFloat(purchase.quantity) || 0), 0);
-    const totalCost = purchases.reduce((sum, purchase) => sum + (parseFloat(purchase.quantity) || 0) * (parseFloat(purchase.buyPrice) || 0), 0);
+    const purchases = [...(asset.purchases || [])].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    let totalQty = 0;
+    let totalCost = 0;
+    for (const p of purchases) {
+      const q = parseFloat(p.quantity) || 0;
+      const price = parseFloat(p.buyPrice) || 0;
+      if (q > 0) {
+        totalCost += q * price;
+        totalQty += q;
+      } else if (q < 0 && totalQty > 0) {
+        const sellQ = Math.min(totalQty, Math.abs(q));
+        const avg = totalCost / totalQty;
+        totalCost = Math.max(0, totalCost - sellQ * avg);
+        totalQty = Math.max(0, totalQty - sellQ);
+      }
+    }
     asset.quantity = totalQty;
     asset.buyPrice = totalQty > 0 ? totalCost / totalQty : 0;
   }
@@ -948,6 +991,10 @@ class InvestmentModule {
     const avgBuyEl = document.getElementById('sellCurrentAvgBuy');
     const priceEl = document.getElementById('sellCurrentPrice');
     const sellPriceInput = document.getElementById('sellPrice');
+    const sellFeeUnitEl = document.getElementById('sellFeeUnitLabel');
+    if (sellFeeUnitEl) sellFeeUnitEl.textContent = `(${item.isUsd ? 'USD' : 'VNĐ'})`;
+    const sellFeeInput = document.getElementById('sellFee');
+    if (sellFeeInput) sellFeeInput.value = '';
 
     const bPrice = item.buyPrice !== undefined ? item.buyPrice : 0;
     const cPrice = item.currentPrice !== undefined ? item.currentPrice : bPrice;
@@ -970,6 +1017,8 @@ class InvestmentModule {
 
     const sellQty = parseFloat(document.getElementById('sellQuantity')?.value);
     const sellPrice = Utils.parseDecimalInput(document.getElementById('sellPrice')?.value);
+    const rawSellFee = Utils.parseDecimalInput(document.getElementById('sellFee')?.value);
+    const sellFee = (!isNaN(rawSellFee) && rawSellFee > 0) ? rawSellFee : 0;
     const sellDate = document.getElementById('sellDate')?.value || new Date().toISOString().split('T')[0];
     const sellNotes = document.getElementById('sellNotes')?.value.trim();
 
@@ -985,9 +1034,12 @@ class InvestmentModule {
     }
 
     item.purchases.push({
+      id: Utils.createId('sell'),
       date: sellDate,
       quantity: -sellQty,
       buyPrice: sellPrice,
+      fee: sellFee,
+      feeUnit: item.isUsd ? 'USD' : 'VNĐ',
       notes: `[BÁN] ${sellNotes || 'Bán tài sản'}`
     });
 

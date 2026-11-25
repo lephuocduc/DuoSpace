@@ -14,6 +14,7 @@ const PRICE_CONFIG = {
       'ETH':  'ethereum',
       'XRP':  'ripple',
       'BNB':  'binancecoin',
+      'PAXG': 'pax-gold',
       'SOL':  'solana',
       'ADA':  'cardano',
       'DOGE': 'dogecoin',

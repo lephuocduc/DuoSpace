@@ -274,6 +274,7 @@
                 class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none">
                 <option value="BTC" selected>₿ Bitcoin (BTC)</option>
                 <option value="BNB">💎 Binance Coin (BNB)</option>
+                <option value="PAXG">🏅 PAX Gold (PAXG)</option>
                 <option value="Vàng DOJI / SJC (VND/chỉ)">🥇 Vàng DOJI / SJC (VND/chỉ)</option>
                 <option value="Vàng thế giới (XAU/USD)">🥇 Vàng thế giới (XAU/USD)</option>
                 <option value="Bạc DOJI (VND/lượng)">🥈 Bạc DOJI (VND/lượng)</option>
@@ -308,12 +309,20 @@
 
           <div
             class="space-y-2 bg-gray-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-slate-700/60">
-            <div>
-              <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 <span
-                  id="investBuyPriceUnitLabel">BTC</span> <span class="text-red-500">*</span></label>
-              <input type="text" inputmode="decimal" id="investBuyPrice" placeholder="Giá mua..."
-                oninput="Utils.formatDecimalInput(this)"
-                class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Giá mua / 1 <span
+                    id="investBuyPriceUnitLabel">BTC</span> <span class="text-red-500">*</span></label>
+                <input type="text" inputmode="decimal" id="investBuyPrice" placeholder="Giá mua..."
+                  oninput="Utils.formatDecimalInput(this)"
+                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Phí giao dịch <span
+                    id="investFeeUnitLabel" class="text-indigo-500 dark:text-indigo-400">(BTC)</span></label>
+                <input type="text" inputmode="decimal" id="investFee" placeholder="0"
+                  class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
             </div>
             <div class="flex items-center justify-between pt-1">
               <div class="flex items-center">
@@ -1265,6 +1274,13 @@
             </div>
           </div>
 
+          <div>
+            <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Phí bán <span
+                id="sellFeeUnitLabel" class="text-rose-500 dark:text-rose-400">(USD)</span></label>
+            <input type="text" inputmode="decimal" id="sellFee" placeholder="0"
+              class="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-xs focus:ring-1 focus:ring-rose-500 outline-none">
+          </div>
+
           <div class="grid grid-cols-2 gap-2.5">
             <div>
               <label class="block text-[11px] text-gray-600 dark:text-slate-400 font-semibold mb-1">Ngày bán</label>
@@ -1556,7 +1572,7 @@
   <script src="js/authConfig.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js?v=3.4"></script>
-  <script src="js/priceConfig.js?v=3.3"></script>
+  <script src="js/priceConfig.js?v=3.4"></script>
   <script src="js/priceUpdater.js?v=3.3"></script>
   <script src="js/ui/theme.js"></script>
   <script src="js/ui/sidebar.js"></script>
@@ -1567,7 +1583,7 @@
   <script src="js/modules/auth.js"></script>
   <script src="js/modules/home.js?v=3.2"></script>
   <script src="js/modules/todo.js"></script>
-  <script src="js/modules/investment.js?v=3.6"></script>
+  <script src="js/modules/investment.js?v=3.7"></script>
   <script src="js/modules/motorbike.js?v=3.6"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
