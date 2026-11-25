@@ -713,6 +713,23 @@
 
       <!-- TAB 8: CÀI ĐẶT -->
       <div id="tab-setting" class="hidden space-y-5 tab-content">
+        <!-- Sub-tabs trong Cài đặt -->
+        <div class="flex bg-gray-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+          <button type="button" onclick="switchSettingSubTab('general')" id="settingSubTab-general"
+            class="flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 transition-colors">
+            Cài đặt chung
+          </button>
+          <button type="button" onclick="switchSettingSubTab('log')" id="settingSubTab-log"
+            class="flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 transition-colors">
+            Nhật ký hệ thống
+          </button>
+          <button type="button" onclick="switchSettingSubTab('guide')" id="settingSubTab-guide"
+            class="flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 transition-colors">
+            Hướng dẫn
+          </button>
+        </div>
+
+        <div id="settingPanel-general" class="space-y-5">
         <!-- Tài khoản & Bảo mật -->
         <div
           class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
@@ -792,10 +809,10 @@
           </div>
           <p class="text-[11px] text-amber-600 dark:text-amber-400">Khôi phục sẽ thay thế toàn bộ dữ liệu hiện có.</p>
         </div>
-      </div>
+        </div>
 
-      <!-- TAB: NHẬT KÝ HỆ THỐNG -->
-      <div id="tab-log" class="hidden space-y-4 tab-content">
+        <!-- SUB-TAB: NHẬT KÝ HỆ THỐNG -->
+        <div id="settingPanel-log" class="hidden space-y-4">
         <section
           class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-3">
           <div class="flex items-center justify-between">
@@ -838,8 +855,8 @@
         </section>
       </div>
 
-      <!-- TAB: HƯỚNG DẪN -->
-      <div id="tab-guide" class="hidden space-y-4 tab-content">
+        <!-- SUB-TAB: HƯỚNG DẪN -->
+        <div id="settingPanel-guide" class="hidden space-y-4">
         <section
           class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-5 text-sm text-gray-600 dark:text-slate-300">
           <div class="border-b border-gray-100 dark:border-slate-700/60 pb-3">
@@ -945,6 +962,7 @@
             </p>
           </div>
         </section>
+        </div>
       </div>
 
       <!-- NEW TAB: SHOPPING LIST -->
@@ -1121,26 +1139,8 @@
           </a>
 
           <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Hệ Thống</h4>
-          <a href="#" onclick="switchTab('log', 'Nhật ký hệ thống'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-            <div
-              class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <i class="fa-solid fa-book text-xs"></i>
-            </div>
-            <span>Nhật ký hệ thống</span>
-          </a>
-
-          <a href="#" onclick="switchTab('guide', 'Hướng dẫn sử dụng'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-            <div
-              class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <i class="fa-solid fa-circle-question text-xs"></i>
-            </div>
-            <span>Hướng dẫn sử dụng</span>
-          </a>
-
           <a href="#" onclick="switchTab('setting', 'Cài Đặt'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors mt-4 border-t border-gray-100 dark:border-slate-800 pt-3">
+            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors">
             <div
               class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center">
               <i class="fa-solid fa-gear text-xs"></i>
@@ -1576,7 +1576,7 @@
   <script src="js/priceUpdater.js?v=3.3"></script>
   <script src="js/ui/theme.js"></script>
   <script src="js/ui/sidebar.js"></script>
-  <script src="js/ui/tabs.js?v=3.6"></script>
+  <script src="js/ui/tabs.js?v=3.7"></script>
   <script src="js/ui/modal.js"></script>
   <script src="js/charts/weight.js"></script>
   <script src="js/charts/investment.js?v=3.1"></script>

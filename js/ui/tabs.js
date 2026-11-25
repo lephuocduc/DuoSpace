@@ -14,9 +14,22 @@ const TabsManager = {
     'shopping': 'Đi Siêu Thị',
     'calendar': 'Lịch & Hóa Đơn',
     'notes': 'Sổ Tay Chung',
-    'setting': 'Cài Đặt',
-    'log': 'Nhật ký hệ thống',
-    'guide': 'Hướng dẫn sử dụng'
+    'setting': 'Cài Đặt'
+  },
+
+  switchSettingSubTab(subTab = 'general') {
+    const panels = ['general', 'log', 'guide'];
+    panels.forEach(id => {
+      const panel = document.getElementById(`settingPanel-${id}`);
+      const btn = document.getElementById(`settingSubTab-${id}`);
+      const active = id === subTab;
+      if (panel) panel.classList.toggle('hidden', !active);
+      if (btn) {
+        btn.className = active
+          ? 'flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 transition-colors'
+          : 'flex-1 py-1.5 rounded-lg text-gray-500 dark:text-slate-400 transition-colors';
+      }
+    });
   },
 
   initFromStorage() {
@@ -70,4 +83,8 @@ const TabsManager = {
 
 function switchTab(tabId, title, btn) {
   TabsManager.switchTab(tabId, title, btn);
+}
+
+function switchSettingSubTab(subTab) {
+  TabsManager.switchSettingSubTab(subTab);
 }
