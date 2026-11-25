@@ -63,19 +63,28 @@ class MotorbikeModule {
     const bike = document.getElementById('maintBikeName').value;
     const titleSelect = document.getElementById('maintTitleSelect');
     const customTitleInput = document.getElementById('maintCustomTitle');
-    
-    let title = titleSelect ? titleSelect.value : '';
-    if (title === 'Khác') {
-      title = customTitleInput ? customTitleInput.value.trim() : '';
+    const checkedBoxes = typeof document.querySelectorAll === 'function'
+      ? Array.from(document.querySelectorAll('.maint-item-checkbox:checked'))
+      : [];
+
+    const selectedItems = checkedBoxes.map(cb => cb.value).filter(Boolean);
+    const customTitle = customTitleInput ? customTitleInput.value.trim() : '';
+
+    let title = '';
+    if (selectedItems.length > 0 || customTitle) {
+      if (customTitle) selectedItems.push(customTitle);
+      title = selectedItems.join(', ');
+    } else if (titleSelect) {
+      title = titleSelect.value === 'Khác' ? customTitle : titleSelect.value;
     }
-    
+
     const odo = this._parseIntegerInput(document.getElementById('maintOdo').value);
     const rawCost = String(document.getElementById('maintCost')?.value ?? '').trim();
     const cost = rawCost === '' ? 0 : this._parseIntegerInput(rawCost);
     const date = document.getElementById('maintDate').value;
 
     if (!title || isNaN(odo) || !date || (rawCost !== '' && (isNaN(cost) || cost < 0))) {
-      return alert('Vui lòng nhập đầy đủ: Hạng mục, Số ODO và Ngày làm!');
+      return alert('Vui lòng chọn ít nhất 1 hạng mục bảo dưỡng, nhập Số ODO và Ngày làm!');
     }
 
     if (!this.app.data.bikeMaintenances) this.app.data.bikeMaintenances = [];
@@ -94,6 +103,7 @@ class MotorbikeModule {
     this.app.save();
     this.app.render();
 
+    checkedBoxes.forEach(cb => { cb.checked = false; });
     if (customTitleInput) customTitleInput.value = '';
     document.getElementById('maintOdo').value = '';
     document.getElementById('maintCost').value = '';

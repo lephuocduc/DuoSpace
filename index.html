@@ -467,25 +467,53 @@
           </div>
           <div class="space-y-2">
             <div>
-              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục bảo dưỡng</label>
-              <select id="maintTitleSelect" onchange="onMaintTitleChange()"
-                class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs font-semibold text-gray-800 dark:text-slate-200">
-                <option value="Thay nhớt máy" selected>🛢️ Thay nhớt máy (Engine Oil)</option>
-                <option value="Thay nhớt lap / Hộp số">💧 Thay nhớt lap / Hộp số (Gear Oil)</option>
-                <option value="Thay lọc gió">💨 Thay lọc gió (Air Filter)</option>
-                <option value="Lọc bụi nồi">🧹 Lọc bụi nồi (CVT Dust Filter)</option>
-                <option value="Thay bugi">⚡ Thay bugi (Spark Plug)</option>
-                <option value="Thay nước làm mát">🌡️ Thay nước làm mát (Coolant)</option>
-                <option value="Thay dây curoa & Bi nồi">🔄 Thay dây curoa & Bi nồi (V-Belt & Rollers)</option>
-                <option value="Thay má phanh / Bố thắng">🛑 Thay má phanh / Bố thắng (Brake Pads)</option>
-                <option value="Thay lốp xe">🔘 Thay lốp xe (Tires)</option>
-                <option value="Bảo dưỡng toàn bộ">🔧 Bảo dưỡng toàn bộ</option>
-                <option value="Khác">📝 Hạng mục khác (Tự nhập)</option>
-              </select>
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1.5">Hạng mục bảo dưỡng (chọn được nhiều mục)</label>
+              <div id="maintItemsGrid" class="grid grid-cols-2 gap-1.5 text-[11px]">
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay nhớt máy">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🛢️ Thay nhớt máy</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay nhớt lap / Hộp số">
+                  <span class="truncate text-gray-700 dark:text-slate-200">💧 Thay nhớt lap</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay lọc gió">
+                  <span class="truncate text-gray-700 dark:text-slate-200">💨 Thay lọc gió</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Lọc bụi nồi">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🧹 Lọc bụi nồi</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay bugi">
+                  <span class="truncate text-gray-700 dark:text-slate-200">⚡ Thay bugi</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay nước làm mát">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🌡️ Nước làm mát</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay dây curoa & Bi nồi">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🔄 Dây curoa & Bi nồi</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay má phanh / Bố thắng">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🛑 Má phanh / Thắng</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Thay lốp xe">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🔘 Thay lốp xe</span>
+                </label>
+                <label class="flex items-center space-x-1.5 p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-900/60 cursor-pointer hover:border-sky-400">
+                  <input type="checkbox" class="maint-item-checkbox rounded text-sky-600 focus:ring-0" value="Bảo dưỡng toàn bộ">
+                  <span class="truncate text-gray-700 dark:text-slate-200">🔧 Bảo dưỡng toàn bộ</span>
+                </label>
+              </div>
             </div>
-            <div id="maintCustomTitleRow" class="hidden">
-              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Tên hạng mục riêng</label>
-              <input type="text" id="maintCustomTitle" placeholder="Ví dụ: Rửa xe, thay bình ắc quy..."
+            <div id="maintCustomTitleRow">
+              <label class="block text-[10px] text-gray-500 font-semibold mb-1">Hạng mục khác (tùy chọn)</label>
+              <input type="text" id="maintCustomTitle" placeholder="VD: Rửa xe, thay bình ắc quy..."
                 class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
             </div>
           </div>
@@ -1619,7 +1647,7 @@
   <script src="js/modules/todo.js"></script>
   <script src="js/modules/investment.js?v=3.9"></script>
   <script src="js/modules/investment.js?v=3.11"></script>
-  <script src="js/modules/motorbike.js?v=3.8"></script>
+  <script src="js/modules/motorbike.js?v=3.9"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
   <script src="js/modules/settings.js"></script>
