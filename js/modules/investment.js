@@ -150,6 +150,8 @@ class InvestmentModule {
 
       document.getElementById('investQuantity').value = '';
       document.getElementById('investBuyPrice').value = item.buyPrice !== undefined ? Utils.formatPriceValue(item.buyPrice) : '';
+      const feeEl = document.getElementById('investFee');
+      if (feeEl) feeEl.value = '';
       document.getElementById('investTarget').value = item.targetWeight || '';
       document.getElementById('investIsUsd').checked = item.isUsd || false;
       document.getElementById('investNotes').value = '';
@@ -170,6 +172,8 @@ class InvestmentModule {
 
       document.getElementById('investQuantity').value = '';
       document.getElementById('investBuyPrice').value = '';
+      const feeEl = document.getElementById('investFee');
+      if (feeEl) feeEl.value = '';
       document.getElementById('investTarget').value = '';
       document.getElementById('investIsUsd').checked = true;
       document.getElementById('investNotes').value = '';
@@ -384,12 +388,12 @@ class InvestmentModule {
     if (asset.purchases.length === 0) {
       // Nếu xóa hết lượt mua, xóa luôn asset
       this.app.data.investments.splice(assetIdx, 1);
+      if (this.app.sync && this.app.data.investments.length === 0) {
+        this.app.sync._explicitEmptyInvestments = true;
+      }
     } else {
-      // Tính lại số lượng & giá vốn trung bình
-      const totalQty = asset.purchases.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
-      const totalCost = asset.purchases.reduce((sum, p) => sum + ((parseFloat(p.quantity) || 0) * (parseFloat(p.buyPrice) || 0)), 0);
-      asset.quantity = totalQty;
-      asset.buyPrice = totalQty > 0 ? (totalCost / totalQty) : 0;
+      // Tính lại số lượng & giá vốn trung bình theo bình quân gia quyền di động
+      this.recalculateAsset(asset);
     }
 
     this.app.save();

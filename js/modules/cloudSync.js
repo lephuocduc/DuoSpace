@@ -248,6 +248,11 @@ class CloudSync {
           ...currentData,
           allowEmptyInvestments: Boolean(this.localVersion > 0 && Array.isArray(currentData.investments) && currentData.investments.length === 0 && this._explicitEmptyInvestments),
           allowEmptyTodos: Boolean(this.localVersion > 0 && Array.isArray(currentData.todos) && currentData.todos.length === 0 && this._explicitEmptyTodos),
+          allowEmptyNotes: Boolean(this.localVersion > 0 && Array.isArray(currentData.notes) && currentData.notes.length === 0),
+          allowEmptyBikeMaintenances: Boolean(this.localVersion > 0 && Array.isArray(currentData.bikeMaintenances) && currentData.bikeMaintenances.length === 0),
+          allowEmptyHealthLogs: Boolean(this.localVersion > 0 && Array.isArray(currentData.healthLogs) && currentData.healthLogs.length === 0),
+          allowEmptyShoppingList: Boolean(this.localVersion > 0 && Array.isArray(currentData.shoppingList) && currentData.shoppingList.length === 0),
+          allowEmptyEvents: Boolean(this.localVersion > 0 && Array.isArray(currentData.events) && currentData.events.length === 0),
           userCode: rawUserCode
         })
       });
@@ -256,6 +261,8 @@ class CloudSync {
       const result = await res.json();
       if (result.success) {
         this._setPendingPush(false);
+        this._explicitEmptyInvestments = false;
+        this._explicitEmptyTodos = false;
         // Cập nhật ETag & Version mới từ phản hồi POST
         const newEtag = res.headers.get('ETag');
         const newVersion = result.version || parseInt(res.headers.get('X-Data-Version') || '0', 10);

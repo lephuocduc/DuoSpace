@@ -748,9 +748,12 @@ export default {
           }
         }
 
-        // Sync Bike Maintenances
+        // Sync Bike Maintenances (đồng bộ cả thao tác xóa, chống client rỗng ghi đè)
         if (Array.isArray(payload.bikeMaintenances)) {
-                    for (const bm of payload.bikeMaintenances) {
+          if (payload.bikeMaintenances.length > 0 || payload.allowEmptyBikeMaintenances === true) {
+            statements.push(db.prepare("DELETE FROM bike_maintenances"));
+          }
+          for (const bm of payload.bikeMaintenances) {
             const id = bm.id || `bike-${Math.random().toString(36).substr(2, 9)}`;
             statements.push(
               db.prepare(`
@@ -761,9 +764,12 @@ export default {
           }
         }
 
-        // Sync Health Logs
+        // Sync Health Logs (đồng bộ cả thao tác xóa, chống client rỗng ghi đè)
         if (Array.isArray(payload.healthLogs)) {
-                    for (const h of payload.healthLogs) {
+          if (payload.healthLogs.length > 0 || payload.allowEmptyHealthLogs === true) {
+            statements.push(db.prepare("DELETE FROM health_logs"));
+          }
+          for (const h of payload.healthLogs) {
             const id = h.id || `health-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = h.createdAt || h.date || new Date().toISOString();
             statements.push(
@@ -819,8 +825,11 @@ export default {
           }
         }
 
-        // Sync Shopping List
+        // Sync Shopping List (đồng bộ cả thao tác xóa, chống client rỗng ghi đè)
         if (Array.isArray(payload.shoppingList)) {
+          if (payload.shoppingList.length > 0 || payload.allowEmptyShoppingList === true) {
+            statements.push(db.prepare("DELETE FROM shopping_list"));
+          }
           for (const s of payload.shoppingList) {
             const id = s.id || `shop-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = s.createdAt || new Date().toISOString();
@@ -833,8 +842,11 @@ export default {
           }
         }
 
-        // Sync Events
+        // Sync Events (đồng bộ cả thao tác xóa, chống client rỗng ghi đè)
         if (Array.isArray(payload.events)) {
+          if (payload.events.length > 0 || payload.allowEmptyEvents === true) {
+            statements.push(db.prepare("DELETE FROM events"));
+          }
           for (const e of payload.events) {
             const id = e.id || `event-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = e.createdAt || e.date || new Date().toISOString();
@@ -849,9 +861,11 @@ export default {
           }
         }
 
-        // Sync Notes (xóa các ghi chú đã bị gỡ trên client để đồng bộ xóa giữa các tab/thiết bị)
+        // Sync Notes (đồng bộ xóa giữa các tab/thiết bị, chống client rỗng ghi đè xóa sạch)
         if (Array.isArray(payload.notes)) {
-          statements.push(db.prepare("DELETE FROM notes"));
+          if (payload.notes.length > 0 || payload.allowEmptyNotes === true) {
+            statements.push(db.prepare("DELETE FROM notes"));
+          }
           for (const n of payload.notes) {
             const id = n.id || `note-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = n.createdAt || new Date().toISOString();
