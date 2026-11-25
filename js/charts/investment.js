@@ -33,8 +33,9 @@ class InvestmentChart {
       if (categoryTotals[key] <= 0) delete categoryTotals[key];
     });
 
-    const labels = Object.keys(categoryTotals);
-    const dataValues = Object.values(categoryTotals);
+    const sortedEntries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+    const labels = sortedEntries.map(([label]) => label);
+    const dataValues = sortedEntries.map(([, val]) => val);
     const backgroundColors = [
       '#6366f1', '#3b82f6', '#f59e0b', '#10b981',
       '#ec4899', '#8b5cf6', '#06b6d4', '#64748b',
