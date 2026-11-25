@@ -148,6 +148,9 @@ class TodoModule {
     if (this.app.data.todos && this.app.data.todos[idx]) {
       const todo = this.app.data.todos[idx];
       this.app.data.todos.splice(idx, 1);
+      if (this.app.sync && this.app.data.todos.length === 0) {
+        this.app.sync._explicitEmptyTodos = true;
+      }
       this.app.log?.system('Xóa công việc', todo.title);
       this.app.save();
       this.app.renderParts(['home', 'todo', 'motorbike', 'cats', 'health', 'log']);

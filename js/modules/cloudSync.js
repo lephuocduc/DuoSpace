@@ -247,6 +247,7 @@ class CloudSync {
         body: JSON.stringify({
           ...currentData,
           allowEmptyInvestments: Boolean(this.localVersion > 0 && Array.isArray(currentData.investments) && currentData.investments.length === 0 && this._explicitEmptyInvestments),
+          allowEmptyTodos: Boolean(this.localVersion > 0 && Array.isArray(currentData.todos) && currentData.todos.length === 0 && this._explicitEmptyTodos),
           userCode: rawUserCode
         })
       });

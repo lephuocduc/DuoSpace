@@ -618,9 +618,12 @@ export default {
           )
         );
 
-        // Sync Todos
+        // Sync Todos (đồng bộ cả thao tác xóa, chống client rỗng ghi đè xóa sạch)
         if (Array.isArray(payload.todos)) {
-                    for (const item of payload.todos) {
+          if (payload.todos.length > 0 || payload.allowEmptyTodos === true) {
+            statements.push(db.prepare("DELETE FROM todos"));
+          }
+          for (const item of payload.todos) {
             const id = item.id || `todo-${Math.random().toString(36).substr(2, 9)}`;
             const createdAt = item.createdAt || item.date || new Date().toISOString();
             statements.push(
