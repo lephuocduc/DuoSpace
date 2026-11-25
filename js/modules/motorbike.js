@@ -346,22 +346,32 @@ class MotorbikeModule {
     const nowIso = new Date().toISOString();
     const todayStr = nowIso.slice(0, 10);
     let addedCount = 0;
+    let completedCount = 0;
 
     for (const bike of bikes) {
       const assignee = bike === 'NMAX' ? 'Đ' : 'S';
       const statuses = this.getPartsStatus(bike);
 
       for (const st of statuses) {
-        if (st.progressPct < 90) continue;
-
         const autoPartKey = `${bike}:${st.part.id}`;
         const title = `Thay/kiểm tra ${st.part.name} (${bike})`;
-        const exists = this.app.data.todos.some(t =>
-          !t.done && (
-            t.autoPartKey === autoPartKey ||
-            (t.title && t.title.trim().toLowerCase() === title.toLowerCase())
-          )
+        const matchAutoTodo = (t) => !t.done && (
+          t.autoPartKey === autoPartKey ||
+          (t.title && t.title.trim().toLowerCase() === title.toLowerCase())
         );
+
+        // Nếu mức hao mòn đã giảm xuống < 90% (vừa thêm lịch sử bảo dưỡng) -> tự động đánh dấu hoàn thành task
+        if (st.progressPct < 90) {
+          this.app.data.todos.forEach(t => {
+            if (matchAutoTodo(t)) {
+              t.done = true;
+              completedCount++;
+            }
+          });
+          continue;
+        }
+
+        const exists = this.app.data.todos.some(matchAutoTodo);
         if (exists) continue;
 
         this.app.data.todos.push({
@@ -382,8 +392,13 @@ class MotorbikeModule {
       }
     }
 
-    if (addedCount > 0) {
-      this.app.log?.system('Tự động thêm việc bảo dưỡng xe', `Đã tạo ${addedCount} công việc ưu tiên cao cho phụ tùng hao mòn ≥ 90%`);
+    if (addedCount > 0 || completedCount > 0) {
+      if (addedCount > 0) {
+        this.app.log?.system('Tự động thêm việc bảo dưỡng xe', `Đã tạo ${addedCount} công việc ưu tiên cao cho phụ tùng hao mòn ≥ 90%`);
+      }
+      if (completedCount > 0) {
+        this.app.log?.system('Tự động hoàn thành việc bảo dưỡng xe', `Đã đánh dấu xong ${completedCount} công việc sau khi ghi nhận bảo dưỡng`);
+      }
       if (saveAndRender) {
         this.app.save();
         if (typeof this.app.renderParts === 'function') {

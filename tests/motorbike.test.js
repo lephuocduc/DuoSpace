@@ -146,4 +146,17 @@ test('syncWearTodos auto-adds high-priority todo at >=90% wear (NMAX->Đ, Grande
   // Calling again should not create duplicates
   const added2 = moto.syncWearTodos(['NMAX', 'Grande']);
   assert.equal(added2, 0);
+
+  // Logging a fresh oil change for NMAX should automatically mark NMAX:engine_oil todo as done
+  app.data.bikeMaintenances.push({
+    id: 'm3',
+    bike: 'NMAX',
+    title: 'Thay nhớt máy',
+    odo: 14850,
+    cost: 250000,
+    date: '2026-11-25T12:00:00.000Z'
+  });
+  moto.syncWearTodos(['NMAX']);
+  assert.equal(nmaxOilTodo.done, true, 'NMAX engine oil todo should auto-complete after maintenance');
+  assert.equal(grandeOilTodo.done, false, 'Grande engine oil todo should remain incomplete');
 });
