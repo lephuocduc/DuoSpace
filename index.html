@@ -35,7 +35,7 @@
   class="bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans antialiased min-h-screen flex justify-center transition-colors duration-200">
 
   <div
-    class="w-full max-w-md md:max-w-2xl lg:max-w-none lg:pl-72 bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl lg:shadow-none relative overflow-x-hidden transition-all duration-300">
+    class="w-full max-w-md md:max-w-2xl lg:max-w-none lg:pl-64 bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col justify-between shadow-2xl lg:shadow-none relative overflow-x-hidden transition-all duration-300">
 
     <!-- HEADER -->
     <header
@@ -1092,127 +1092,124 @@
     </div>
 
     <aside id="sidebar"
-      class="fixed top-0 left-0 h-screen w-72 bg-white dark:bg-slate-900 z-40 -translate-x-full lg:translate-x-0 sidebar-transition shadow-2xl lg:shadow-none lg:border-r lg:border-gray-200 dark:lg:border-slate-800 p-5 flex flex-col justify-between transition-colors">
-      <div class="flex-1 min-h-0 flex flex-col space-y-4">
-        <div class="pt-2 pb-3 border-b border-gray-100 dark:border-slate-800 space-y-2.5 shrink-0">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Gia Đình</h3>
-          <div class="space-y-2">
-            <div class="bg-rose-50 dark:bg-rose-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+      class="fixed top-0 left-0 h-screen w-64 bg-white dark:bg-slate-900 z-40 -translate-x-full lg:translate-x-0 sidebar-transition shadow-2xl lg:shadow-none lg:border-r lg:border-gray-200 dark:lg:border-slate-800 px-4 py-3.5 flex flex-col justify-between transition-colors">
+      <div class="flex-1 min-h-0 flex flex-col space-y-2.5">
+        <div class="pb-2.5 border-b border-gray-100 dark:border-slate-800 space-y-2 shrink-0">
+          <div class="flex items-center justify-between px-1">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white tracking-tight">DuoSpace</h3>
+            <span class="text-[10px] font-semibold text-gray-400">Gia Đình</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="bg-rose-50 dark:bg-rose-950/40 rounded-lg px-2 py-1.5 flex items-center space-x-2">
               <div
-                class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs">Đ
+                class="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">Đ
               </div>
-              <div>
-                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Phước Đức (Đức)</p>
-              </div>
+              <p class="text-[11px] font-semibold text-gray-900 dark:text-slate-200 truncate">Đức</p>
             </div>
-            <div class="bg-blue-50 dark:bg-blue-950/40 rounded-lg p-2.5 flex items-center space-x-3">
+            <div class="bg-blue-50 dark:bg-blue-950/40 rounded-lg px-2 py-1.5 flex items-center space-x-2">
               <div
-                class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">S
+                class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">S
               </div>
-              <div>
-                <p class="text-xs font-semibold text-gray-900 dark:text-slate-200">Thu Sương (Sương)</p>
-              </div>
+              <p class="text-[11px] font-semibold text-gray-900 dark:text-slate-200 truncate">Sương</p>
             </div>
           </div>
         </div>
 
-        <nav class="flex-1 min-h-0 space-y-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
-          <div class="hidden lg:block space-y-1.5 mb-4">
-            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">Chính</h4>
+        <nav class="flex-1 min-h-0 space-y-0.5 overflow-y-auto custom-scrollbar pr-0.5 pb-2">
+          <div class="hidden lg:block space-y-0.5 mb-2">
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-1 px-2.5">Chính</h4>
             <a href="#" onclick="switchTab('home', 'Tổng quan'); toggleSidebar();"
-              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-              <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <i class="fa-solid fa-house text-xs"></i>
+              class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-[13px] transition-colors">
+              <div class="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-house text-[11px]"></i>
               </div>
               <span>Tổng quan</span>
             </a>
             <a href="#" onclick="switchTab('todo', 'Công việc chung'); toggleSidebar();"
-              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-sm transition-colors">
-              <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                <i class="fa-solid fa-list-check text-xs"></i>
+              class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 font-medium text-[13px] transition-colors">
+              <div class="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-list-check text-[11px]"></i>
               </div>
               <span>To-Do</span>
             </a>
             <a href="#" onclick="switchTab('investment', 'Tài Sản'); toggleSidebar();"
-              class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-sm transition-colors">
-              <div class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                <i class="fa-solid fa-chart-line text-xs"></i>
+              class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 font-medium text-[13px] transition-colors">
+              <div class="w-6 h-6 rounded-md bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-chart-line text-[11px]"></i>
               </div>
               <span>Tài sản</span>
             </a>
           </div>
 
-          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">Gia Đình & Sức Khỏe
-          </h4>
+          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-2 px-2.5">Gia Đình & Sức Khỏe</h4>
           <a href="#" onclick="switchTab('motorbike', 'Xe Máy'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-800 hover:text-sky-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <i class="fa-solid fa-motorcycle text-xs"></i>
+              class="w-6 h-6 rounded-md bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-motorcycle text-[11px]"></i>
             </div>
             <span>Xe Máy</span>
           </a>
 
           <a href="#" onclick="switchTab('cats', 'Mun & Bông'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-              <i class="fa-solid fa-cat text-xs"></i>
+              class="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-cat text-[11px]"></i>
             </div>
             <span>Mun, Bông</span>
           </a>
 
           <a href="#" onclick="switchTab('health', 'Sức Khỏe'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <i class="fa-solid fa-heart-pulse text-xs"></i>
+              class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-heart-pulse text-[11px]"></i>
             </div>
             <span>Sức Khỏe</span>
           </a>
 
-          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Công Cụ & Kế Hoạch
-          </h4>
+          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-2.5 px-2.5">Công Cụ & Kế Hoạch</h4>
           <a href="#" onclick="switchTab('shopping', 'Đi Siêu Thị'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800 hover:text-orange-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-800 hover:text-orange-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center">
-              <i class="fa-solid fa-basket-shopping text-xs"></i>
+              class="w-6 h-6 rounded-md bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-basket-shopping text-[11px]"></i>
             </div>
             <span>Đi Siêu Thị</span>
           </a>
 
           <a href="#" onclick="switchTab('calendar', 'Lịch & Hóa Đơn'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 hover:text-purple-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 hover:text-purple-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <i class="fa-regular fa-calendar-days text-xs"></i>
+              class="w-6 h-6 rounded-md bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <i class="fa-regular fa-calendar-days text-[11px]"></i>
             </div>
             <span>Lịch & Hóa Đơn</span>
           </a>
 
           <a href="#" onclick="switchTab('notes', 'Sổ Tay Chung'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-600 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-              <i class="fa-regular fa-note-sticky text-xs"></i>
+              class="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <i class="fa-regular fa-note-sticky text-[11px]"></i>
             </div>
             <span>Sổ Tay Chung</span>
           </a>
 
-          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Hệ Thống</h4>
+          <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 mt-2.5 px-2.5">Hệ Thống</h4>
           <a href="#" onclick="switchTab('setting', 'Cài Đặt'); toggleSidebar();"
-            class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors">
+            class="flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 font-medium text-[13px] transition-colors">
             <div
-              class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center">
-              <i class="fa-solid fa-gear text-xs"></i>
+              class="w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-gear text-[11px]"></i>
             </div>
-            <span>Cài Đặt (Setting)</span>
+            <span>Cài Đặt</span>
           </a>
         </nav>
       </div>
 
-      <div class="space-y-3 border-t border-gray-100 dark:border-slate-800 pt-4">
+      <div class="space-y-2 border-t border-gray-100 dark:border-slate-800 pt-2.5 shrink-0">
         <!-- Thông tin tài khoản đăng nhập hiện tại -->
         <div id="authSidebarUser"
           class="hidden flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-800">
@@ -1646,7 +1643,7 @@
   <script src="js/modules/home.js?v=3.2"></script>
   <script src="js/modules/todo.js"></script>
   <script src="js/modules/investment.js?v=3.9"></script>
-  <script src="js/modules/investment.js?v=3.13"></script>
+  <script src="js/modules/investment.js?v=3.12"></script>
   <script src="js/modules/motorbike.js?v=3.9"></script>
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js"></script>
