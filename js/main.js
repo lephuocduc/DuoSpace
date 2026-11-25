@@ -118,6 +118,12 @@ class DuoSpaceApp {
         if (this.motorbike && typeof this.motorbike.closePartsStatusModal === 'function') {
           this.motorbike.closePartsStatusModal();
         }
+        if (this.notes && typeof this.notes.closeModal === 'function') {
+          this.notes.closeModal();
+        }
+        if (this.calendar && typeof this.calendar.closeModal === 'function') {
+          this.calendar.closeModal();
+        }
       }
     });
     window.addEventListener('error', event => {
