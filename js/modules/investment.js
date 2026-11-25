@@ -14,6 +14,7 @@ class InvestmentModule {
     this.currentFilter = 'all';
     this.searchQuery = '';
     this.expandedCards = {}; // lưu trạng thái mở rộng lịch sử mua { [assetName]: boolean }
+    this.historyLimits = {}; // số giao dịch hiển thị mặc định (10) cho mỗi tài sản
   }
 
   render() {
@@ -334,6 +335,14 @@ class InvestmentModule {
 
   toggleCardHistory(assetName) {
     this.expandedCards[assetName] = !this.expandedCards[assetName];
+    if (!this.expandedCards[assetName]) {
+      this.historyLimits[assetName] = 10;
+    }
+    this.renderInvestmentList(false);
+  }
+
+  loadMoreCardHistory(assetName) {
+    this.historyLimits[assetName] = (this.historyLimits[assetName] || 10) + 10;
     this.renderInvestmentList(false);
   }
 
@@ -754,19 +763,24 @@ class InvestmentModule {
           sellCount > 0 ? `<span class="inline-flex items-center space-x-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-semibold whitespace-nowrap shrink-0"><i class="fa-solid fa-arrow-trend-down text-[8px]"></i><span>${sellCount} bán</span></span>` : ''
         ].filter(Boolean).join(' ');
 
-        // Purchases History section HTML
+        // Purchases History section HTML (hiển thị trước 10 giao dịch mới nhất, có nút Xem thêm)
+        const sortedPurchases = purchases
+          .map((p, pIdx) => ({ p, pIdx }))
+          .sort((a, b) => String(b.p.date || '').localeCompare(String(a.p.date || '')) || b.pIdx - a.pIdx);
+        const historyLimit = this.historyLimits[item.name] || 10;
+        const visiblePurchases = sortedPurchases.slice(0, historyLimit);
+        const remainingCount = sortedPurchases.length - visiblePurchases.length;
+
         const purchasesHtml = `
           <div class="mt-2.5 pt-2.5 border-t border-gray-100 dark:border-slate-700/80 ${isExpanded ? '' : 'hidden'}">
             <div class="flex justify-between items-center mb-1.5">
-              <span class="text-[11px] font-bold text-gray-700 dark:text-slate-300">Lịch sử giao dịch</span>
+              <span class="text-[11px] font-bold text-gray-700 dark:text-slate-300">Lịch sử giao dịch (${sortedPurchases.length})</span>
               <button onclick="window.app.investment.openForm(-1, ${assetNameArg})" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-md hover:underline">
                 + Thêm lần mua
               </button>
             </div>
             <div class="space-y-1.5">
-              ${purchases.map((p, pIdx) => ({ p, pIdx }))
-                .sort((a, b) => String(b.p.date || '').localeCompare(String(a.p.date || '')) || b.pIdx - a.pIdx)
-                .map(({ p, pIdx }) => {
+              ${visiblePurchases.map(({ p, pIdx }) => {
                 const isSell = p.quantity < 0;
                 const displayQty = Math.abs(p.quantity);
                 const pCostVnd = item.isUsd ? (displayQty * p.buyPrice * usdRate) : (displayQty * p.buyPrice);
@@ -798,6 +812,12 @@ class InvestmentModule {
                 `;
               }).join('')}
             </div>
+            ${remainingCount > 0 ? `
+              <button onclick="window.app.investment.loadMoreCardHistory(${assetNameArg})"
+                class="w-full mt-2 py-1.5 bg-gray-100 dark:bg-slate-700/70 hover:bg-gray-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-[11px] font-semibold transition-colors">
+                Xem thêm (${remainingCount} giao dịch cũ hơn)
+              </button>
+            ` : ''}
           </div>
         `;
 
