@@ -228,22 +228,25 @@ class PriceUpdater {
     const taelToOz = cfg.taelToOz || 1.2057;
     const isValidSilverTael = (p) => typeof p === 'number' && !isNaN(p) && p >= 100000 && p <= 50000000;
 
-    // 1. Primary: Cloudflare Worker live Vietnam domestic silver price (giabac.phuquygroup.vn / giabac.vn)
+    // 1. Primary: Cloudflare Worker live Vietnam domestic silver price (banggia.doji.vn)
+    // Retry 1 lần nếu gặp lỗi mạng thoáng qua để tránh rơi xuống giá bạc thế giới thấp hơn giá DOJI.
     const workerBase = (typeof CONFIG !== 'undefined' && CONFIG.D1_API_URL) ? CONFIG.D1_API_URL.replace(/\/$/, '') : '';
     const workerUrl = cfg.workerApi || (workerBase && cfg.workerEndpoint ? `${workerBase}${cfg.workerEndpoint}` : '');
     if (workerUrl) {
-      try {
-        const res = await fetch(workerUrl);
-        if (res.ok) {
-          const data = await res.json();
-          const price = Number(data?.buy || data?.sell || data?.price || 0);
-          if (isValidSilverTael(price)) {
-            this._setCache(cacheKey, price);
-            return price;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(workerUrl);
+          if (res.ok) {
+            const data = await res.json();
+            const price = Number(data?.buy || data?.sell || data?.price || 0);
+            if (isValidSilverTael(price)) {
+              this._setCache(cacheKey, price);
+              return price;
+            }
           }
+        } catch (err) {
+          console.warn(`[PriceUpdater] Silver worker API error (attempt ${attempt + 1}):`, err);
         }
-      } catch (err) {
-        console.warn('[PriceUpdater] Silver worker API error:', err);
       }
     }
 
