@@ -11,7 +11,71 @@ class CloudSync {
     this.localVersion = parseInt(localStorage.getItem('duospace_sync_version') || '0', 10);
     this.hasPendingPush = localStorage.getItem('duospace_sync_pending') === '1';
     this.pendingPushAt = parseInt(localStorage.getItem('duospace_sync_pending_at') || '0', 10);
+    this._lastSyncedSnapshot = null;
+    this._lastSyncedLogIds = new Set();
     this._bindLifecycleListeners();
+  }
+
+  _captureSnapshot(data) {
+    if (!data || typeof data !== 'object') return;
+    const keys = [
+      'usdRate', 'settings', 'todos', 'investments', 'netWorthHistory',
+      'catWeights', 'bikeMaintenances', 'healthLogs', 'shoppingList', 'events', 'notes'
+    ];
+    const snap = {};
+    for (const k of keys) {
+      snap[k] = JSON.stringify(data[k] ?? null);
+    }
+    this._lastSyncedSnapshot = snap;
+    this._lastSyncedLogIds = new Set((data.logs || []).map(l => l.id || `${l.date}|${l.title}|${l.notes}`));
+  }
+
+  _buildDiffPayload(currentData, rawUserCode) {
+    const payload = {
+      usdRate: currentData.usdRate || 25400,
+      settings: currentData.settings || {},
+      userCode: rawUserCode
+    };
+    const snap = this._lastSyncedSnapshot;
+    const arrayKeys = [
+      'todos', 'investments', 'netWorthHistory',
+      'catWeights', 'bikeMaintenances', 'healthLogs', 'shoppingList', 'events', 'notes'
+    ];
+    let hasChanges = !snap ||
+      snap.usdRate !== JSON.stringify(currentData.usdRate ?? null) ||
+      snap.settings !== JSON.stringify(currentData.settings ?? null);
+
+    for (const k of arrayKeys) {
+      const serialized = JSON.stringify(currentData[k] ?? null);
+      if (!snap || snap[k] !== serialized) {
+        payload[k] = currentData[k] || [];
+        hasChanges = true;
+      }
+    }
+
+    // Chỉ gửi các dòng system_logs mới chưa từng đồng bộ (giảm mạnh rows written trên D1)
+    const allLogs = Array.isArray(currentData.logs) ? currentData.logs.slice(-200) : [];
+    const newLogs = snap
+      ? allLogs.filter(l => !this._lastSyncedLogIds.has(l.id || `${l.date}|${l.title}|${l.notes}`))
+      : allLogs.slice(-20);
+    if (newLogs.length > 0) {
+      payload.logs = newLogs;
+      hasChanges = true;
+    }
+
+    if (payload.investments) {
+      payload.allowEmptyInvestments = Boolean(this.localVersion > 0 && payload.investments.length === 0 && this._explicitEmptyInvestments);
+    }
+    if (payload.todos) {
+      payload.allowEmptyTodos = Boolean(this.localVersion > 0 && payload.todos.length === 0 && this._explicitEmptyTodos);
+    }
+    if (payload.notes) payload.allowEmptyNotes = Boolean(this.localVersion > 0 && payload.notes.length === 0);
+    if (payload.bikeMaintenances) payload.allowEmptyBikeMaintenances = Boolean(this.localVersion > 0 && payload.bikeMaintenances.length === 0);
+    if (payload.healthLogs) payload.allowEmptyHealthLogs = Boolean(this.localVersion > 0 && payload.healthLogs.length === 0);
+    if (payload.shoppingList) payload.allowEmptyShoppingList = Boolean(this.localVersion > 0 && payload.shoppingList.length === 0);
+    if (payload.events) payload.allowEmptyEvents = Boolean(this.localVersion > 0 && payload.events.length === 0);
+
+    return { payload, hasChanges };
   }
 
   _bindLifecycleListeners() {
@@ -190,6 +254,7 @@ class CloudSync {
         }
         const merged = this.storage.mergeWithDefaults(cloudData);
         this.storage.save(merged);
+        this._captureSnapshot(merged);
         if (window.app && typeof window.app.render === 'function') {
           window.app.data = merged;
           window.app.render();
@@ -204,8 +269,8 @@ class CloudSync {
     return false;
   }
 
-  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (debounce 1.2s + đánh dấu pending để tránh mất dữ liệu khi refresh)
-  debouncePushToCloud(delay = 1200) {
+  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (debounce 2.5s + chỉ gửi bảng thay đổi để tối ưu rows written)
+  debouncePushToCloud(delay = 2500) {
     if (!this.isEnabled) return;
     this._setPendingPush(true);
     if (this.syncTimeout) clearTimeout(this.syncTimeout);
@@ -233,6 +298,13 @@ class CloudSync {
       const currentData = this.storage.getData();
       const rawUserCode = window.authManager?.matchedProfile?.code || 'Đ';
       const safeUserCode = rawUserCode === 'Đ' ? 'D' : (rawUserCode === 'S' ? 'S' : 'Both');
+      const { payload, hasChanges } = this._buildDiffPayload(currentData, rawUserCode);
+
+      if (!hasChanges) {
+        this._setPendingPush(false);
+        this.setSyncStatus('success', 'Dữ liệu đã mới nhất');
+        return true;
+      }
 
       const headers = {
         'Content-Type': 'application/json',
@@ -244,17 +316,7 @@ class CloudSync {
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          ...currentData,
-          allowEmptyInvestments: Boolean(this.localVersion > 0 && Array.isArray(currentData.investments) && currentData.investments.length === 0 && this._explicitEmptyInvestments),
-          allowEmptyTodos: Boolean(this.localVersion > 0 && Array.isArray(currentData.todos) && currentData.todos.length === 0 && this._explicitEmptyTodos),
-          allowEmptyNotes: Boolean(this.localVersion > 0 && Array.isArray(currentData.notes) && currentData.notes.length === 0),
-          allowEmptyBikeMaintenances: Boolean(this.localVersion > 0 && Array.isArray(currentData.bikeMaintenances) && currentData.bikeMaintenances.length === 0),
-          allowEmptyHealthLogs: Boolean(this.localVersion > 0 && Array.isArray(currentData.healthLogs) && currentData.healthLogs.length === 0),
-          allowEmptyShoppingList: Boolean(this.localVersion > 0 && Array.isArray(currentData.shoppingList) && currentData.shoppingList.length === 0),
-          allowEmptyEvents: Boolean(this.localVersion > 0 && Array.isArray(currentData.events) && currentData.events.length === 0),
-          userCode: rawUserCode
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
@@ -263,6 +325,7 @@ class CloudSync {
         this._setPendingPush(false);
         this._explicitEmptyInvestments = false;
         this._explicitEmptyTodos = false;
+        this._captureSnapshot(currentData);
         // Cập nhật ETag & Version mới từ phản hồi POST
         const newEtag = res.headers.get('ETag');
         const newVersion = result.version || parseInt(res.headers.get('X-Data-Version') || '0', 10);

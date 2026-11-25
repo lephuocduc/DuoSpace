@@ -144,7 +144,8 @@ class DuoSpaceApp {
 
   toggleAmounts() {
     this.data.hideAmounts = !this.data.hideAmounts;
-    this.save();
+    // Chỉ lưu trạng thái ẩn/hiện số tiền ở localStorage máy hiện tại, không đẩy lên D1
+    this.storage.save(this.data);
     this.updateToggleAmountsIcon();
     this.skipCharts = true;
     this.render();

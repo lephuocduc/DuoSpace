@@ -745,8 +745,8 @@ class InvestmentModule {
         const buyCount  = purchases.filter(p => p.quantity > 0).length;
         const sellCount = purchases.filter(p => p.quantity < 0).length;
         const histBadge = [
-          buyCount  > 0 ? `<span class="inline-flex items-center space-x-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold"><i class="fa-solid fa-arrow-trend-up text-[8px]"></i><span>${buyCount} mua</span></span>` : '',
-          sellCount > 0 ? `<span class="inline-flex items-center space-x-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-semibold"><i class="fa-solid fa-arrow-trend-down text-[8px]"></i><span>${sellCount} bán</span></span>` : ''
+          buyCount  > 0 ? `<span class="inline-flex items-center space-x-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold whitespace-nowrap shrink-0"><i class="fa-solid fa-arrow-trend-up text-[8px]"></i><span>${buyCount} mua</span></span>` : '',
+          sellCount > 0 ? `<span class="inline-flex items-center space-x-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-semibold whitespace-nowrap shrink-0"><i class="fa-solid fa-arrow-trend-down text-[8px]"></i><span>${sellCount} bán</span></span>` : ''
         ].filter(Boolean).join(' ');
 
         // Purchases History section HTML
@@ -771,21 +771,23 @@ class InvestmentModule {
                 const icon     = isSell ? '📤' : '📥';
                 const typeLabel = isSell ? 'Giá bán' : 'Giá mua';
                 const amountColor = isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-700 dark:text-slate-300';
-                const feeStr = (p.fee && Number(p.fee) > 0) ? ` • Phí: ${p.fee} ${Utils.escapeHtml(p.feeUnit || '')}` : '';
+                const feeNum = Number(p.fee);
+                const feeFormatted = (feeNum > 0) ? feeNum.toFixed(8).replace(/\.?0+$/, '') : '';
+                const feeStr = feeFormatted ? ` • Phí: ${feeFormatted} ${Utils.escapeHtml(p.feeUnit || '')}` : '';
                 return `
-                  <div class="flex justify-between items-center ${rowBg} p-2.5 rounded-xl text-[11px] border">
-                    <div>
-                      <div class="font-semibold text-gray-800 dark:text-slate-200">
-                        <span>${icon} ${p.date ? Utils.formatDate(p.date) : 'N/A'}</span>
-                        <span class="ml-2 font-bold ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${assetUnit}</span>
+                  <div class="flex justify-between items-center gap-2 ${rowBg} p-2.5 rounded-xl text-[11px] border">
+                    <div class="min-w-0 flex-1">
+                      <div class="font-semibold text-gray-800 dark:text-slate-200 flex flex-wrap items-center gap-x-2">
+                        <span class="whitespace-nowrap">${icon} ${p.date ? Utils.formatDate(p.date) : 'N/A'}</span>
+                        <span class="font-bold whitespace-nowrap ${isSell ? 'text-rose-600 dark:text-rose-400' : 'text-gray-600 dark:text-slate-400'}">${isSell ? '-' : '+'}${displayQty} ${assetUnit}</span>
                       </div>
-                      <div class="text-gray-400 mt-0.5">
+                      <div class="text-gray-400 mt-0.5 break-words">
                         ${typeLabel}: ${dollarSign}${p.buyPrice.toLocaleString(priceFormat)}${feeStr} ${p.notes ? '• ' + Utils.escapeHtml(p.notes) : ''}
                       </div>
                     </div>
-                    <div class="flex items-center space-x-2.5">
-                      <span class="font-bold ${amountColor}">${isSell ? '+' : ''}${Utils.formatCurrency(pCostVnd)}</span>
-                      <button onclick="window.app.investment.deletePurchase(${item.rawIdx}, ${pIdx})" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-500 hover:text-rose-700 flex items-center justify-center transition-colors" title="Xóa lần ${isSell ? 'bán' : 'mua'}"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <div class="flex items-center space-x-2 shrink-0">
+                      <span class="font-bold whitespace-nowrap ${amountColor}">${isSell ? '+' : ''}${Utils.formatCurrency(pCostVnd)}</span>
+                      <button onclick="window.app.investment.deletePurchase(${item.rawIdx}, ${pIdx})" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-500 hover:text-rose-700 flex items-center justify-center transition-colors shrink-0" title="Xóa lần ${isSell ? 'bán' : 'mua'}"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
                   </div>
                 `;
@@ -796,22 +798,22 @@ class InvestmentModule {
 
         return `
           <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between items-start mb-2.5">
-              <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-xl ${assetIconColor} flex items-center justify-center text-base shadow-sm">
+            <div class="flex justify-between items-start gap-2 mb-2.5">
+              <div class="flex items-start space-x-2.5 min-w-0 flex-1">
+                <div class="w-9 h-9 rounded-xl ${assetIconColor} flex items-center justify-center text-base shadow-sm shrink-0">
                   <i class="${assetIcon}"></i>
                 </div>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">${Utils.escapeHtml(item.name)}</h4>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white leading-snug">${Utils.escapeHtml(item.name)}</h4>
                     ${histBadge}
                   </div>
-                  <p class="text-[10px] text-gray-500 font-medium">${item.type} • Tỷ trọng: <span class="font-bold text-indigo-600 dark:text-indigo-400">${weight.toFixed(1)}%</span></p>
+                  <p class="text-[10px] text-gray-500 font-medium mt-0.5">${item.type} • Tỷ trọng: <span class="font-bold text-indigo-600 dark:text-indigo-400">${weight.toFixed(1)}%</span></p>
                 </div>
               </div>
-              <div class="text-right">
-                <p class="text-sm font-bold text-gray-900 dark:text-white">${Utils.formatCurrency(valueVnd)}</p>
-                <p class="text-[11px] font-bold ${hideAmounts ? 'text-gray-400 dark:text-slate-400' : pnlColorClass}">${hideAmounts ? '***** đ (***%)' : `${pnlSign}${Utils.formatCurrency(pnl)} (${pnlSign}${roi.toFixed(2)}%)`}</p>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">${Utils.formatCurrency(valueVnd)}</p>
+                <p class="text-[11px] font-bold whitespace-nowrap ${hideAmounts ? 'text-gray-400 dark:text-slate-400' : pnlColorClass}">${hideAmounts ? '***** đ (***%)' : `${pnlSign}${Utils.formatCurrency(pnl)} (${pnlSign}${roi.toFixed(2)}%)`}</p>
               </div>
             </div>
 

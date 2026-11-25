@@ -802,7 +802,7 @@ export default {
             const id = l.id || `log-${logDate}-${(l.title || "").slice(0, 20)}`;
             statements.push(
               db.prepare(`
-                INSERT OR REPLACE INTO system_logs (id, title, notes, type, date)
+                INSERT OR IGNORE INTO system_logs (id, title, notes, type, date)
                 VALUES (?, ?, ?, ?, ?)
               `).bind(id, l.title || "", l.notes || "", l.type || "system", logDate)
             );
