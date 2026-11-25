@@ -668,7 +668,7 @@ export default {
           }
         }
 
-        // Sync Investments (chống trùng lặp theo tên & đồng bộ xóa tài sản)
+        // Sync Investments (chống trùng lặp theo tên & bảo vệ không bị client rỗng ghi đè xóa sạch)
         if (Array.isArray(payload.investments)) {
           const uniqueInvestments = new Map();
           for (const inv of payload.investments) {
@@ -676,7 +676,10 @@ export default {
             if (!key) continue;
             uniqueInvestments.set(key, inv);
           }
-          statements.push(db.prepare("DELETE FROM investments"));
+          // Chỉ xóa toàn bộ bảng investments khi payload có dữ liệu thật hoặc client chủ động xóa hết (allowEmptyInvestments)
+          if (uniqueInvestments.size > 0 || payload.allowEmptyInvestments === true) {
+            statements.push(db.prepare("DELETE FROM investments"));
+          }
           for (const [key, inv] of uniqueInvestments.entries()) {
             const id = inv.id || `inv-${key.replace(/[^a-z0-9]+/g, '-')}`;
             statements.push(

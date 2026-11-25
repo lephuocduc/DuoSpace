@@ -361,6 +361,9 @@ class InvestmentModule {
         const linkedExpenseIds = (item.purchases || []).map(purchase => purchase.expenseId).filter(Boolean);
         if (linkedExpenseIds.length) this.app.data.expenses = (this.app.data.expenses || []).filter(expense => !linkedExpenseIds.includes(expense.id));
         this.app.data.investments.splice(idx, 1);
+        if (this.app.sync && this.app.data.investments.length === 0) {
+          this.app.sync._explicitEmptyInvestments = true;
+        }
         this.app.log?.system('Xóa tài sản đầu tư', `${item.name} · ${item.quantity} đơn vị · Xóa ${linkedExpenseIds.length} khoản chi đầu tư liên kết`);
         this.app.save();
         this.renderInvestmentList();
