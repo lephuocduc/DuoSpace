@@ -47,7 +47,7 @@ const Utils = {
   formatCurrency(amount) {
     if (window.app?.data?.hideAmounts) return '***** đ';
     if (isNaN(amount) || amount === null || amount === undefined) return '0 đ';
-    return Number(amount).toLocaleString('vi-VN') + ' đ';
+    return Math.round(Number(amount)).toLocaleString('vi-VN') + ' đ';
   },
 
   /**
