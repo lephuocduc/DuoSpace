@@ -620,14 +620,20 @@ class InvestmentModule {
     const totalCostEl = document.getElementById('investTotalCost');
     if (totalCostEl) totalCostEl.innerText = Utils.formatCurrency(totalCostVnd);
 
+    const hideAmounts = Boolean(this.app.data.hideAmounts);
     const pnlEl = document.getElementById('investTotalPnL');
     if (pnlEl) {
-      pnlEl.innerText = totalPnL >= 0
-        ? `+${Utils.formatCurrency(totalPnL)} (+${totalRoi.toFixed(2)}%)`
-        : `${Utils.formatCurrency(totalPnL)} (${totalRoi.toFixed(2)}%)`;
-      pnlEl.className = totalPnL >= 0
-        ? 'text-sm font-bold text-emerald-400 drop-shadow-sm'
-        : 'text-sm font-bold text-rose-400 drop-shadow-sm';
+      if (hideAmounts) {
+        pnlEl.innerText = '***** đ (***%)';
+        pnlEl.className = 'text-sm font-bold text-indigo-100/80 drop-shadow-sm';
+      } else {
+        pnlEl.innerText = totalPnL >= 0
+          ? `+${Utils.formatCurrency(totalPnL)} (+${totalRoi.toFixed(2)}%)`
+          : `${Utils.formatCurrency(totalPnL)} (${totalRoi.toFixed(2)}%)`;
+        pnlEl.className = totalPnL >= 0
+          ? 'text-sm font-bold text-emerald-400 drop-shadow-sm'
+          : 'text-sm font-bold text-rose-400 drop-shadow-sm';
+      }
     }
 
     const badgeEl = document.getElementById('investPriceBadges');
@@ -801,7 +807,7 @@ class InvestmentModule {
               </div>
               <div class="text-right">
                 <p class="text-sm font-bold text-gray-900 dark:text-white">${Utils.formatCurrency(valueVnd)}</p>
-                <p class="text-[11px] font-bold ${pnlColorClass}">${pnlSign}${Utils.formatCurrency(pnl)} (${pnlSign}${roi.toFixed(2)}%)</p>
+                <p class="text-[11px] font-bold ${hideAmounts ? 'text-gray-400 dark:text-slate-400' : pnlColorClass}">${hideAmounts ? '***** đ (***%)' : `${pnlSign}${Utils.formatCurrency(pnl)} (${pnlSign}${roi.toFixed(2)}%)`}</p>
               </div>
             </div>
 
