@@ -407,7 +407,7 @@ class PriceUpdater {
     this._updatingPromise = (async () => {
       try {
         if (force) {
-          this.cache.clear();
+          this._cache = {};
           this._lastForceUpdateAt = Date.now();
         }
         const usdRate = data.usdRate || 25400;
@@ -425,6 +425,8 @@ class PriceUpdater {
           if (window.app.home) window.app.home.render();
           console.log('[PriceUpdater] Prices updated and UI refreshed');
         }
+      } catch (err) {
+        console.warn('[PriceUpdater] updateAllPrices error:', err);
       } finally {
         this._updatingPromise = null;
       }
