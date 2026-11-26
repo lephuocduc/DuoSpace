@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>DuoSpace</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='43' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='800' fill='white' text-anchor='middle'%3EDS%3C/text%3E%3C/svg%3E">
   <script>
     // Suppress Tailwind Play CDN production warning in console
     (function () {
@@ -725,7 +726,13 @@
 
           <div
             class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700/60">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Lịch chăm sóc Mun & Bông</h3>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Lịch chăm sóc Mun & Bông</h3>
+              <button onclick="openAddModal()"
+                class="text-[11px] font-semibold px-2.5 py-1 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-lg transition-colors">
+                <i class="fa-solid fa-plus mr-1"></i>Thêm lịch
+              </button>
+            </div>
             <div id="catsTodoList" class="space-y-2"></div>
           </div>
         </div>
@@ -1112,15 +1119,13 @@
       </div>
 
       <!-- NEW TAB: SHOPPING LIST -->
-      <div id="tab-shopping" class="hidden space-y-4 tab-content">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-            <i class="fa-solid fa-basket-shopping text-orange-500 mr-2"></i> Đi Siêu Thị
-          </h2>
+      <div id="tab-shopping" class="hidden space-y-3 tab-content">
+        <div class="flex items-center justify-end">
           <button onclick="window.app.shopping.clearDone()"
-            class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-xl transition-colors"
-            title="Xóa món đã mua">
-            <i class="fa-solid fa-broom text-xs"></i>
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+            title="Xóa các món đã mua">
+            <i class="fa-solid fa-broom text-[11px] text-orange-500"></i>
+            <span>Dọn đã mua</span>
           </button>
         </div>
 
@@ -1140,16 +1145,7 @@
       </div>
 
       <!-- NEW TAB: CALENDAR -->
-      <div id="tab-calendar" class="hidden space-y-4 tab-content">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-            <i class="fa-regular fa-calendar-days text-purple-500 mr-2"></i> Lịch & Hóa Đơn
-          </h2>
-          <button onclick="window.app.calendar.openModal()"
-            class="w-8 h-8 flex items-center justify-center bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-800/50 text-purple-600 dark:text-purple-400 rounded-xl transition-colors">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
+      <div id="tab-calendar" class="hidden space-y-3 tab-content">
         <div id="eventsContainer" class="min-h-[200px]">
         </div>
       </div>
@@ -1762,12 +1758,12 @@
   <script src="js/modules/investment.js?v=3.13"></script>
   <script src="js/modules/motorbike.js?v=3.9"></script>
   <script src="js/modules/cats.js"></script>
-  <script src="js/modules/health.js"></script>
+  <script src="js/modules/health.js?v=3.1"></script>
   <script src="js/modules/settings.js"></script>
   <script src="js/modules/cloudSync.js?v=3.8"></script>
   <script src="js/modules/log.js?v=3.4"></script>
   <script src="js/modules/shopping.js"></script>
-  <script src="js/modules/calendar.js"></script>
+  <script src="js/modules/calendar.js?v=3.1"></script>
   <script src="js/modules/notes.js?v=3.3"></script>
   <script src="js/main.js?v=3.7"></script>
 </body>

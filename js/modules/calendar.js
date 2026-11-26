@@ -15,9 +15,15 @@ class CalendarModule {
     
     if (events.length === 0) {
       this.container.innerHTML = `
-        <div class="text-center py-10 text-gray-400 dark:text-slate-500">
-          <i class="fa-regular fa-calendar-xmark text-5xl mb-3 opacity-30"></i>
-          <p class="text-sm">Chưa có sự kiện hay hóa đơn nào.</p>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-slate-700/60 text-center space-y-3">
+          <div class="w-12 h-12 mx-auto rounded-2xl bg-purple-50 dark:bg-purple-900/30 text-purple-500 flex items-center justify-center">
+            <i class="fa-regular fa-calendar-xmark text-xl"></i>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-slate-400">Chưa có sự kiện hay hóa đơn nào.</p>
+          <button onclick="window.app.calendar.openModal()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all">
+            <i class="fa-solid fa-plus"></i>Thêm sự kiện / hóa đơn
+          </button>
         </div>
       `;
       return;

@@ -90,7 +90,15 @@ class HealthModule {
     if (countEl) countEl.innerText = `${logs.length} bản ghi`;
 
     if (logs.length === 0) {
-      container.innerHTML = '<p class="text-xs text-gray-400 dark:text-slate-500 text-center py-4">Chưa có dữ liệu đo sức khỏe. Nhấn "+ Ghi chỉ số" để bắt đầu theo dõi!</p>';
+      container.innerHTML = `
+        <div class="text-center py-5 space-y-2.5">
+          <p class="text-xs text-gray-400 dark:text-slate-500">Chưa có dữ liệu đo sức khỏe.</p>
+          <button onclick="window.app.health.toggleHealthForm(true)"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all">
+            <i class="fa-solid fa-plus"></i>Ghi chỉ số ngay
+          </button>
+        </div>
+      `;
       return;
     }
 
