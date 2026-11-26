@@ -38,17 +38,19 @@ async function ensureExtendedTables(db) {
       amount REAL DEFAULT 0, user TEXT DEFAULT 'Both', notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`),
     db.prepare(`CREATE TABLE IF NOT EXISTS notes (
-      id TEXT PRIMARY KEY, title TEXT NOT NULL, content TEXT,
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, content TEXT, sensitive INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`)
   ]);
+  try {
+    await db.prepare("ALTER TABLE notes ADD COLUMN sensitive INTEGER DEFAULT 0").run();
+  } catch (_) {}
   extendedTablesEnsured = true;
 }
 
 // Cache giá bạc trong nước (5 phút)
 let cachedSilverPrice = null;
 let cachedSilverExpiry = 0;
-let lastGoodDojiSilverPrice = null;
 
 const DOJI_TABLE_API = 'https://banggia.doji.vn/api/TablePrice/GetTablePrice';
 const DOJI_TABLE_KEY_HEX = '7a4b8c3d1e9f2a5b6c0d4e8f3a7b1c5d9e2f6a0b4c8d3e7f1a5b9c2d6e0f4a8b';
@@ -93,37 +95,28 @@ export function parseDojiSilverTable(rows) {
 }
 
 async function fetchDojiSilverPrice() {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(DOJI_TABLE_API, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-          'Accept': 'application/json, text/plain, */*',
-          'Referer': 'https://banggia.doji.vn/'
-        }
-      });
-      if (!res.ok) continue;
-      const payload = await res.json();
-      if (!payload || !payload.status || !payload.data) continue;
+  const res = await fetch(DOJI_TABLE_API, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; DuoSpaceBot/1.0)' }
+  });
+  if (!res.ok) return null;
+  const payload = await res.json();
+  if (!payload || !payload.status || !payload.data) return null;
 
-      const raw = base64ToBytes(payload.data);
-      if (raw.length <= 16) continue;
-      const iv = raw.slice(0, 16);
-      const ciphertext = raw.slice(16);
-      const key = await crypto.subtle.importKey('raw', hexToBytes(DOJI_TABLE_KEY_HEX), { name: 'AES-CBC' }, false, ['decrypt']);
-      const plainBuf = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
-      const rows = JSON.parse(new TextDecoder().decode(plainBuf));
-      const parsed = parseDojiSilverTable(rows);
-      if (!parsed) continue;
+  const raw = base64ToBytes(payload.data);
+  if (raw.length <= 16) return null;
+  const iv = raw.slice(0, 16);
+  const ciphertext = raw.slice(16);
+  const key = await crypto.subtle.importKey('raw', hexToBytes(DOJI_TABLE_KEY_HEX), { name: 'AES-CBC' }, false, ['decrypt']);
+  const plainBuf = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
+  const rows = JSON.parse(new TextDecoder().decode(plainBuf));
+  const parsed = parseDojiSilverTable(rows);
+  if (!parsed) return null;
 
-      return {
-        success: true,
-        source: 'banggia.doji.vn',
-        ...parsed
-      };
-    } catch (_) {}
-  }
-  return null;
+  return {
+    success: true,
+    source: 'banggia.doji.vn',
+    ...parsed
+  };
 }
 
 function decodeHtmlEntities(str) {
@@ -176,17 +169,11 @@ async function fetchLiveVnSilverPrice() {
   try {
     const doji = await fetchDojiSilverPrice();
     if (doji) {
-      lastGoodDojiSilverPrice = doji;
       cachedSilverPrice = doji;
       cachedSilverExpiry = now + 5 * 60 * 1000;
       return cachedSilverPrice;
     }
   } catch (_) {}
-
-  // Nếu DOJI vừa lỗi thoáng qua nhưng đã có giá DOJI gần nhất -> giữ giá DOJI thay vì nhảy sang Phú Quý
-  if (lastGoodDojiSilverPrice) {
-    return lastGoodDojiSilverPrice;
-  }
 
   // 2. Fallback: Bảng giá Bạc Phú Quý / giabac.vn
   const sources = [
@@ -588,6 +575,7 @@ export default {
               id: n.id,
               title: n.title,
               content: n.content,
+              sensitive: Boolean(n.sensitive),
               createdAt: n.created_at,
               updatedAt: n.updated_at
             }))
@@ -888,9 +876,9 @@ export default {
             const updatedAt = n.updatedAt || createdAt;
             statements.push(
               db.prepare(`
-                INSERT OR REPLACE INTO notes (id, title, content, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?)
-              `).bind(id, n.title || "", n.content || "", createdAt, updatedAt)
+                INSERT OR REPLACE INTO notes (id, title, content, sensitive, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+              `).bind(id, n.title || "", n.content || "", n.sensitive ? 1 : 0, createdAt, updatedAt)
             );
           }
         }

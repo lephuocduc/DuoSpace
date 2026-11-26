@@ -5,6 +5,16 @@ class NotesModule {
   constructor(app) {
     this.app = app;
     this.container = document.getElementById('notesContainer');
+    this.revealedNotes = new Set();
+  }
+
+  toggleReveal(id) {
+    if (this.revealedNotes.has(id)) {
+      this.revealedNotes.delete(id);
+    } else {
+      this.revealedNotes.add(id);
+    }
+    this.render();
   }
 
   render() {
@@ -26,24 +36,40 @@ class NotesModule {
     // Sort by updated at
     const sorted = [...notes].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
     
-    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+    let html = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">';
     sorted.forEach(note => {
-      const contentSnippet = note.content ? (note.content.length > 250 ? note.content.substring(0, 250) + '...' : note.content) : '';
-      
+      const isSensitive = Boolean(note.sensitive);
+      const isRevealed = this.revealedNotes.has(note.id);
+      const safeTitle = Utils.escapeHtml(note.title || '');
+      const rawContent = note.content || '';
+      const contentSnippet = rawContent.length > 160 ? rawContent.substring(0, 160) + '...' : rawContent;
+      const safeContent = Utils.escapeHtml(contentSnippet);
+      const contentHtml = (isSensitive && !isRevealed)
+        ? `<p class="text-xs text-amber-600/80 dark:text-amber-400/80 tracking-widest select-none flex-1 flex items-center gap-1.5 py-1"><i class="fa-solid fa-lock text-[10px]"></i>••••••••••••</p>`
+        : `<p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap flex-1 line-clamp-3 leading-relaxed">${safeContent}</p>`;
+      const eyeBtnHtml = isSensitive
+        ? `<button onclick="event.stopPropagation(); window.app.notes.toggleReveal('${note.id}')" title="${isRevealed ? 'Ẩn nội dung' : 'Hiện nội dung'}" class="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-medium px-1.5 py-0.5 rounded hover:bg-amber-100/70 dark:hover:bg-amber-900/40 transition-colors">
+             <i class="fa-regular ${isRevealed ? 'fa-eye-slash' : 'fa-eye'}"></i> ${isRevealed ? 'Ẩn' : 'Hiện'}
+           </button>`
+        : '';
+
       html += `
-        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 p-4 rounded-2xl cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full relative group" onclick="window.app.notes.openModal('${note.id}')">
-          <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onclick="event.stopPropagation(); window.app.notes.openModal('${note.id}')" class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-sm text-amber-600 flex items-center justify-center hover:bg-amber-100">
-              <i class="fa-solid fa-pen text-xs"></i>
+        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 p-3 rounded-xl cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full relative group" onclick="window.app.notes.openModal('${note.id}')">
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onclick="event.stopPropagation(); window.app.notes.openModal('${note.id}')" class="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-sm text-amber-600 flex items-center justify-center hover:bg-amber-100">
+              <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
           </div>
-          <h4 class="font-bold text-gray-800 dark:text-gray-200 mb-2 truncate pr-10">${note.title}</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap flex-1 line-clamp-4">${contentSnippet}</p>
-          <div class="mt-4 pt-3 border-t border-amber-200/50 dark:border-amber-800/50 flex justify-between items-center text-xs text-gray-400 dark:text-slate-500">
-            <span><i class="fa-regular fa-clock mr-1"></i> ${Utils.formatDate(note.updatedAt || note.createdAt)}</span>
-            <button onclick="event.stopPropagation(); window.app.notes.copyNote('${note.id}')" class="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium px-2 py-1 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
-              <i class="fa-regular fa-copy"></i> Copy
-            </button>
+          <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-1 truncate pr-7">${safeTitle}</h4>
+          ${contentHtml}
+          <div class="mt-2.5 pt-2 border-t border-amber-200/50 dark:border-amber-800/50 flex justify-between items-center text-[11px] text-gray-400 dark:text-slate-500 gap-1">
+            <span class="truncate"><i class="fa-regular fa-clock mr-1"></i>${Utils.formatDate(note.updatedAt || note.createdAt)}</span>
+            <div class="flex items-center gap-1 shrink-0">
+              ${eyeBtnHtml}
+              <button onclick="event.stopPropagation(); window.app.notes.copyNote('${note.id}')" class="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium px-1.5 py-0.5 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -62,6 +88,8 @@ class NotesModule {
     document.getElementById('noteId').value = id || '';
     document.getElementById('noteTitle').value = note ? note.title : '';
     document.getElementById('noteContent').value = note ? note.content : '';
+    const sensitiveEl = document.getElementById('noteSensitive');
+    if (sensitiveEl) sensitiveEl.checked = Boolean(note && note.sensitive);
     
     const delBtn = document.getElementById('deleteNoteBtn');
     if (delBtn) {
@@ -97,6 +125,7 @@ class NotesModule {
     const id = document.getElementById('noteId').value;
     const title = document.getElementById('noteTitle').value.trim();
     const content = document.getElementById('noteContent').value.trim();
+    const sensitive = Boolean(document.getElementById('noteSensitive')?.checked);
     
     if (!title) {
       Utils.notify('Vui lòng nhập tiêu đề ghi chú', 'error');
@@ -110,13 +139,13 @@ class NotesModule {
       if (idx !== -1) {
         this.app.data.notes[idx] = {
           ...this.app.data.notes[idx],
-          title, content, updatedAt: new Date().toISOString()
+          title, content, sensitive, updatedAt: new Date().toISOString()
         };
       }
     } else {
       this.app.data.notes.push({
         id: 'note-' + Date.now(),
-        title, content,
+        title, content, sensitive,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
