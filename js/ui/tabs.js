@@ -93,3 +93,31 @@ function switchTab(tabId, title, btn) {
 function switchSettingSubTab(subTab) {
   TabsManager.switchSettingSubTab(subTab);
 }
+
+function handleHeaderAdd() {
+  const tab = TabsManager.currentTab || 'home';
+  if (tab === 'notes' && window.app?.notes) {
+    window.app.notes.openModal();
+    return;
+  }
+  if (tab === 'investment' && window.app?.investment) {
+    window.app.investment.toggleForm();
+    return;
+  }
+  if (tab === 'motorbike' && window.app?.motorbike) {
+    window.app.motorbike.toggleMaintenanceForm();
+    return;
+  }
+  if (tab === 'calendar' && window.app?.calendar) {
+    window.app.calendar.openModal();
+    return;
+  }
+  if (tab === 'shopping') {
+    const input = document.getElementById('shoppingInput');
+    if (input) {
+      input.focus();
+      return;
+    }
+  }
+  if (typeof openAddModal === 'function') openAddModal();
+}

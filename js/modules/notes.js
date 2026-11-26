@@ -6,6 +6,12 @@ class NotesModule {
     this.app = app;
     this.container = document.getElementById('notesContainer');
     this.revealedNotes = new Set();
+    this.searchQuery = '';
+  }
+
+  search(query) {
+    this.searchQuery = (query || '').toLowerCase().trim();
+    this.render();
   }
 
   toggleReveal(id) {
@@ -33,8 +39,24 @@ class NotesModule {
       return;
     }
     
-    // Sort by updated at
-    const sorted = [...notes].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+    // Sort by updated at & filter by search query
+    let sorted = [...notes].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+    if (this.searchQuery) {
+      sorted = sorted.filter(n => {
+        const titleMatch = (n.title || '').toLowerCase().includes(this.searchQuery);
+        const contentMatch = !n.sensitive && (n.content || '').toLowerCase().includes(this.searchQuery);
+        return titleMatch || contentMatch;
+      });
+    }
+    if (sorted.length === 0) {
+      this.container.innerHTML = `
+        <div class="text-center py-8 text-gray-400 dark:text-slate-500">
+          <i class="fa-solid fa-magnifying-glass text-2xl mb-2 opacity-40"></i>
+          <p class="text-xs">Không tìm thấy ghi chú phù hợp.</p>
+        </div>
+      `;
+      return;
+    }
     
     let html = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">';
     sorted.forEach(note => {

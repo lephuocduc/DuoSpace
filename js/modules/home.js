@@ -8,10 +8,73 @@ class HomeModule {
   }
 
   render() {
+    this.renderDashboardSummary();
     this.renderUpcomingReminders();
     this.renderImportantReminders();
     this.updateDynamicInfo();
     this.updateBadges();
+  }
+
+  renderDashboardSummary() {
+    // 1. Portfolio summary
+    const portfolioEl = document.getElementById('homeStatPortfolio');
+    const portfolioSubEl = document.getElementById('homeStatPortfolioSub');
+    if (portfolioEl) {
+      const list = this.app.data.investments || [];
+      const usdRate = this.app.data.usdRate || 25400;
+      let totalVal = 0;
+      let totalCost = 0;
+      list.forEach(item => {
+        const qty = Number(item.quantity || 0);
+        const cur = Number(item.currentPrice || 0);
+        const buy = Number(item.buyPrice || 0);
+        const mult = item.isUsd ? usdRate : 1;
+        totalVal += qty * cur * mult;
+        totalCost += qty * buy * mult;
+      });
+      portfolioEl.innerText = Utils.formatCurrency(totalVal);
+      if (portfolioSubEl) {
+        if (this.app.data.hideAmounts) {
+          portfolioSubEl.innerText = `${list.length} tài sản`;
+          portfolioSubEl.className = 'text-[10px] text-gray-400 dark:text-slate-400 truncate';
+        } else {
+          const pnl = totalVal - totalCost;
+          const roi = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
+          portfolioSubEl.innerText = `${pnl >= 0 ? '+' : ''}${roi.toFixed(1)}% • ${list.length} tài sản`;
+          portfolioSubEl.className = `text-[10px] font-semibold truncate ${pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`;
+        }
+      }
+    }
+
+    // 2. Motorbike summary
+    const bikeEl = document.getElementById('homeStatMotorbike');
+    const bikeSubEl = document.getElementById('homeStatMotorbikeSub');
+    if (bikeEl) {
+      const s = this.app.data.settings || {};
+      bikeEl.innerText = `${(s.nmaxOdo || 0).toLocaleString('vi-VN')} / ${(s.grandeOdo || 0).toLocaleString('vi-VN')}`;
+      if (bikeSubEl) bikeSubEl.innerText = 'NMAX / Grande (km)';
+    }
+
+    // 3. Shopping summary
+    const shopEl = document.getElementById('homeStatShopping');
+    if (shopEl) {
+      const pendingShop = (this.app.data.shoppingList || []).filter(i => !i.done).length;
+      shopEl.innerText = `${pendingShop} món`;
+    }
+
+    // 4. Upcoming Events/Bills (7 days)
+    const calEl = document.getElementById('homeStatCalendar');
+    if (calEl) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const upcoming7 = (this.app.data.events || []).filter(ev => {
+        const d = new Date(ev.date);
+        d.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+        return diff >= 0 && diff <= 7;
+      }).length;
+      calEl.innerText = `${upcoming7} sự kiện`;
+    }
   }
 
   renderImportantReminders() {
@@ -34,27 +97,27 @@ class HomeModule {
     container.innerHTML = importantTodos.map(todo => {
       const realIdx = this.app.data.todos.indexOf(todo);
       const priorityBadge = todo.priority === 'high'
-        ? '<span class="text-[10px] font-bold px-2 py-0.5 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-md">🔴 Cao</span>'
-        : '<span class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-md">🟡 Trung bình</span>';
+        ? '<span class="text-[10px] font-semibold px-2 py-0.5 bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 rounded-full shrink-0"><i class="fa-solid fa-flag text-[9px] mr-1"></i>Cao</span>'
+        : '<span class="text-[10px] font-semibold px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 rounded-full shrink-0"><i class="fa-solid fa-circle text-[7px] mr-1 align-middle"></i>Trung bình</span>';
       const userText = todo.user === 'Đ' ? 'Đức' : todo.user === 'S' ? 'Sương' : 'Cả hai';
       
       let dateInfo = '';
       if (todo.dueDate) {
         const isOverdue = !todo.done && new Date(todo.dueDate).setHours(23,59,59,999) < Date.now();
-        dateInfo = ` • <span class="${isOverdue ? 'text-rose-500 font-semibold' : ''}">⏰ Hạn: ${Utils.formatDate(todo.dueDate)}</span>`;
+        dateInfo = ` • <span class="${isOverdue ? 'text-rose-500 font-semibold' : ''}"><i class="fa-regular fa-clock mr-1"></i>Hạn: ${Utils.formatDate(todo.dueDate)}</span>`;
       } else if (todo.startDate) {
-        dateInfo = ` • 📅 Từ: ${Utils.formatDate(todo.startDate)}`;
+        dateInfo = ` • <i class="fa-regular fa-calendar mr-1"></i>Từ: ${Utils.formatDate(todo.startDate)}`;
       } else if (todo.date) {
-        dateInfo = ` • 📅 ${Utils.formatDate(todo.date)}`;
+        dateInfo = ` • <i class="fa-regular fa-calendar mr-1"></i>${Utils.formatDate(todo.date)}`;
       }
 
       return `
-        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-900/60 rounded-xl border border-gray-100 dark:border-slate-800 hover:bg-gray-100/80 transition-colors">
-          <div class="flex items-center space-x-3 flex-1">
-            <input type="checkbox" onchange="window.app.todo.toggleTodo(${realIdx})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer">
-            <div onclick="window.app.todo.editTodo(${realIdx})" class="flex-1 cursor-pointer">
-              <p class="text-sm font-semibold text-gray-800 dark:text-slate-200">${Utils.escapeHtml(todo.title)}</p>
-              <p class="text-[11px] text-gray-400 dark:text-slate-500">${todo.category} • ${userText}${dateInfo}</p>
+        <div class="flex items-center justify-between gap-2 p-2.5 bg-gray-50 dark:bg-slate-900/60 rounded-xl border border-gray-100 dark:border-slate-800 hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition-colors">
+          <div class="flex items-center space-x-3 flex-1 min-w-0">
+            <input type="checkbox" onchange="window.app.todo.toggleTodo(${realIdx})" class="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer shrink-0">
+            <div onclick="window.app.todo.editTodo(${realIdx})" class="flex-1 min-w-0 cursor-pointer">
+              <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 truncate">${Utils.escapeHtml(todo.title)}</p>
+              <p class="text-[11px] text-gray-400 dark:text-slate-500 truncate">${Utils.escapeHtml(todo.category || '')} • ${userText}${dateInfo}</p>
             </div>
           </div>
           ${priorityBadge}
