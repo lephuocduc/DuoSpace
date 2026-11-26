@@ -214,55 +214,9 @@ class PriceUpdater {
   }
 
   /**
-   * Lấy giá Bạc DOJI 99.9 - 1 LƯỢNG trực tiếp từ bảng giá chính thức banggia.doji.vn
-   * (banggia.doji.vn hỗ trợ CORS cho GitHub Pages và trình duyệt tự xử lý chuỗi SSL AIA).
-   * @returns {number|null} - VND/lượng (giá mua vào)
-   */
-  async _fetchDojiSilverDirect() {
-    if (typeof crypto === 'undefined' || !crypto.subtle) return null;
-    try {
-      const res = await fetch('https://banggia.doji.vn/api/TablePrice/GetTablePrice');
-      if (!res.ok) return null;
-      const payload = await res.json();
-      if (!payload || !payload.status || !payload.data) return null;
-
-      const bin = atob(payload.data);
-      const raw = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
-      if (raw.length <= 16) return null;
-
-      const iv = raw.slice(0, 16);
-      const ciphertext = raw.slice(16);
-      const keyHex = '7a4b8c3d1e9f2a5b6c0d4e8f3a7b1c5d9e2f6a0b4c8d3e7f1a5b9c2d6e0f4a8b';
-      const keyBytes = new Uint8Array(keyHex.length / 2);
-      for (let i = 0; i < keyBytes.length; i++) {
-        keyBytes[i] = parseInt(keyHex.slice(i * 2, i * 2 + 2), 16);
-      }
-
-      const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-CBC' }, false, ['decrypt']);
-      const plainBuf = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
-      const rows = JSON.parse(new TextDecoder().decode(plainBuf));
-      if (!Array.isArray(rows)) return null;
-
-      const silverRows = rows.filter(r => r && r.type === 'S');
-      const target = silverRows.find(r => String(r.materialCode) === '14')
-        || silverRows.find(r => /1\s*lượng/i.test(r.materialName || ''))
-        || silverRows[0];
-      if (!target) return null;
-
-      let buy = Number(target.priceDojiBuyIn || 0);
-      if (buy > 0 && buy < 100000) buy = Math.round(buy * 1000);
-      return (buy >= 100000 && buy <= 50000000) ? buy : null;
-    } catch (err) {
-      console.warn('[PriceUpdater] Direct DOJI silver fetch error:', err);
-      return null;
-    }
-  }
-
-  /**
    * Fetch giá bạc trong nước (VND/lượng).
-   * Ưu tiên lấy trực tiếp từ bảng giá Bạc DOJI chính thức (banggia.doji.vn),
-   * fallback sang Cloudflare Worker (/api/prices/silver), rồi CoinGecko KAG / currency-api.
+   * Ưu tiên Cloudflare Worker (/api/prices/silver - lấy giá trực tiếp từ Phú Quý/giabac.vn),
+   * fallback sang CoinGecko KAG (realtime) rồi currency-api (XAG/VND × 1.2057).
    * @returns {number|null}
    */
   async fetchVnSilverPrice() {
@@ -274,14 +228,8 @@ class PriceUpdater {
     const taelToOz = cfg.taelToOz || 1.2057;
     const isValidSilverTael = (p) => typeof p === 'number' && !isNaN(p) && p >= 100000 && p <= 50000000;
 
-    // 1. Primary: Trực tiếp từ banggia.doji.vn (BẠC DOJI 99.9 - 1 LƯỢNG, mã 14)
-    const directDojiPrice = await this._fetchDojiSilverDirect();
-    if (isValidSilverTael(directDojiPrice)) {
-      this._setCache(cacheKey, directDojiPrice);
-      return directDojiPrice;
-    }
-
-    // 2. Fallback 1: Cloudflare Worker live Vietnam domestic silver price
+    // 1. Primary: Cloudflare Worker live Vietnam domestic silver price (banggia.doji.vn)
+    // Retry 1 lần nếu gặp lỗi mạng thoáng qua để tránh rơi xuống giá bạc thế giới thấp hơn giá DOJI.
     const workerBase = (typeof CONFIG !== 'undefined' && CONFIG.D1_API_URL) ? CONFIG.D1_API_URL.replace(/\/$/, '') : '';
     const workerUrl = cfg.workerApi || (workerBase && cfg.workerEndpoint ? `${workerBase}${cfg.workerEndpoint}` : '');
     if (workerUrl) {
@@ -375,7 +323,7 @@ class PriceUpdater {
   // Dựa vào priceSource được tự động gán từ asset catalog, không cần DOM
   // ─────────────────────────────────────────────
 
-  async updateSingleItem(item, usdRate) {
+  async updateSingleItem(item, usdRate, force = false) {
     const ps = item.priceSource;
     if (!ps || ps.type === 'manual') return item;
 
@@ -383,7 +331,7 @@ class PriceUpdater {
     const lastSec = ps.lastUpdated ? new Date(ps.lastUpdated).getTime() / 1000 : 0;
     const interval = ps.refreshInterval || 3600;
 
-    if (nowSec - lastSec < interval) return item; // Chưa đến lúc refresh
+    if (!force && nowSec - lastSec < interval) return item; // Chưa đến lúc refresh
 
     let newPrice = null;
     try {
@@ -445,25 +393,44 @@ class PriceUpdater {
   // CORE: Update all investments
   // ─────────────────────────────────────────────
 
-  async updateAllPrices() {
+  async updateAllPrices(force = false) {
     if (!window.app) return;
     const data = window.app.data;
     if (!data.investments || data.investments.length === 0) return;
 
-    const usdRate = data.usdRate || 25400;
-    let changed = false;
-
-    for (let i = 0; i < data.investments.length; i++) {
-      const before = data.investments[i].currentPrice;
-      data.investments[i] = await this.updateSingleItem(data.investments[i], usdRate);
-      if (data.investments[i].currentPrice !== before) changed = true;
+    // Tránh gọi trùng lặp trong thời gian ngắn (15 giây) hoặc khi đang chạy song song
+    if (this._updatingPromise) return this._updatingPromise;
+    if (force && this._lastForceUpdateAt && (Date.now() - this._lastForceUpdateAt < 15000)) {
+      return;
     }
 
-    if (changed) {
-      window.app.save();
-      window.app.investment.renderInvestmentList();
-      console.log('[PriceUpdater] Prices updated and UI refreshed');
-    }
+    this._updatingPromise = (async () => {
+      try {
+        if (force) {
+          this.cache.clear();
+          this._lastForceUpdateAt = Date.now();
+        }
+        const usdRate = data.usdRate || 25400;
+        let changed = false;
+
+        for (let i = 0; i < data.investments.length; i++) {
+          const before = data.investments[i].currentPrice;
+          data.investments[i] = await this.updateSingleItem(data.investments[i], usdRate, force);
+          if (data.investments[i].currentPrice !== before) changed = true;
+        }
+
+        if (changed) {
+          window.app.save();
+          if (window.app.investment) window.app.investment.render();
+          if (window.app.home) window.app.home.render();
+          console.log('[PriceUpdater] Prices updated and UI refreshed');
+        }
+      } finally {
+        this._updatingPromise = null;
+      }
+    })();
+
+    return this._updatingPromise;
   }
 
   // ─────────────────────────────────────────────

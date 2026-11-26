@@ -68,6 +68,11 @@ const TabsManager = {
       if (tabId === 'investment') setTimeout(() => window.app.charts.renderInvestmentCharts(), 100);
     }
 
+    // Tự động cập nhật giá tài sản khi bấm qua tab Tài Sản
+    if (tabId === 'investment' && window.app && !window.app._isInitializing && typeof priceUpdater !== 'undefined') {
+      priceUpdater.updateAllPrices(true);
+    }
+
     document.querySelectorAll('.tab-btn').forEach(b => {
       b.classList.remove('text-blue-600', 'dark:text-blue-400');
       b.classList.add('text-gray-400', 'dark:text-slate-500');

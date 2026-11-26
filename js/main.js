@@ -89,15 +89,18 @@ class DuoSpaceApp {
       TabsManager.initFromStorage();
     }
 
-    // ── AUTO PRICE UPDATE: fetch prices & start background timer ──
-    if (typeof priceUpdater !== 'undefined') {
-      priceUpdater.updateAllPrices();   // First run immediately
-      priceUpdater.startAutoUpdate();   // Then every 5 min check
-    }
+    // ── SYNC WITH CLOUDFLARE D1 & AUTO PRICE UPDATE ──
+    const runInitialPriceUpdate = () => {
+      if (typeof priceUpdater !== 'undefined') {
+        priceUpdater.updateAllPrices(true); // Cập nhật giá mới mỗi khi refresh trang
+        priceUpdater.startAutoUpdate();     // Sau đó tự kiểm tra định kỳ
+      }
+    };
 
-    // ── SYNC WITH CLOUDFLARE D1 ──
     if (this.sync && this.sync.isEnabled) {
-      this.sync.pullFromCloud();
+      Promise.resolve(this.sync.pullFromCloud()).finally(runInitialPriceUpdate);
+    } else {
+      runInitialPriceUpdate();
     }
   }
 
