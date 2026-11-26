@@ -219,3 +219,29 @@ test('recordDailyNetWorth backfills past purchase dates chronologically', () => 
   assert.equal(app.data.netWorthHistory[0].value, Math.round(0.00027 * 65000 * 25000));
   assert.equal(app.data.netWorthHistory[1].value, Math.round(0.00027 * 65000 * 25000 + 0.5 * 13750000));
 });
+
+test('refreshAllPrices clears pending loading badge even when fetched price is unchanged', async () => {
+  const { app, inv, elements } = setupInvestment(async (url) => {
+    if (url.includes('/api/prices/silver')) {
+      return { ok: true, async json() { return { success: true, buy: 1541000, sell: 1606000 }; } };
+    }
+    return { ok: false, status: 404 };
+  });
+
+  app.data.investments = [
+    {
+      name: 'Bạc DOJI (VND/lượng)',
+      type: '🥈 Bạc',
+      unit: 'lượng',
+      quantity: 2,
+      buyPrice: 1662000,
+      currentPrice: 1541000, // unchanged price
+      isUsd: false,
+      priceSource: { type: 'silver_vn', symbol: 'XAG', refreshInterval: 86400, lastUpdated: new Date().toISOString(), fetchStatus: 'success' }
+    }
+  ];
+
+  await inv.refreshAllPrices();
+  assert.equal(app.data.investments[0].priceSource.fetchStatus, 'success');
+  assert.equal(elements.investmentList.innerHTML.includes('⏳'), false);
+});
