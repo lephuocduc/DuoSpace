@@ -31,7 +31,7 @@ const Utils = {
     const mainContainer = document.getElementById('mainScrollContainer');
     if (mainContainer) mainContainer.classList.remove('scroll-locked');
   },
-  notify(message, type = 'error') {
+  notify(message, type = 'success') {
     const toast = document.getElementById('appToast');
     if (!toast) return alert(message);
     toast.textContent = message;
