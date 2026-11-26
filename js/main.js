@@ -162,13 +162,11 @@ class DuoSpaceApp {
   }
 
   updateToggleAmountsIcon() {
-    const icon = document.getElementById('toggleAmountsIcon');
-    if (!icon) return;
-    if (this.data.hideAmounts) {
-      icon.className = 'fa-solid fa-eye-slash text-gray-500 dark:text-slate-400 text-xs sm:text-sm';
-    } else {
-      icon.className = 'fa-solid fa-eye text-gray-500 dark:text-slate-400 text-xs sm:text-sm';
-    }
+    const hide = Boolean(this.data.hideAmounts);
+    document.querySelectorAll('.toggle-amounts-icon').forEach(icon => {
+      icon.classList.toggle('fa-eye-slash', hide);
+      icon.classList.toggle('fa-eye', !hide);
+    });
   }
 
   /** Render các mô-đun sau khi dữ liệu thay đổi. */
