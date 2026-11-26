@@ -413,11 +413,11 @@ class PriceUpdater {
         const usdRate = data.usdRate || 25400;
         let changed = false;
 
-        for (let i = 0; i < data.investments.length; i++) {
-          const before = data.investments[i].currentPrice;
-          data.investments[i] = await this.updateSingleItem(data.investments[i], usdRate, force);
+        await Promise.all(data.investments.map(async (item, i) => {
+          const before = item.currentPrice;
+          data.investments[i] = await this.updateSingleItem(item, usdRate, force);
           if (data.investments[i].currentPrice !== before) changed = true;
-        }
+        }));
 
         if (changed) {
           window.app.save();

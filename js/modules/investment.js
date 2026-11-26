@@ -886,23 +886,27 @@ class InvestmentModule {
 
   async refreshAllPrices() {
     const icon = document.getElementById('refreshAllIcon');
+    if (typeof priceUpdater === 'undefined') return;
+
+    // Nếu vừa mới ép cập nhật trong vòng 15 giây, không đặt lại trạng thái pending ⏳
+    if (priceUpdater._lastForceUpdateAt && (Date.now() - priceUpdater._lastForceUpdateAt < 15000)) {
+      return;
+    }
+
     if (icon) icon.classList.add('fa-spin');
 
     try {
-      if (typeof priceUpdater !== 'undefined') {
-        // Đặt tất cả item sang trạng thái pending
-        (this.app.data.investments || []).forEach(inv => {
-          if (inv.priceSource && inv.priceSource.type !== 'manual') {
-            inv.priceSource.lastUpdated = new Date(0).toISOString();
-            inv.priceSource.fetchStatus = 'pending';
-          }
-        });
-        this.renderInvestmentList(false);
+      // Đặt tất cả item sang trạng thái pending
+      (this.app.data.investments || []).forEach(inv => {
+        if (inv.priceSource && inv.priceSource.type !== 'manual') {
+          inv.priceSource.fetchStatus = 'pending';
+        }
+      });
+      this.renderInvestmentList(false);
 
-        await priceUpdater.updateAllPrices(true);
-        // Luôn render lại để xóa trạng thái ⏳ ngay cả khi giá mới trùng giá cũ
-        this.renderInvestmentList(false);
-      }
+      await priceUpdater.updateAllPrices(true);
+      // Luôn render lại để xóa trạng thái ⏳ ngay cả khi giá mới trùng giá cũ
+      this.renderInvestmentList(false);
     } finally {
       if (icon) icon.classList.remove('fa-spin');
     }
