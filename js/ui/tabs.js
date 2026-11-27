@@ -82,14 +82,20 @@ const TabsManager = {
       });
     }
 
+    // Chặn hành vi mặc định của thẻ <a href="#"> trong sidebar để không ghi đè hash #tabId
+    document.addEventListener('click', (e) => {
+      const anchor = e.target && e.target.closest ? e.target.closest('a[href="#"]') : null;
+      if (anchor) e.preventDefault();
+    });
+
     // Xử lý nút Back / vuốt quay lại trên điện thoại & trình duyệt
     window.addEventListener('popstate', (event) => {
       // Ưu tiên 1: Đang mở modal / form nhập / sidebar -> đóng nó ra trước, giữ nguyên tab
       if (this.closeAllOverlays()) {
         return;
       }
-      // Ưu tiên 2: Chuyển về tab trước đó
-      const targetTab = event.state?.tab || (location.hash ? location.hash.replace(/^#/, '') : 'home');
+      // Ưu tiên 2: Chỉ chuyển tab khi có state hợp lệ do DuoSpace tạo ra
+      const targetTab = event.state && event.state.duospace ? event.state.tab : null;
       if (targetTab && this.tabTitles[targetTab] && targetTab !== this.currentTab) {
         this.switchTab(targetTab, this.tabTitles[targetTab], null, { fromPopstate: true });
       }
