@@ -245,19 +245,19 @@
             <i class="fa-solid fa-chart-pie text-9xl -mt-4 -mr-4"></i>
           </div>
 
-          <div class="flex justify-between items-center relative z-10">
-            <div class="flex items-center gap-2">
+          <div class="flex flex-wrap justify-between items-center gap-2 relative z-10">
+            <div class="flex items-center gap-2 whitespace-nowrap">
               <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Portfolio Thực Tế</span>
               <button onclick="window.app.toggleAmounts()" title="Ẩn/hiện số tiền (Alt+H)" aria-label="Ẩn/hiện số tiền"
-                class="w-6 h-6 rounded-full bg-white/15 hover:bg-white/25 text-indigo-100 flex items-center justify-center transition-colors active:scale-95">
+                class="w-6 h-6 rounded-full bg-white/15 hover:bg-white/25 text-indigo-100 flex items-center justify-center transition-colors active:scale-95 shrink-0">
                 <i class="toggle-amounts-icon fa-solid fa-eye text-[11px]"></i>
               </button>
             </div>
             <div
-              class="flex items-center space-x-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20">
+              class="flex items-center space-x-1 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20 whitespace-nowrap shrink-0">
               <span class="font-medium">💵 VNĐ/USD:</span>
               <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)"
-                class="w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
+                class="w-12 sm:w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
               <span class="font-medium">đ</span>
               <button id="usdRateRefreshBtn" onclick="fetchRealtimeUsdRate()" aria-label="Cập nhật tỷ giá USD"
                 class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
@@ -459,9 +459,9 @@
               <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
             </div>
             <div id="viewNmaxOdo" class="text-lg font-bold">14.850 km</div>
-            <div class="flex justify-between items-center text-[10px] opacity-85">
-              <span id="viewNmaxPlate">BS: 50AD-539.09</span>
-              <span class="underline font-medium">Parts Status →</span>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 text-[10px] opacity-85">
+              <span id="viewNmaxPlate" class="whitespace-nowrap">BS: 50AD-539.09</span>
+              <span class="underline font-medium whitespace-nowrap">Parts Status →</span>
             </div>
           </div>
           <div onclick="openPartsStatusModal('Grande')"
@@ -471,9 +471,9 @@
               <i class="fa-solid fa-motorcycle group-hover:translate-x-1 transition-transform"></i>
             </div>
             <div id="viewGrandeOdo" class="text-lg font-bold">8.200 km</div>
-            <div class="flex justify-between items-center text-[10px] opacity-85">
-              <span id="viewGrandePlate">BS: 50N2-461.30</span>
-              <span class="underline font-medium">Parts Status →</span>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 text-[10px] opacity-85">
+              <span id="viewGrandePlate" class="whitespace-nowrap">BS: 50N2-461.30</span>
+              <span class="underline font-medium whitespace-nowrap">Parts Status →</span>
             </div>
           </div>
         </div>
@@ -1769,7 +1769,7 @@
   <script src="js/modules/cats.js"></script>
   <script src="js/modules/health.js?v=3.1"></script>
   <script src="js/modules/settings.js"></script>
-  <script src="js/modules/cloudSync.js?v=3.10"></script>
+  <script src="js/modules/cloudSync.js?v=3.11"></script>
   <script src="js/modules/log.js?v=3.4"></script>
   <script src="js/modules/shopping.js"></script>
   <script src="js/modules/calendar.js?v=3.1"></script>

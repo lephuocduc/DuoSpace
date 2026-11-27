@@ -436,23 +436,23 @@ class CloudSync {
     if (!el) return;
 
     if (status === 'loading') {
-      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 shrink-0 ${text ? 'mr-1' : ''}"></i><span class="text-blue-600 dark:text-blue-400 font-semibold text-[10px] sm:text-xs">${text || ''}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-blue-500 shrink-0 ${text ? 'sm:mr-1' : ''}"></i><span class="hidden sm:inline text-blue-600 dark:text-blue-400 font-semibold text-[10px] sm:text-xs">${text || ''}</span>`;
     } else if (status === 'success') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 shrink-0 mr-1"></i><span class="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] sm:text-xs">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500 shrink-0 sm:mr-1"></i><span class="hidden sm:inline text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] sm:text-xs">${text}</span>`;
       setTimeout(() => {
         if (el && !this.isSyncing) {
-          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Đã đồng bộ</span>`;
+          el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500 shrink-0 sm:mr-1"></i><span class="hidden sm:inline text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Đã đồng bộ</span>`;
         }
       }, 3500);
     } else if (status === 'error') {
-      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 shrink-0 mr-1"></i><span class="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs font-semibold">${text}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-500 shrink-0 sm:mr-1"></i><span class="hidden sm:inline text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs font-semibold">${text}</span>`;
       setTimeout(() => {
         if (el && !this.isSyncing) {
-          el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Cloud</span>`;
+          el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 sm:mr-1"></i><span class="hidden sm:inline text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">Cloud</span>`;
         }
       }, 4000);
     } else {
-      el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 mr-1"></i><span class="text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">${text || 'Cloud'}</span>`;
+      el.innerHTML = `<i class="fa-solid fa-cloud text-gray-400 shrink-0 sm:mr-1"></i><span class="hidden sm:inline text-[10px] sm:text-xs text-gray-600 dark:text-slate-300 font-medium">${text || 'Cloud'}</span>`;
     }
   }
 }

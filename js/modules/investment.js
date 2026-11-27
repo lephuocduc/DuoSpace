@@ -634,14 +634,14 @@ class InvestmentModule {
     if (pnlEl) {
       if (hideAmounts) {
         pnlEl.innerText = '***** đ (***%)';
-        pnlEl.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-white/15 text-indigo-100/90 border border-white/20';
+        pnlEl.className = 'inline-flex items-center px-2 py-0.5 rounded-xl text-xs font-bold bg-white/15 text-indigo-100/90 border border-white/20';
       } else {
         pnlEl.innerText = totalPnL >= 0
           ? `+${Utils.formatCurrency(totalPnL)} (+${totalRoi.toFixed(2)}%)`
           : `${Utils.formatCurrency(totalPnL)} (${totalRoi.toFixed(2)}%)`;
         pnlEl.className = totalPnL >= 0
-          ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/25 text-emerald-50 border border-emerald-200/40 backdrop-blur-sm'
-          : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/25 text-rose-50 border border-rose-200/40 backdrop-blur-sm';
+          ? 'inline-flex items-center px-2.5 py-0.5 rounded-xl text-xs font-bold bg-emerald-500/25 text-emerald-50 border border-emerald-200/40 backdrop-blur-sm leading-snug'
+          : 'inline-flex items-center px-2.5 py-0.5 rounded-xl text-xs font-bold bg-rose-500/25 text-rose-50 border border-rose-200/40 backdrop-blur-sm leading-snug';
       }
     }
 
