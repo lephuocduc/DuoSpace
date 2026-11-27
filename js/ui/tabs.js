@@ -33,16 +33,137 @@ const TabsManager = {
   },
 
   initFromStorage() {
-    const rawSavedTab = localStorage.getItem('duospace_active_tab') || 'home';
+    const hashTab = (typeof location !== 'undefined' && location.hash) ? location.hash.replace(/^#/, '') : '';
+    const rawSavedTab = this.tabTitles[hashTab] ? hashTab : (localStorage.getItem('duospace_active_tab') || 'home');
     const savedTab = this.tabTitles[rawSavedTab] ? rawSavedTab : 'home';
     const title = this.tabTitles[savedTab] || 'Tổng quan';
-    this.switchTab(savedTab, title, null);
+    this.switchTab(savedTab, title, null, { replaceHistory: true });
+    this.initHistory();
   },
 
-  switchTab(tabId, title, btn) {
+  initHistory() {
+    if (this._historyInitialized || typeof window === 'undefined' || !window.history) return;
+    this._historyInitialized = true;
+
+    // Tự động ghi nhận history khi bất kỳ modal hoặc form nhập nào được mở
+    const overlayIds = [
+      'addModal', 'noteModal', 'eventModal', 'sellAssetModal',
+      'partsStatusModal', 'catHistoryModal',
+      'investmentForm', 'bikeMaintenanceForm', 'healthForm'
+    ];
+    const isOverlayOpen = (el) => {
+      if (!el) return false;
+      if (el.classList.contains('hidden')) return false;
+      if (el.classList.contains('opacity-0') && el.classList.contains('pointer-events-none')) return false;
+      return true;
+    };
+
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
+          const el = m.target;
+          if (isOverlayOpen(el)) {
+            if (!window.history.state || window.history.state.overlay !== el.id) {
+              try {
+                window.history.pushState(
+                  { duospace: true, tab: this.currentTab, overlay: el.id },
+                  '',
+                  `#${this.currentTab}`
+                );
+              } catch (_) {}
+            }
+          }
+        }
+      });
+      overlayIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+      });
+    }
+
+    // Xử lý nút Back / vuốt quay lại trên điện thoại & trình duyệt
+    window.addEventListener('popstate', (event) => {
+      // Ưu tiên 1: Đang mở modal / form nhập / sidebar -> đóng nó ra trước, giữ nguyên tab
+      if (this.closeAllOverlays()) {
+        return;
+      }
+      // Ưu tiên 2: Chuyển về tab trước đó
+      const targetTab = event.state?.tab || (location.hash ? location.hash.replace(/^#/, '') : 'home');
+      if (targetTab && this.tabTitles[targetTab] && targetTab !== this.currentTab) {
+        this.switchTab(targetTab, this.tabTitles[targetTab], null, { fromPopstate: true });
+      }
+    });
+  },
+
+  closeAllOverlays() {
+    let closedAny = false;
+    const isOpen = (id) => {
+      const el = document.getElementById(id);
+      if (!el || el.classList.contains('hidden')) return false;
+      if (el.classList.contains('opacity-0') && el.classList.contains('pointer-events-none')) return false;
+      return true;
+    };
+
+    if (isOpen('addModal') && typeof ModalManager !== 'undefined') {
+      ModalManager.closeAddModal();
+      closedAny = true;
+    }
+    if (isOpen('catHistoryModal') && typeof ModalManager !== 'undefined') {
+      ModalManager.closeCatHistoryModal();
+      closedAny = true;
+    }
+    if (isOpen('noteModal') && window.app?.notes?.closeModal) {
+      window.app.notes.closeModal();
+      closedAny = true;
+    }
+    if (isOpen('eventModal') && window.app?.calendar?.closeModal) {
+      window.app.calendar.closeModal();
+      closedAny = true;
+    }
+    if (isOpen('sellAssetModal') && window.app?.investment?.closeSellModal) {
+      window.app.investment.closeSellModal();
+      closedAny = true;
+    }
+    if (isOpen('partsStatusModal') && window.app?.motorbike?.closePartsStatusModal) {
+      window.app.motorbike.closePartsStatusModal();
+      closedAny = true;
+    }
+    if (isOpen('investmentForm')) {
+      document.getElementById('investmentForm').classList.add('hidden');
+      closedAny = true;
+    }
+    if (isOpen('bikeMaintenanceForm')) {
+      document.getElementById('bikeMaintenanceForm').classList.add('hidden');
+      closedAny = true;
+    }
+    if (isOpen('healthForm') && window.app?.health?.toggleHealthForm) {
+      window.app.health.toggleHealthForm(false);
+      closedAny = true;
+    }
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024 && typeof SidebarManager !== 'undefined') {
+      SidebarManager.close();
+      closedAny = true;
+    }
+    return closedAny;
+  },
+
+  switchTab(tabId, title, btn, options = {}) {
     if (!this.tabTitles[tabId]) tabId = 'home';
+    const prevTab = this.currentTab;
     this.currentTab = tabId;
     localStorage.setItem('duospace_active_tab', tabId);
+
+    if (typeof window !== 'undefined' && window.history) {
+      try {
+        if (options.replaceHistory) {
+          window.history.replaceState({ duospace: true, tab: tabId }, '', `#${tabId}`);
+        } else if (!options.fromPopstate && tabId !== prevTab) {
+          window.history.pushState({ duospace: true, tab: tabId }, '', `#${tabId}`);
+        }
+      } catch (_) {}
+    }
 
     const actualTitle = title || this.tabTitles[tabId] || 'Tổng quan';
     const pageTitle = document.getElementById('pageTitle');
