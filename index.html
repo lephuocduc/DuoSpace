@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>DuoSpace</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='43' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='800' fill='white' text-anchor='middle'%3EDS%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='43' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='800' fill='white' text-anchor='middle'%3EDS%3C/text%3E%3C/svg%3E">
   <script>
     // Suppress Tailwind Play CDN production warning in console
     (function () {
@@ -101,48 +102,58 @@
                   class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-700/70 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-300 flex items-center justify-center transition-colors">
                   <i class="toggle-amounts-icon fa-solid fa-eye text-xs"></i>
                 </button>
-                <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
+                <span
+                  class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
                   <i class="fa-solid fa-chart-line"></i>
                 </span>
               </div>
             </div>
-            <p id="homeStatPortfolio" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 đ</p>
-            <p id="homeStatPortfolioSub" class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">0 tài sản</p>
+            <p id="homeStatPortfolio"
+              class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 đ</p>
+            <p id="homeStatPortfolioSub" class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">0 tài sản
+            </p>
           </div>
 
           <div onclick="switchTab('motorbike', 'Xe Máy')"
             class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 cursor-pointer hover:shadow-md hover:border-sky-200 dark:hover:border-sky-800 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-[11px] font-semibold text-gray-400 dark:text-slate-400">Xe Máy</span>
-              <span class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xs">
+              <span
+                class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-motorcycle"></i>
               </span>
             </div>
-            <p id="homeStatMotorbike" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 / 0</p>
-            <p id="homeStatMotorbikeSub" class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">NMAX / Grande (km)</p>
+            <p id="homeStatMotorbike"
+              class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 / 0</p>
+            <p id="homeStatMotorbikeSub" class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">NMAX /
+              Grande (km)</p>
           </div>
 
           <div onclick="switchTab('shopping', 'Đi Siêu Thị')"
             class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 cursor-pointer hover:shadow-md hover:border-orange-200 dark:hover:border-orange-800 transition-all">
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-[11px] font-semibold text-gray-400 dark:text-slate-400">Đi Siêu Thị</span>
-              <span class="w-7 h-7 rounded-lg bg-orange-50 dark:bg-orange-900/40 text-orange-500 flex items-center justify-center text-xs">
+              <span
+                class="w-7 h-7 rounded-lg bg-orange-50 dark:bg-orange-900/40 text-orange-500 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-basket-shopping"></i>
               </span>
             </div>
-            <p id="homeStatShopping" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 món</p>
+            <p id="homeStatShopping" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">
+              0 món</p>
             <p class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">Cần mua sắp tới</p>
           </div>
 
           <div onclick="switchTab('calendar', 'Lịch & Hóa Đơn')"
             class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-slate-700/60 cursor-pointer hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800 transition-all">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[11px] font-semibold text-gray-400 dark:text-slate-400">Lịch 7 ngày</span>
-              <span class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs">
+              <span class="text-[11px] font-semibold text-gray-400 dark:text-slate-400">Lịch & Hóa Đơn</span>
+              <span
+                class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-calendar-days"></i>
               </span>
             </div>
-            <p id="homeStatCalendar" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">0 sự kiện</p>
+            <p id="homeStatCalendar" class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">
+              0 sự kiện</p>
             <p class="text-[10px] text-gray-400 dark:text-slate-400 truncate mt-0.5">Hóa đơn & lịch hẹn</p>
           </div>
         </section>
@@ -257,7 +268,8 @@
               class="flex items-center space-x-1 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] border border-white/20 whitespace-nowrap shrink-0">
               <span class="font-medium">💵 VNĐ/USD:</span>
               <input type="number" id="usdRateInput" onchange="updateUsdRate(this.value)"
-                class="w-12 sm:w-14 bg-transparent text-white font-bold text-right focus:outline-none" title="Tỷ giá VNĐ/USD">
+                class="w-12 sm:w-14 bg-transparent text-white font-bold text-right focus:outline-none"
+                title="Tỷ giá VNĐ/USD">
               <span class="font-medium">đ</span>
               <button id="usdRateRefreshBtn" onclick="fetchRealtimeUsdRate()" aria-label="Cập nhật tỷ giá USD"
                 class="ml-1 text-indigo-200 hover:text-white transition-transform active:rotate-180">
@@ -494,7 +506,8 @@
                 <p class="text-gray-500 dark:text-slate-400 break-all">Số khung: RLCSGB310TY001107</p>
               </div>
               <div>
-                <label for="bikeNmaxOdo" class="block text-[10px] text-gray-500 font-semibold mb-1">NMAX ODO (km)</label>
+                <label for="bikeNmaxOdo" class="block text-[10px] text-gray-500 font-semibold mb-1">NMAX ODO
+                  (km)</label>
                 <input type="text" inputmode="numeric" id="bikeNmaxOdo" placeholder="14.850"
                   oninput="Utils.formatNumberInput(this)"
                   class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
@@ -505,7 +518,8 @@
                 <p class="text-gray-500 dark:text-slate-400 break-all">Số khung: RLCSEK410NY006766</p>
               </div>
               <div>
-                <label for="bikeGrandeOdo" class="block text-[10px] text-gray-500 font-semibold mb-1">Grande ODO (km)</label>
+                <label for="bikeGrandeOdo" class="block text-[10px] text-gray-500 font-semibold mb-1">Grande ODO
+                  (km)</label>
                 <input type="text" inputmode="numeric" id="bikeGrandeOdo" placeholder="8.200"
                   oninput="Utils.formatNumberInput(this)"
                   class="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-700 dark:bg-slate-900 rounded-lg text-xs">
@@ -513,7 +527,8 @@
             </div>
             <div class="flex justify-end">
               <button onclick="saveBikeInfo()"
-                class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold">Lưu ODO</button>
+                class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold">Lưu
+                ODO</button>
             </div>
           </div>
         </details>
@@ -1163,7 +1178,8 @@
       <div id="tab-notes" class="hidden space-y-3 tab-content">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input type="text" id="notesSearchInput" oninput="window.app.notes.search(this.value)" placeholder="Tìm kiếm ghi chú..."
+          <input type="text" id="notesSearchInput" oninput="window.app.notes.search(this.value)"
+            placeholder="Tìm kiếm ghi chú..."
             class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 text-gray-800 dark:text-slate-200">
         </div>
         <div id="notesContainer" class="min-h-[200px]">
@@ -1665,12 +1681,14 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="min-w-0">
-            <label for="eventDate" class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày</label>
+            <label for="eventDate"
+              class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Ngày</label>
             <input type="date" id="eventDate"
               class="w-full max-w-full min-w-0 px-3 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
           </div>
           <div class="min-w-0">
-            <label for="eventType" class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân loại</label>
+            <label for="eventType" class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Phân
+              loại</label>
             <select id="eventType"
               class="w-full min-w-0 px-3 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               onchange="window.app.calendar.toggleAmountField()">
@@ -1724,7 +1742,8 @@
           <textarea id="noteContent" rows="6" placeholder="Nội dung ghi chú..."
             class="w-full px-3 py-3 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
         </div>
-        <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-gray-600 dark:text-slate-300">
+        <label
+          class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-gray-600 dark:text-slate-300">
           <input type="checkbox" id="noteSensitive"
             class="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-amber-500 focus:ring-amber-500">
           <span><i class="fa-solid fa-eye-slash text-amber-500 mr-1"></i>Sensitive (ẩn nội dung trên thẻ)</span>
@@ -1762,7 +1781,7 @@
   <script src="js/charts/weight.js"></script>
   <script src="js/charts/investment.js?v=3.1"></script>
   <script src="js/modules/auth.js"></script>
-  <script src="js/modules/home.js?v=3.3"></script>
+  <script src="js/modules/home.js?v=3.4"></script>
   <script src="js/modules/todo.js"></script>
   <script src="js/modules/investment.js?v=3.15"></script>
   <script src="js/modules/motorbike.js?v=3.9"></script>

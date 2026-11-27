@@ -62,18 +62,11 @@ class HomeModule {
       shopEl.innerText = `${pendingShop} món`;
     }
 
-    // 4. Upcoming Events/Bills (7 days)
+    // 4. Total Events/Bills
     const calEl = document.getElementById('homeStatCalendar');
     if (calEl) {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const upcoming7 = (this.app.data.events || []).filter(ev => {
-        const d = new Date(ev.date);
-        d.setHours(0, 0, 0, 0);
-        const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
-        return diff >= 0 && diff <= 7;
-      }).length;
-      calEl.innerText = `${upcoming7} sự kiện`;
+      const totalEvents = (this.app.data.events || []).length;
+      calEl.innerText = `${totalEvents} sự kiện`;
     }
   }
 
