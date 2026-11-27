@@ -64,16 +64,16 @@ class CloudSync {
     }
 
     if (payload.investments) {
-      payload.allowEmptyInvestments = Boolean(this.localVersion > 0 && payload.investments.length === 0 && this._explicitEmptyInvestments);
+      payload.allowEmptyInvestments = Boolean(this.localVersion > 0 && payload.investments.length === 0 && (this._explicitEmptyInvestments || (snap && snap.investments && snap.investments !== '[]')));
     }
     if (payload.todos) {
-      payload.allowEmptyTodos = Boolean(this.localVersion > 0 && payload.todos.length === 0 && this._explicitEmptyTodos);
+      payload.allowEmptyTodos = Boolean(this.localVersion > 0 && payload.todos.length === 0 && (this._explicitEmptyTodos || (snap && snap.todos && snap.todos !== '[]')));
     }
-    if (payload.notes) payload.allowEmptyNotes = Boolean(this.localVersion > 0 && payload.notes.length === 0);
-    if (payload.bikeMaintenances) payload.allowEmptyBikeMaintenances = Boolean(this.localVersion > 0 && payload.bikeMaintenances.length === 0);
-    if (payload.healthLogs) payload.allowEmptyHealthLogs = Boolean(this.localVersion > 0 && payload.healthLogs.length === 0);
-    if (payload.shoppingList) payload.allowEmptyShoppingList = Boolean(this.localVersion > 0 && payload.shoppingList.length === 0);
-    if (payload.events) payload.allowEmptyEvents = Boolean(this.localVersion > 0 && payload.events.length === 0);
+    if (payload.notes) payload.allowEmptyNotes = Boolean(payload.notes.length === 0 && snap && snap.notes && snap.notes !== '[]');
+    if (payload.bikeMaintenances) payload.allowEmptyBikeMaintenances = Boolean(payload.bikeMaintenances.length === 0 && snap && snap.bikeMaintenances && snap.bikeMaintenances !== '[]');
+    if (payload.healthLogs) payload.allowEmptyHealthLogs = Boolean(payload.healthLogs.length === 0 && snap && snap.healthLogs && snap.healthLogs !== '[]');
+    if (payload.shoppingList) payload.allowEmptyShoppingList = Boolean(payload.shoppingList.length === 0 && snap && snap.shoppingList && snap.shoppingList !== '[]');
+    if (payload.events) payload.allowEmptyEvents = Boolean(payload.events.length === 0 && snap && snap.events && snap.events !== '[]');
 
     return { payload, hasChanges };
   }
@@ -196,6 +196,7 @@ class CloudSync {
 
         // Nếu máy chủ báo 304 Not Modified hoặc changed = false -> Dữ liệu trên máy bạn đã mới nhất!
         if (checkRes.status === 304) {
+          this._captureSnapshot(this.storage.getData());
           this.setSyncStatus('success', 'Dữ liệu đã mới nhất (304)');
           return true;
         }
@@ -203,6 +204,7 @@ class CloudSync {
         if (checkRes.ok) {
           const checkData = await checkRes.json();
           if (checkData.success && !checkData.changed) {
+            this._captureSnapshot(this.storage.getData());
             this.setSyncStatus('success', 'Dữ liệu đã mới nhất');
             return true;
           }
@@ -224,6 +226,7 @@ class CloudSync {
       });
 
       if (res.status === 304) {
+        this._captureSnapshot(this.storage.getData());
         this.setSyncStatus('success', 'Dữ liệu đã mới nhất');
         return true;
       }
@@ -269,8 +272,8 @@ class CloudSync {
     return false;
   }
 
-  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (debounce 2.5s + chỉ gửi bảng thay đổi để tối ưu rows written)
-  debouncePushToCloud(delay = 2500) {
+  // Đẩy dữ liệu từ LocalStorage lên Cloudflare D1 (debounce 800ms + chỉ gửi bảng thay đổi để tối ưu rows written)
+  debouncePushToCloud(delay = 800) {
     if (!this.isEnabled) return;
     this._setPendingPush(true);
     if (this.syncTimeout) clearTimeout(this.syncTimeout);
@@ -282,7 +285,11 @@ class CloudSync {
   }
 
   async pushToCloud() {
-    if (!this.isEnabled || this.isSyncing) return false;
+    if (!this.isEnabled) return false;
+    if (this.isSyncing) {
+      this._resyncAfterCurrent = true;
+      return false;
+    }
 
     // Lấy Google ID Token từ AuthModule
     const idToken = await window.authManager?.getIdToken();
@@ -313,10 +320,12 @@ class CloudSync {
       };
       if (CONFIG.D1_APP_SECRET) headers['X-App-Secret'] = CONFIG.D1_APP_SECRET;
 
+      const isPageHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
       const res = await fetch(`${this.apiUrl}/api/sync`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        keepalive: isPageHidden
       });
 
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
@@ -346,6 +355,10 @@ class CloudSync {
       this.setSyncStatus('error', 'Lỗi lưu Cloud (đã lưu máy local)');
     } finally {
       this.isSyncing = false;
+      if (this._resyncAfterCurrent) {
+        this._resyncAfterCurrent = false;
+        setTimeout(() => this.pushToCloud(), 150);
+      }
     }
     return false;
   }
@@ -362,6 +375,14 @@ class CloudSync {
 
     try {
       this.setSyncStatus('loading', 'Đang đồng bộ...');
+      // Nếu máy hiện tại có thay đổi chưa kịp đẩy lên Cloud -> đẩy lên trước để không bị ghi đè mất!
+      if (this.hasPendingPush) {
+        if (this.syncTimeout) {
+          clearTimeout(this.syncTimeout);
+          this.syncTimeout = null;
+        }
+        await this.pushToCloud();
+      }
       const success = await this.pullFromCloud(true); // force=true để đảm bảo ép tải mới nhất khi bấm thủ công
       if (success) {
         if (typeof Utils !== 'undefined' && Utils.notify) {
