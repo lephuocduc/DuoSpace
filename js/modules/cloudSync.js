@@ -83,7 +83,8 @@ class CloudSync {
     if (this._listenersBound) return;
     this._listenersBound = true;
 
-    // Đẩy ngay thay đổi đang chờ khi người dùng chuyển tab hoặc đóng/refresh trang
+    // Đẩy ngay thay đổi đang chờ khi người dùng chuyển tab hoặc đóng/refresh trang,
+    // và tự kiểm tra dữ liệu mới từ thiết bị khác khi quay lại tab
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden' && this.hasPendingPush) {
         if (this.syncTimeout) {
@@ -91,8 +92,20 @@ class CloudSync {
           this.syncTimeout = null;
         }
         this.pushToCloud();
+      } else if (document.visibilityState === 'visible') {
+        this._autoCheckCloud();
       }
     });
+
+    // Tự kiểm tra dữ liệu mới mỗi 30 giây khi tab đang mở (chỉ tốn 1 row read /api/sync/check)
+    this._pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this._autoCheckCloud();
+      }
+    }, 30000);
+    if (this._pollInterval && typeof this._pollInterval.unref === 'function') {
+      this._pollInterval.unref();
+    }
 
     // Đồng bộ tức thì giữa các tab trình duyệt cùng mở ứng dụng
     window.addEventListener('storage', (e) => {
@@ -130,12 +143,22 @@ class CloudSync {
     return Boolean(this.apiUrl && this.apiUrl.startsWith('http'));
   }
 
+  _autoCheckCloud() {
+    if (!this.isEnabled || this.isSyncing || this.hasPendingPush) return;
+    const now = Date.now();
+    if (this._lastAutoPullAt && (now - this._lastAutoPullAt < 5000)) return;
+    this._lastAutoPullAt = now;
+    this.pullFromCloud(false, { silent: true });
+  }
+
   /**
    * Tải dữ liệu từ Cloudflare D1 về.
    * Sử dụng kết hợp ETag (HTTP 304) và kiểm tra Version trước để giảm tối đa đọc DB & băng thông.
    * @param {boolean} force - Bắt buộc tải lại toàn bộ mà không qua kiểm tra version
+   * @param {{ silent?: boolean }} options - silent=true để không nhấp nháy trạng thái khi không có thay đổi
    */
-  async pullFromCloud(force = false) {
+  async pullFromCloud(force = false, options = {}) {
+    const silent = Boolean(options && options.silent);
     if (!this.isEnabled) return false;
 
     // Lấy Google ID Token từ AuthModule (chờ nếu đang khôi phục phiên)
@@ -179,7 +202,7 @@ class CloudSync {
     }
 
     try {
-      this.setSyncStatus('loading', 'Đang kiểm tra dữ liệu...');
+      if (!silent) this.setSyncStatus('loading', 'Đang kiểm tra dữ liệu...');
 
       // BƯỚC 1: Nếu không ép tải (force), kiểm tra nhẹ qua /api/sync/check (Chỉ tốn 1 row read siêu nhẹ)
       if (!force && this.localVersion > 0) {
@@ -197,7 +220,7 @@ class CloudSync {
         // Nếu máy chủ báo 304 Not Modified hoặc changed = false -> Dữ liệu trên máy bạn đã mới nhất!
         if (checkRes.status === 304) {
           this._captureSnapshot(this.storage.getData());
-          this.setSyncStatus('success', 'Dữ liệu đã mới nhất (304)');
+          if (!silent) this.setSyncStatus('success', 'Dữ liệu đã mới nhất (304)');
           return true;
         }
 
@@ -205,7 +228,7 @@ class CloudSync {
           const checkData = await checkRes.json();
           if (checkData.success && !checkData.changed) {
             this._captureSnapshot(this.storage.getData());
-            this.setSyncStatus('success', 'Dữ liệu đã mới nhất');
+            if (!silent) this.setSyncStatus('success', 'Dữ liệu đã mới nhất');
             return true;
           }
         }
